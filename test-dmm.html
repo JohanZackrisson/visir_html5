@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Multimeter test</title>
+	<link rel="stylesheet" href="instruments/flukemultimeter/flukemultimeter.css" />
+	<style>
+	</style>
+	<script type="text/javascript" src="http://dev.openlabs.bth.se/~zeta/dav/test/js/jquery-1.8.2.min.js"></script>
+	<script type="text/javascript" src="utils.js"></script>
+	<script type="text/javascript" src="instruments/transport.js"></script>
+	<script type="text/javascript" src="instruments/multimeter.js"></script>
+	<script type="text/javascript" src="instruments/flukemultimeter/flukemultimeter.js"></script>
+	<script>
+	
+	function init()
+	{
+		var circuit = '<circuit><circuitlist>W_X A23 DMM_VHI\nW_X F23 DMM_VLO\nR_X A23 F23 10k\n</circuitlist></circuit>';
+		var instrxml = '<multimeter id="1"><dmm_function value="ac current"/><dmm_resolution value="3.5"/><dmm_range value="10"/></multimeter><multimeter id="2"><dmm_function value="dc volts"/><dmm_resolution value="3.5"/><dmm_range value="10"/></multimeter>';
+		var dcpower = '<dcpower><dc_outputs><dc_output channel="6V+"><dc_voltage value="5"/><dc_current value="0.5"/></dc_output><dc_output channel="25V+"><dc_voltage value="0"/><dc_current value="0.5"/></dc_output><dc_output channel="25V-"><dc_voltage value="0"/><dc_current value="0.5"/></dc_output></dc_outputs></dcpower>';
+		
+		trace("starting up..");
+
+		var transport = new visir.JSTransport(visir.SetWorking);
+		transport.Connect("http://194.47.134.182:8080/measureserver", "fnord");
+/*		
+		var dmm = new visir.Multimeter(1);
+		dmm.SetMode("resistance");
+		console.log(dmm.WriteRequest());
+		dmm.SetMode("off");
+		console.log(dmm.WriteRequest());
+*/		
+		var flukedmm = new visir.FlukeMultimeter(1, $("#dmm"));
+		
+		var response = '<multimeter id="1"><dmm_function value="ac current" /><dmm_resolution value="3.5" /><dmm_range value="10" /><dmm_result value="123.4" /></multimeter>';
+		flukedmm.ReadResponse(response);
+		console.log(flukedmm.GetResult());
+		
+		$("#measure").click( function() {
+			transport.Request(circuit + flukedmm.WriteRequest(), function(res) {
+				flukedmm.ReadResponse(res);
+			});
+		});
+		
+		$("#showlog").click( function() {
+			$("#logwindow").css("display", "block");
+		});
+		$("#hidelog").click( function() {
+			$("#logwindow").css("display", "none");
+	});
+	}
+	$( function() { init(); });
+</script>
+</head>
+<body>
+	<button id="measure">Measure</button>
+	<br/>
+	<div id="dmm"></div>
+	<div>
+		Log window:
+		<button id="showlog">Show</button>
+		<button id="hidelog">Hide</button>
+	</div>
+	<div id="logwindow" style="border: 1px solid #000000; padding: 2px; height: 500px; width: 800px; overflow: scroll; display:none"></div>
+</body>
+</html>
