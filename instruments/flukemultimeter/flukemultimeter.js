@@ -1,3 +1,4 @@
+"use strict";
 var visir = visir || {};
 
 visir.FlukeMultimeter = function(id, elem)
@@ -26,51 +27,26 @@ visir.FlukeMultimeter = function(id, elem)
 	setRotation(top, 345);
 	
 	var handle = elem.find(".rot");
+	
+	function handleTurn(deg)
+	{
+		deg = ( deg - deg % 30 )  + 15;
 
-	handle.on("mousedown touchstart", function(e) {
+		if (deg <= 105 || deg >= 255)
+		{
+			setRotation(top, deg);
 
-		e.preventDefault();
-		//alert("elem clicked");
-		//$('#info').html("clicked");
-		console.log("clicked");
-		var doc = $(document);
-
-		doc.on("mousemove.rem touchmove.rem", function(e) {
-
-			e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
-
-			var offset = handle.offset();
-			//console.log("move: " + offset.left + " " + offset.top + " " + e.pageX + " " + e.pageY);
-			var center = { x: 16, y: 102 };
-			var dx = e.pageX - offset.left - center.x;
-			var dy = e.pageY - offset.top - center.y;
-
-			var deg = Math.atan2(dy, dx) * 180 / Math.PI;
-			deg += 90;
-			if (deg < 0) deg += 360;
-			//console.log("rel: " + dx + " " + dy + " " + deg);
-
-			deg = ( deg - deg % 30 )  + 15;
-
-			//console.log("deg: " + deg);
-			if( deg < 225 || deg > 315 )
-			{
-				setRotation(top, deg);
-				
-				var rotFuncMap = { 345: "off", 15: "ac volts", 45: "dc volts", 75: "off", 105: "resistance", 135: "off", 165: "ac current", 195: "dc current"};
-				var mode = rotFuncMap[deg];
-				dmm.SetMode(mode);
-				dmm._result = "?";
-				dmm.UpdateDisplay();
-			}
-		});
-
-		doc.on("mouseup.rem touchend.rem", function(e) {
-			console.log("up");
-			handle.off(".rem");
-			doc.off(".rem");
-		});
-	});
+			var rotFuncMap = { 255: "off", 285: "ac volts", 315: "dc volts", 345: "off", 15: "resistance", 45: "off", 75: "ac current", 105: "dc current"};
+			var mode = rotFuncMap[deg];
+			dmm.SetMode(mode);
+			dmm._result = "?";
+			dmm.UpdateDisplay();
+			return deg;
+		}
+		return undefined; // don't set a new rotation
+	}
+	
+	handle.turnable({ offset: 90, turn: handleTurn })
 }
 
 extend(visir.FlukeMultimeter, visir.Multimeter)

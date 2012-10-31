@@ -1,8 +1,4 @@
 
-//XXX: move these into the hidden scope..
-
-
-
 (function( $ ){
 	
 	function _isInBounds(touch, $elem) {

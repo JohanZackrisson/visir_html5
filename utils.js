@@ -26,3 +26,7 @@ function setRotation(elem, deg)
 		,'-webkit-transform': rotateCSS
 	});
 }
+
+function AddXMLValue(where, name, value) {
+	where.append('<' + name + ' value="'+ value + '"/>');
+}

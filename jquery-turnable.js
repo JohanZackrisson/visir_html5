@@ -3,7 +3,7 @@
 		init : function( props ) {
 			var options = $.extend({
 				offset: 0,
-				turn: function(){}
+				turn: function(deg){ return deg; }
 				}, props || {});
 			
 			return this.each(function(){
@@ -15,7 +15,6 @@
 				handle.on("mousedown touchstart", function(e) {
 
 					e.preventDefault();
-					console.log("clicked");
 
 					doc.on("mousemove.rem touchmove.rem", function(e) {
 
@@ -34,11 +33,15 @@
 						var dy = e.pageY - offset.top - center.y;
 
 						var deg = Math.atan2(dy, dx) * 180 / Math.PI;
-						setRotation(top, deg + options.offset); // XXX: not portable..
+						deg = (deg + 360) % 360;
+						var userdeg = options.turn(deg);
+						if (userdeg != undefined) {
+							setRotation(top, userdeg + options.offset); // XXX: not portable..
+						}
+						
 					});
 
 					doc.on("mouseup.rem touchend.rem", function(e) {
-						console.log("up");
 						handle.off(".rem");
 						doc.off(".rem");
 					});

@@ -1,3 +1,5 @@
+"use strict";
+
 var visir = visir || {};
 
 visir.Multimeter = function(id)
@@ -10,10 +12,6 @@ visir.Multimeter = function(id)
 	this._result = null;
 }
 
-function AddXMLValue(where, name, value) {
-	where.append('<' + name + ' value="'+ value + '"/>');
-}
-
 visir.Multimeter.prototype.SetMode = function(mode) { this._mode = mode; },
 visir.Multimeter.prototype.GetMode = function() { return this._mode; },
 
@@ -21,9 +19,9 @@ visir.Multimeter.prototype.GetResult = function() { return this._result },
 	
 visir.Multimeter.prototype.WriteRequest = function()
 {
-	if (this._mode == "off") return '<multimeter id="'+ this._id + '" />';
+	if (this._mode == "off") return ""; //'<multimeter id="'+ this._id + '" />';
 	
-	$xml = $('<multimeter />');
+	var $xml = $('<multimeter />');
 	$xml.attr("id", this._id);
 	
 	var values = {
@@ -43,5 +41,13 @@ visir.Multimeter.prototype.WriteRequest = function()
 
 visir.Multimeter.prototype.ReadResponse = function(response) {
 	var $xml = $(response);
-	this._result = parseFloat($xml.find("dmm_result").attr("value"));
+	var $multimeter = $xml.find("multimeter[id=" + this._id + "]");
+	if ($multimeter.length > 0) {
+		var result = $multimeter.find("dmm_result").attr("value");
+		if (!isNaN(result))	{
+			this._result = parseFloat(result);
+		} else {
+			this._result = NaN;
+		}
+	}	
 }

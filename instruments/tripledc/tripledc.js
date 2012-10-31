@@ -1,3 +1,5 @@
+"use strict";
+
 var visir = visir || {};
 
 visir.TripleDC = function(id, elem)
@@ -138,6 +140,7 @@ visir.TripleDC.prototype._SetActiveChannel = function(ch) {
 	this._activeChannel = ch;
 	
 	this._elem.find(".channelselect > div").addClass("hide");
+	var show = "";
 	switch(ch) {
 		case "6V+": show = "p6v"; break;
 		case "25V+": show = "p25v"; break;

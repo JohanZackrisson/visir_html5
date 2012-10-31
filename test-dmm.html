@@ -2,42 +2,82 @@
 <html>
 <head>
 	<title>Multimeter test</title>
+	<meta name="viewport" content="initial-scale=1.0" />
 	<link rel="stylesheet" href="instruments/flukemultimeter/flukemultimeter.css" />
+	<link rel="stylesheet" href="instruments/tripledc/tripledc.css" />
 	<style>
+		#dmm , #dmm2 {
+			display: inline-block;
+		}
+	
+		#turn {
+			width: 188px; height: 188px; 
+		}
+		#turn .top
+		{
+			transform-origin: 94px 94px;
+			-moz-transform-origin: 94px 94px;
+			-webkit-transform-origin: 94px 94px;
+			width: 188px; height: 188px; 
+		}
+		#turn2
+		{
+			height: 94px;
+			width: 94px;
+		}
+		
+		#turn2 .top
+		{
+			height: 94px;
+			width: 94px;
+		}
 	</style>
-	<script type="text/javascript" src="http://dev.openlabs.bth.se/~zeta/dav/test/js/jquery-1.8.2.min.js"></script>
+	<script type="text/javascript" src="jquery-1.8.2.min.js"></script>
 	<script type="text/javascript" src="utils.js"></script>
+	<script type="text/javascript" src="jquery-turnable.js"></script>
+	<script type="text/javascript" src="jquery-updownbutton.js"></script>
 	<script type="text/javascript" src="instruments/transport.js"></script>
+	
 	<script type="text/javascript" src="instruments/multimeter.js"></script>
 	<script type="text/javascript" src="instruments/flukemultimeter/flukemultimeter.js"></script>
+	
+	<script type="text/javascript" src="instruments/dcpower.js"></script>
+	<script type="text/javascript" src="instruments/tripledc/tripledc.js"></script>
+
 	<script>
 	
 	function init()
 	{
-		var circuit = '<circuit><circuitlist>W_X A23 DMM_VHI\nW_X F23 DMM_VLO\nR_X A23 F23 10k\n</circuitlist></circuit>';
+		//var circuit = '<circuit><circuitlist>W_X A23 DMM_VHI\nW_X F23 DMM_VLO\nR_X A23 F23 10k\nDMM_2 AA BB\nR_X AA BB 1k\n</circuitlist></circuit>';
+		var circuit = '<circuit><circuitlist>W_X A23 DMM_VHI\nW_X F23 DMM_VLO\nR_X A23 F23 10k\nVDC+6V AA\nDMM_2 AA 0\n</circuitlist></circuit>';
 		var instrxml = '<multimeter id="1"><dmm_function value="ac current"/><dmm_resolution value="3.5"/><dmm_range value="10"/></multimeter><multimeter id="2"><dmm_function value="dc volts"/><dmm_resolution value="3.5"/><dmm_range value="10"/></multimeter>';
 		var dcpower = '<dcpower><dc_outputs><dc_output channel="6V+"><dc_voltage value="5"/><dc_current value="0.5"/></dc_output><dc_output channel="25V+"><dc_voltage value="0"/><dc_current value="0.5"/></dc_output><dc_output channel="25V-"><dc_voltage value="0"/><dc_current value="0.5"/></dc_output></dc_outputs></dcpower>';
 		
 		trace("starting up..");
 
 		var transport = new visir.JSTransport(visir.SetWorking);
-		transport.Connect("http://194.47.134.182:8080/measureserver", "fnord");
-/*		
-		var dmm = new visir.Multimeter(1);
-		dmm.SetMode("resistance");
-		console.log(dmm.WriteRequest());
-		dmm.SetMode("off");
-		console.log(dmm.WriteRequest());
-*/		
-		var flukedmm = new visir.FlukeMultimeter(1, $("#dmm"));
+		transport.onerror = function(err) { alert("Error: " + err); }
 		
-		var response = '<multimeter id="1"><dmm_function value="ac current" /><dmm_resolution value="3.5" /><dmm_range value="10" /><dmm_result value="123.4" /></multimeter>';
-		flukedmm.ReadResponse(response);
-		console.log(flukedmm.GetResult());
+		transport.Connect("http://194.47.134.182:8080/measureserver", "fnord");
+
+		var flukedmm = new visir.FlukeMultimeter(1, $("#dmm"));
+		var flukedmm2 = new visir.FlukeMultimeter(2, $("#dmm2"));
+		
+		/*var dcpower = new visir.DCPower(1);
+		dcpower.GetChannel("6V+").voltage = 5;
+		dcpower.WriteRequest();
+		*/
+		
+		var tripledc = new visir.TripleDC(1, $("#tripledc"));
 		
 		$("#measure").click( function() {
-			transport.Request(circuit + flukedmm.WriteRequest(), function(res) {
+			transport.Request(circuit
+				+ flukedmm.WriteRequest()
+				+ flukedmm2.WriteRequest()
+				+ tripledc.WriteRequest(),
+			function(res) {
 				flukedmm.ReadResponse(res);
+				flukedmm2.ReadResponse(res);				
 			});
 		});
 		
@@ -46,7 +86,7 @@
 		});
 		$("#hidelog").click( function() {
 			$("#logwindow").css("display", "none");
-	});
+		});		
 	}
 	$( function() { init(); });
 </script>
@@ -55,6 +95,8 @@
 	<button id="measure">Measure</button>
 	<br/>
 	<div id="dmm"></div>
+	<div id="dmm2"></div>
+	<div id="tripledc"></div>
 	<div>
 		Log window:
 		<button id="showlog">Show</button>

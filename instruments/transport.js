@@ -1,5 +1,5 @@
 //var visir = visir || { Transport:null};
-//var visir.Transport = {};
+"use strict";
 
 var visir = visir || {};
 visir.JSTransport = function(workingCallback)
@@ -9,6 +9,8 @@ visir.JSTransport = function(workingCallback)
 	this._isWorking = false;
 	this._workCall = workingCallback;
 	this._sessionKey = null;
+	this._error = null;
+	this.onerror = null;
 }
 
 /*
@@ -22,6 +24,7 @@ visir.JSTransport = function(workingCallback)
 visir.JSTransport.prototype.Request = function(request, callback)
 {
 	trace("Send request");
+	this._error = null;
 	if (this._isWorking) return;
 	this.SetWorking(true);
 	if (!this._IsAuthenticated()) {
@@ -68,7 +71,12 @@ visir.JSTransport.prototype._SendRequest = function(xmlstring, callback)
 	this._SendXML(data, function(response) {
 		trace("reponse: " + response);
 		tprt.SetWorking(false, false);
-		if (typeof callback == "function") callback(tprt._ReadResponseProtocolHeader(response));
+		if (typeof callback == "function") {
+			// this will check for errors in the request
+			var ret = tprt._ReadResponseProtocolHeader(response);
+			// and we only want to do the callback if there is no errors
+			if (!tprt._error) callback(ret);
+		}
 	});
 }
 
@@ -84,7 +92,16 @@ visir.JSTransport.prototype._AuthReadSessionKey = function(response)
 visir.JSTransport.prototype._ReadResponseProtocolHeader = function(response)
 {
 	var $xml = $(response);	
-	return $xml.html(); // this will strip of the outer protocol tags
+	if ($xml.find("response").length > 0) {
+		return $xml.html(); // this will strip of the outer protocol tags
+	}
+	var $error = $xml.find("error");
+	if ($error.length > 0)
+	{
+		this.Error($error.text());
+		return;
+	}
+	this.Error("Unable to parse response");
 }
 
 
@@ -116,11 +133,14 @@ visir.JSTransport.prototype._SendXML = function(data, callback)
 	} else {
 		var req = new XMLHttpRequest();
 		req.open('POST', this._url, true);
-		req.onerror = function(e) { trace("XMLHttpRequest error: " + e); throw e; }
+		req.onerror = function(e) { trace("XMLHttpRequest error: " + e); this.Error(e); }
 		req.onreadystatechange = function(response)
 		{
 			if (req.readyState != 4) return;
-			if (req.status != "200" && req.status != "304") throw "unexpected request return status";
+			if (req.status != "200" && req.status != "304") {
+				this.Error("unexpected request return status");
+				return;
+			}
 			trace("XMLHttpRequest response: " + req.responseText);
 			callback(req.responseText);
 		};
@@ -133,18 +153,11 @@ visir.JSTransport.prototype._IsAuthenticated = function()
 	return (this._sessionKey != null);
 }
 
-function CreateXDomainChannel(ondata, onerror)
-{
-	
+visir.JSTransport.prototype.Error = function(errormsg) {
+	this.SetWorking(false, false);
+	trace(errormsg);
+	if (typeof this.onerror == "function") this.onerror(errormsg);
+	this._error = errormsg;
+	this._sessionKey = null; // XXX: all errors lead to requthentication
 }
 
-
-/*(function(namespace) {
-	var fn = visir.JSTransport.prototype;
-	
-	fn.Connect = function(url) {
-		
-	}
-	
-})(visir.JSTransport);
-*/
