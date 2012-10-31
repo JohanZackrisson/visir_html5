@@ -18,7 +18,7 @@
 	text-align: right;
 }
 
-.tripledc .green
+.tripledc .on .green
 {
 	color: #00FF00;	
 }
@@ -116,4 +116,18 @@
 	left: 258px;
 	width: 47px;
 	height: 34px;
+}
+
+.tripledc .button_left {
+	top: 178px;
+	left: 564px;
+	width: 37px;
+	height: 35px;
+}
+
+.tripledc .button_right {
+	top: 179px;
+	left: 606px;
+	width: 37px;
+	height: 35px;
 }
