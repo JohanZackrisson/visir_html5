@@ -207,9 +207,12 @@ visir.Breadboard.prototype._AddComponentEvents = function($comp)
 	var $doc = $(document);
 	
 	var offset = this._$elem.offset();
+	
+	var touches = 0;
 
 	$comp.on("mousedown touchstart", function(e) {
 		e.preventDefault();
+		touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
 		e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
 		//var start = { x: e.pageX - offset.x, y: e.pageY - offset.y};
 		
@@ -227,7 +230,9 @@ visir.Breadboard.prototype._AddComponentEvents = function($comp)
 		});
 
 		$doc.on("mousemove.rem touchmove.rem", function(e) {
+			touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
 			var touch = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
+			
 
 			var p = { x: touch.pageX - offset.left, y: touch.pageY - offset.top };
 			snapPoint(p);
@@ -254,6 +259,12 @@ visir.Breadboard.prototype._AddComponentEvents = function($comp)
 		});
 
 		$doc.on("mouseup.rem touchend.rem", function(e) {
+			trace("up: " + touches);
+			if (touches > 1) {
+				touches--;
+				return;
+			}
+			//if (e.originalEvent.touches && e.originalEvent.touches.length > 1) return;
 			$comp.off(".rem");
 			$doc.off(".rem");
 		});
