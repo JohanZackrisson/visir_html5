@@ -5,11 +5,11 @@ var visir = visir || {};
 visir.Multimeter = function(id)
 {
 	this._id = id;
-	this._mode = "resistance";
+	this._mode = "off";
 	this._resolution = "3.5";
 	this._range = 10;
 	this._autozero = 1;
-	this._result = null;
+	this._result = 0.0;
 }
 
 visir.Multimeter.prototype.SetMode = function(mode) { this._mode = mode; },

@@ -8,6 +8,7 @@ visir.FlukeMultimeter = function(id, elem)
 	
 	var dmm = this;
 	this._elem = elem;
+	this._result = "";
 	
 	visir.FlukeMultimeter.parent.constructor.apply(this, arguments)
 	
@@ -39,7 +40,9 @@ visir.FlukeMultimeter = function(id, elem)
 			var rotFuncMap = { 255: "off", 285: "ac volts", 315: "dc volts", 345: "off", 15: "resistance", 45: "off", 75: "ac current", 105: "dc current"};
 			var mode = rotFuncMap[deg];
 			dmm.SetMode(mode);
-			dmm._result = "?";
+			if (mode == "off") dmm._result = "";
+			else if (mode == "resistance") dmm._result = "OL";
+			else dmm._result = 0.0;
 			dmm.UpdateDisplay();
 			return deg;
 		}
@@ -47,6 +50,8 @@ visir.FlukeMultimeter = function(id, elem)
 	}
 	
 	handle.turnable({ offset: 90, turn: handleTurn })
+	
+	dmm.UpdateDisplay();
 }
 
 extend(visir.FlukeMultimeter, visir.Multimeter)
@@ -56,9 +61,14 @@ visir.FlukeMultimeter.prototype.Test = function() {
 }
 
 visir.FlukeMultimeter.prototype.UpdateDisplay = function() {
-	var out = this.GetResult();
-	if (typeof out == "number") out = out.toPrecision(4);
-	this._elem.find(".dmm_value").text(out);
+	var $value = this._elem.find(".dmm_value");
+	if (this.GetMode() == "off") {
+		$value.text("");
+	} else {
+		var out = this.GetResult();
+		if (typeof out == "number") out = out.toPrecision(4);
+		$value.text(out);
+	}
 }
 
 visir.FlukeMultimeter.prototype.ReadResponse = function(response) {
