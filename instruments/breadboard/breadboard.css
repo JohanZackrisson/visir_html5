@@ -1,0 +1,107 @@
+.breadboard {
+	border: 1px solid black;
+	width: 714px;
+	height: 450px;
+	position:relative;
+}
+
+/* canvas for drawing wires, should be drawn in the forground above components */
+.breadboard #wires
+{
+	pointer-events:none;
+	position:absolute;
+	top:0;
+	left:0px;
+	width: 714px;
+	height: 450px;
+}
+
+.breadboard .clickarea
+{
+	position:absolute;
+	top:0;
+	left:0px;
+	width: 714px;
+	height: 450px;
+}
+
+.breadboard .background
+{
+	position:absolute;
+	left:117px;
+	top:117px;
+}
+
+.breadboard .bin
+{
+	width:700px;
+	height:102px;
+	border:2px solid rgb(200,193,138);
+	position:absolute;
+	left:3px;
+	top:3px;
+	border-radius: 6px;
+	box-shadow: 2px 2px 4px #888;
+	background: rgb(232,231,212);
+}
+
+.breadboard .components
+{
+	
+}
+
+.breadboard .component
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.breadboard .component img
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.breadboard .component img
+{
+	display: none;
+}
+
+.breadboard .component img.active
+{
+	display: inline;
+}
+
+
+
+.breadboard .colorpicker
+{
+	position:absolute;
+	top: 130px;
+	right: 20px;
+	width: 90px;
+}
+
+.breadboard .color
+{
+	position: relative;
+	float: left;
+	width: 40px;
+	height: 40px;	
+}
+
+.color.red { background: red; }
+.color.black { background: black; }
+.color.green { background: green; }
+.color.yellow { background: yellow;}
+.color.blue { background: blue; }
+.color.brown { background: brown; }
+
+.color.selected
+{
+	border: 3px solid gray;
+	margin: -3px;
+	z-index: 10;
+}
