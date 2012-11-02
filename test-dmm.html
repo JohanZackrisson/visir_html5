@@ -31,6 +31,16 @@
 			height: 94px;
 			width: 94px;
 		}
+		
+		#bottom
+		{
+			position: fixed;
+			height: 30px;
+
+			bottom: 0;
+			right: 0;
+			
+		}
 	</style>
 	<script type="text/javascript" src="jquery-1.8.2.min.js"></script>
 	<script type="text/javascript" src="utils.js"></script>
@@ -70,7 +80,7 @@
 		
 		var tripledc = new visir.TripleDC(1, $("#tripledc"));
 		
-		$("#measure").click( function() {
+		$(".measure").click( function() {
 			transport.Request(circuit
 				+ flukedmm.WriteRequest()
 				+ flukedmm2.WriteRequest()
@@ -92,11 +102,14 @@
 </script>
 </head>
 <body>
-	<button id="measure">Measure</button>
+	<button class="measure">Measure</button>
 	<br/>
 	<div id="dmm"></div>
 	<div id="dmm2"></div>
 	<div id="tripledc"></div>
+	<div id="bottom">
+		<button class="measure">Measure</button>
+	</div>
 	<div>
 		Log window:
 		<button id="showlog">Show</button>
