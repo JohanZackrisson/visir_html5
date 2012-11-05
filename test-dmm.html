@@ -5,6 +5,7 @@
 	<meta name="viewport" content="initial-scale=1.0" />
 	<link rel="stylesheet" href="instruments/flukemultimeter/flukemultimeter.css" />
 	<link rel="stylesheet" href="instruments/tripledc/tripledc.css" />
+	<link rel="stylesheet" href="instruments/hp_funcgen/hp_funcgen.css" />
 	<style>
 		#dmm , #dmm2 {
 			display: inline-block;
@@ -53,6 +54,9 @@
 	
 	<script type="text/javascript" src="instruments/dcpower.js"></script>
 	<script type="text/javascript" src="instruments/tripledc/tripledc.js"></script>
+	
+	<script type="text/javascript" src="instruments/functiongenerator.js"></script>
+	<script type="text/javascript" src="instruments/hp_funcgen/hp_funcgen.js"></script>
 
 	<script>
 	
@@ -79,6 +83,8 @@
 		*/
 		
 		var tripledc = new visir.TripleDC(1, $("#tripledc"));
+		
+		var hp_func = new visir.HPFunctionGenerator(1, $("#hp_funcgen"));
 		
 		$(".measure").click( function() {
 			transport.Request(circuit
@@ -107,6 +113,7 @@
 	<div id="dmm"></div>
 	<div id="dmm2"></div>
 	<div id="tripledc"></div>
+	<div id="hp_funcgen"></div>
 	<div id="bottom">
 		<button class="measure">Measure</button>
 	</div>

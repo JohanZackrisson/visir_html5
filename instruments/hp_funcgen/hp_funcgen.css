@@ -1,0 +1,194 @@
+.hp_funcgen
+{
+	position: relative;
+}
+
+/* wheel */
+.hp_funcgen .knob {
+	width: 112px;
+	height: 112px;
+	position:absolute;
+	top: 38px;
+	left: 592px;
+}
+
+.hp_funcgen .top {
+	width: 112px;
+	height: 112px;
+	transform-origin: 56px 56px;
+	-moz-transform-origin: 56px 56px;
+	-webkit-transform-origin: 56px 56px;
+}
+
+.hp_funcgen .button, .hp_funcgen .button img {
+	position:absolute;
+}
+
+.hp_funcgen .button img { display: none; }
+.hp_funcgen .button img.active {	display: inline; }
+
+/* first row */
+.hp_funcgen .button_sine { top: 197px; left: 105px; width: 52px; height: 37px; }
+.hp_funcgen .button_square { top: 197px; left: 171px; width: 52px; height: 37px; }
+.hp_funcgen .button_tri { top: 197px; left: 237px; width: 52px; height: 37px; }
+.hp_funcgen .button_saw { top: 197px; left: 303px; width: 52px; height: 37px; }
+.hp_funcgen .button_noise { top: 197px; left: 369px; width: 52px; height: 37px; }
+.hp_funcgen .button_arb { top: 197px; left: 435px; width: 52px; height: 37px; }
+.hp_funcgen .button_enter { top: 197px; left: 500px; width: 54px; height: 40px; }
+/* second row */
+.hp_funcgen .button_freq { top: 257px; left: 103px; width: 54px; height: 40px; }
+.hp_funcgen .button_ampl { top: 257px; left: 169px; width: 54px; height: 40px; }
+.hp_funcgen .button_offset { top: 257px; left: 235px; width: 54px; height: 40px; }
+.hp_funcgen .button_single { top: 257px; left: 302px; width: 54px; height: 40px; }
+.hp_funcgen .button_recall { top: 257px; left: 368px; width: 54px; height: 40px; }
+.hp_funcgen .button_enternumber { top: 257px; left: 433px; width: 54px; height: 40px; }
+.hp_funcgen .button_shift { top: 256px; left: 500px; width: 54px; height: 40px; }
+/* arrow buttons */
+.hp_funcgen .button_up { top: 177px; left: 569px; width: 38px; height: 29px; }
+.hp_funcgen .button_down { top: 212px; left: 569px; width: 38px; height: 29px; }
+.hp_funcgen .button_right { top: 247px; left: 569px; width: 38px; height: 29px; }
+.hp_funcgen .button_left { top: 282px; left: 569px; width: 38px; height: 29px; }
+
+
+/*
+.tripledc .hide
+{
+	display: none;
+}
+*/
+
+.hp_funcgen .bigtext
+{
+	font-size: 42pt;
+	font-family: monospace;
+	font-weight: bold;
+	color: #008000;	
+	position: absolute;
+	text-align: right;
+}
+
+.hp_funcgen .num_display
+{
+	top: 75px;
+	left: 30px;
+	width: 400px;
+}
+
+.hp_funcgen .num_unit
+{
+	top: 75px;
+	left: 434px;
+	width: 100px;
+}
+
+
+.hp_funcgen .on .green
+{
+	color: #00FF00;	
+}
+
+/*
+.tripledc .smalltext
+{
+	font-size: 10pt;
+	font-family: monospace;
+	color: #008000;	
+	position: absolute;
+	text-align: right;
+}
+
+.tripledc > .voltage {
+	top: 65px;
+	left: 45px;
+	width: 210px;
+}
+
+.tripledc > .current {
+	top: 65px;
+	left: 280px;
+	width: 210px;
+}
+
+.tripledc > .channelselect > .p6v {
+	top: 120px;
+	left: 82px;
+	width: 50px;
+}
+
+.tripledc > .channelselect > .p25v {
+	top: 120px;
+	left: 129px;
+	width: 50px;
+}
+
+.tripledc > .channelselect > .m25v {
+	top: 120px;
+	left: 176px;
+	width: 50px;
+}
+
+
+.tripledc .knob {
+	width: 94px;
+	height: 94px;
+	position:absolute;
+	top: 62px;
+	left: 560px;
+}
+
+.tripledc .top {
+	width: 94px;
+	height: 94px;
+	transform-origin: 47px 47px;
+	-moz-transform-origin: 47px 47px;
+	-webkit-transform-origin: 47px 47px;
+}
+
+.tripledc .button, .tripledc .button img {
+	position:absolute;
+}
+
+.tripledc .button img {
+	display: none;
+}
+
+.tripledc .button img.active {
+	display: inline;
+}
+
+
+.tripledc .button_p6v {
+	top: 179px;
+	left: 139px;
+	width: 47px;
+	height: 34px;
+}
+
+.tripledc .button_p25v {
+	top: 179px;
+	left: 198px;
+	width: 47px;
+	height: 34px;
+}
+
+.tripledc .button_m25v {
+	top: 179px;
+	left: 258px;
+	width: 47px;
+	height: 34px;
+}
+
+.tripledc .button_left {
+	top: 178px;
+	left: 564px;
+	width: 37px;
+	height: 35px;
+}
+
+.tripledc .button_right {
+	top: 179px;
+	left: 606px;
+	width: 37px;
+	height: 35px;
+}
+*/
