@@ -1,17 +1,5 @@
 <html>
 <head>
-<style>
-
-span.componentcircle{
-  display:block;
-  position:relative;
-}
-
-span.componentcircle span.innercomponent{
-  position:absolute;
-}
-
-</style>
 <script>
 
     var CIRCLE_SIZE    =  140;
@@ -55,8 +43,9 @@ span.componentcircle span.innercomponent{
         var innerComponentSpan = document.createElement('span');
         innerComponentSpan.className = "innercomponent";
         innerComponentSpan.appendChild(component);
-        innerComponentSpan.style.left = relativeLeft;
-        innerComponentSpan.style.top  = relativeTop;
+        innerComponentSpan.style.position = 'absolute';
+        innerComponentSpan.style.left     = relativeLeft;
+        innerComponentSpan.style.top      = relativeTop;
 
         blockSpan.appendChild(innerComponentSpan);
 

@@ -218,7 +218,7 @@ visir.Breadboard.prototype._AddComponentEvents = function($comp)
 		
 		$doc.on("keypress.rem", function(e) {
 			trace("key: " + e.which);
-			if (e.which == 114) { // r
+			if (e.which == 114) { // 'r'
 				var $next = $comp.find("img.active").next();
 				$comp.find("img").removeClass("active");
 				if ($next.length > 0) {					
@@ -269,6 +269,114 @@ visir.Breadboard.prototype._AddComponentEvents = function($comp)
 			$doc.off(".rem");
 		});
 	});
+
+    $comp.on("click", function() {
+        // TODO XXX Where should I place constants / settings?
+        var CIRCLE_SIZE    =  140;
+        var ICON_SIZE      =   40;
+
+        // If the circle may be slightly bigger than the four 
+        // corner icons, since circles don't have corners. This
+        // constant establishes the level of overlap between the 
+        // square that surrounds a circle and the square that
+        // surrounds the icons. Example: establishing it to 0 
+        // the circle will not overlap at all; establishing it to
+        // 1 will overlap completely.
+        var CIRCLE_OVERLAP =  0.4;
+
+        var originalTop        = parseInt($comp.css('top'), 10);
+        var originalLeft       = parseInt($comp.css('left'), 10);
+
+        var relativeTop  = (CIRCLE_SIZE - $comp.height()) / 2;
+        var relativeLeft = (CIRCLE_SIZE - $comp.width())  / 2;
+
+        var newTop  = originalTop  - relativeTop;
+        var newLeft = originalLeft - relativeLeft;
+
+        var $parentNode = $comp.parent();
+        $comp.remove();
+
+        var $blockSpan = $('<span class="componentcircle"></span>');
+        $blockSpan.width(CIRCLE_SIZE);
+        $blockSpan.css({
+            'position' : 'absolute',
+            'top'      : newTop + 'px',
+            'left'     : newLeft + 'px'
+        });
+
+        var $innerComponentSpan = $('<span class="innercomponent"></span>');
+        $innerComponentSpan.append($comp);
+        $innerComponentSpan.css({
+            'position' : 'absolute',
+            'left'     : relativeLeft + 'px',
+            'top'      : relativeTop + 'px'
+        });
+
+        $blockSpan.append($innerComponentSpan);
+
+        var $circleImg = $('<img src="instruments/breadboard/images/empty_circle.png"/>');
+        $circleImg.width(CIRCLE_SIZE - 2 * (1 - CIRCLE_OVERLAP) * ICON_SIZE);
+        $circleImg.height(CIRCLE_SIZE - 2 * (1 - CIRCLE_OVERLAP) * ICON_SIZE);
+        $circleImg.css({
+            'position' : 'absolute',
+            'left'     : (1 - CIRCLE_OVERLAP) * ICON_SIZE,
+            'top'      : (1 - CIRCLE_OVERLAP) * ICON_SIZE
+        });
+        $blockSpan.append($circleImg);
+
+        // http://openclipart.org/detail/68/trash-can-by-andy
+        var $trashImg = $('<img src="instruments/breadboard/images/trash.png"/>');
+        $trashImg.width(ICON_SIZE);
+        $trashImg.height(ICON_SIZE);
+        $trashImg.css({
+            'position' : 'absolute',
+            'left'     : 0,
+            'top'      : CIRCLE_SIZE - ICON_SIZE
+        })
+        $trashImg.click(function() {
+            $blockSpan.remove();
+        });
+        $blockSpan.append($trashImg);
+
+        // Public domain
+        // http://openclipart.org/detail/33685/tango-view-refresh-by-warszawianka
+        var $rotateImg = $('<img src="instruments/breadboard/images/rotate.png"/>');
+        $rotateImg.width(ICON_SIZE);
+        $rotateImg.height(ICON_SIZE);
+        $rotateImg.css({
+            'position' : 'absolute',
+            'left'     : CIRCLE_SIZE - ICON_SIZE,
+            'top'      : CIRCLE_SIZE - ICON_SIZE
+        });
+        $rotateImg.click(function() {
+            // TODO: refactor
+            var $next = $comp.find("img.active").next();
+            $comp.find("img").removeClass("active");
+            if ($next.length > 0) {					
+                $next.addClass("active");
+            } else {
+                $comp.find("img").first().addClass("active");
+            }
+        });
+        $blockSpan.append($rotateImg);
+
+        // XXX Gentleface; CC Attribution-NonCommercial 3.0
+        // http://www.softicons.com/free-icons/toolbar-icons/black-wireframe-toolbar-icons-by-gentleface/cursor-hand-icon
+        // http://www.softicons.com/free-icons/toolbar-icons/black-wireframe-toolbar-icons-by-gentleface/cursor-drag-hand-icon
+        var $dragImg = $('<img src="instruments/breadboard/images/drop.png" />');
+        $dragImg.width(ICON_SIZE);
+        $dragImg.height(ICON_SIZE);
+        $dragImg.css({
+            'position' : 'absolute',
+            'left'     : CIRCLE_SIZE - ICON_SIZE,
+            'top'      : 0
+        });
+        $blockSpan.append($dragImg);
+
+        $parentNode.append($blockSpan);
+
+        $comp.css('position', 'static');
+    });
 }
 
 visir.Breadboard.prototype._SetComponentRotation = function($comp, step)
