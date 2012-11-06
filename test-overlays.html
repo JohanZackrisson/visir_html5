@@ -14,10 +14,19 @@ span.componentcircle span.innercomponent{
 </style>
 <script>
 
-    var CIRCLE_SIZE = 140;
+    var CIRCLE_SIZE    =  140;
+    var ICON_SIZE      =   40;
+
+    // If the circle may be slightly bigger than the four 
+    // corner icons, since circles don't have corners. This
+    // constant establishes the level of overlap between the 
+    // square that surrounds a circle and the square that
+    // surrounds the icons. Example: establishing it to 0 
+    // the circle will not overlap at all; establishing it to
+    // 1 will overlap completely.
+    var CIRCLE_OVERLAP =  0.4;
 
     function decorate_component(component) {
-
         if(component.parentNode.className == 'innercomponent') {
             undecorate_component(component);
             return;
@@ -35,20 +44,13 @@ span.componentcircle span.innercomponent{
         var parentNode = component.parentNode;
         parentNode.removeChild(component);
 
-        var circleSpan         = document.createElement('span');
-        circleSpan.className   = "componentcircle";
-        circleSpan.width       = CIRCLE_SIZE + 'px';
+        var blockSpan         = document.createElement('span');
+        blockSpan.className   = "componentcircle";
+        blockSpan.width       = CIRCLE_SIZE;
 
-        circleSpan.style.position = "absolute";
-        circleSpan.style.top      = newTop; 
-        circleSpan.style.left     = newLeft;
-
-        var circleImg = document.createElement('img');
-        circleImg.src = 'instruments/breadboard/images/circle_components.png';
-        circleImg.width  = CIRCLE_SIZE;
-        circleImg.height = CIRCLE_SIZE;
-        
-        circleSpan.appendChild(circleImg);
+        blockSpan.style.position = "absolute";
+        blockSpan.style.top      = newTop; 
+        blockSpan.style.left     = newLeft;
 
         var innerComponentSpan = document.createElement('span');
         innerComponentSpan.className = "innercomponent";
@@ -56,8 +58,66 @@ span.componentcircle span.innercomponent{
         innerComponentSpan.style.left = relativeLeft;
         innerComponentSpan.style.top  = relativeTop;
 
-        circleSpan.appendChild(innerComponentSpan);
-        parentNode.appendChild(circleSpan);
+        blockSpan.appendChild(innerComponentSpan);
+
+        var circleImg = document.createElement('img');
+        circleImg.src = 'instruments/breadboard/images/empty_circle.png';
+        circleImg.width  = CIRCLE_SIZE - 2 * (1 - CIRCLE_OVERLAP) * ICON_SIZE;
+        circleImg.height = CIRCLE_SIZE - 2 * (1 - CIRCLE_OVERLAP) * ICON_SIZE;
+        circleImg.style.position = 'absolute';
+        circleImg.style.left = (1 - CIRCLE_OVERLAP) * ICON_SIZE;
+        circleImg.style.top  = (1 - CIRCLE_OVERLAP) * ICON_SIZE;
+        circleImg.onclick = function() {
+            undecorate_component(component);
+        }
+        blockSpan.appendChild(circleImg);
+
+        var trashImg = document.createElement('img');
+        // http://openclipart.org/detail/68/trash-can-by-andy
+        trashImg.src = 'instruments/breadboard/images/trash.png';
+        trashImg.width  = ICON_SIZE;
+        trashImg.height = ICON_SIZE;
+        trashImg.style.position = 'absolute';
+        trashImg.style.left = 0;
+        trashImg.style.top  = CIRCLE_SIZE - ICON_SIZE;
+        trashImg.onclick = function() {
+            parentNode.removeChild(blockSpan);
+        }
+        blockSpan.appendChild(trashImg);
+
+        var rotateImg = document.createElement('img');
+        // Public domain
+        // http://openclipart.org/detail/33685/tango-view-refresh-by-warszawianka
+        rotateImg.src = 'instruments/breadboard/images/rotate.png';
+        rotateImg.width  = ICON_SIZE;
+        rotateImg.height = ICON_SIZE;
+        rotateImg.style.position = 'absolute';
+        rotateImg.style.left = CIRCLE_SIZE - ICON_SIZE;
+        rotateImg.style.top  = CIRCLE_SIZE - ICON_SIZE;
+        rotateImg.onclick = function() {
+            // TODO: webkit dependent
+            var rotationStr = component.style.webkitTransform.replace(/rotate\((\d*)deg\)/, "$1");
+            var rotation = (rotationStr == "")?0:parseInt(rotationStr);
+            var newRotation = "rotate(" + (rotation + 90) % 360 + "deg)";
+            component.style.webkitTransform = newRotation;
+            component.style.MozTransform    = newRotation;
+            component.style.transform       = newRotation;
+        };
+        blockSpan.appendChild(rotateImg);
+
+        var dragImg = document.createElement('img');
+        // XXX Gentleface; CC Attribution-NonCommercial 3.0
+        // http://www.softicons.com/free-icons/toolbar-icons/black-wireframe-toolbar-icons-by-gentleface/cursor-hand-icon
+        // http://www.softicons.com/free-icons/toolbar-icons/black-wireframe-toolbar-icons-by-gentleface/cursor-drag-hand-icon
+        dragImg.src = 'instruments/breadboard/images/drop.png';
+        dragImg.width  = ICON_SIZE;
+        dragImg.height = ICON_SIZE;
+        dragImg.style.position = 'absolute';
+        dragImg.style.left = CIRCLE_SIZE - ICON_SIZE;
+        dragImg.style.top  = 0;
+        blockSpan.appendChild(dragImg);
+
+        parentNode.appendChild(blockSpan);
 
         component.style.position = 'static';
     }
@@ -74,20 +134,11 @@ span.componentcircle span.innercomponent{
         component.style.position = 'absolute';
     }
 
-    
-    function test() {
-        var resistor = document.getElementById('resistor1');
-        decorate_component(resistor);
-    }
-
 </script>
 </head>
 <body>
 
-<button onclick="test();">Press me</button>
-
-
-    <img id="resistor1" src="instruments/breadboard/images/r_1.5k.png" style="position: absolute; top: 300px; left: 300px"/>
+    <img onclick="decorate_component(this)" src="instruments/breadboard/images/r_1.5k.png" style="position: absolute; top: 300px; left: 300px"/>
 
 </body>
 </html>
