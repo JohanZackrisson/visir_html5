@@ -284,18 +284,23 @@ visir.Breadboard.prototype._AddComponentEvents = function($comp)
         // 1 will overlap completely.
         var CIRCLE_OVERLAP =  0.4;
 
+        // Where is the component?
         var originalTop        = parseInt($comp.css('top'), 10);
         var originalLeft       = parseInt($comp.css('left'), 10);
 
+        // Where should be located inside the circle?
         var relativeTop  = (CIRCLE_SIZE - $comp.height()) / 2;
         var relativeLeft = (CIRCLE_SIZE - $comp.width())  / 2;
 
+        // Where should the whole circle be located?
         var newTop  = originalTop  - relativeTop;
         var newLeft = originalLeft - relativeLeft;
 
+        // Later they are removed
         var $parentNode = $comp.parent();
-        $comp.remove();
+        // $comp.remove();
 
+        // Overall block
         var $blockSpan = $('<span class="componentcircle"></span>');
         $blockSpan.width(CIRCLE_SIZE);
         $blockSpan.css({
@@ -304,16 +309,7 @@ visir.Breadboard.prototype._AddComponentEvents = function($comp)
             'left'     : newLeft + 'px'
         });
 
-        var $innerComponentSpan = $('<span class="innercomponent"></span>');
-        $innerComponentSpan.append($comp);
-        $innerComponentSpan.css({
-            'position' : 'absolute',
-            'left'     : relativeLeft + 'px',
-            'top'      : relativeTop + 'px'
-        });
-
-        $blockSpan.append($innerComponentSpan);
-
+        // Circle
         var $circleImg = $('<img src="instruments/breadboard/images/empty_circle.png"/>');
         $circleImg.width(CIRCLE_SIZE - 2 * (1 - CIRCLE_OVERLAP) * ICON_SIZE);
         $circleImg.height(CIRCLE_SIZE - 2 * (1 - CIRCLE_OVERLAP) * ICON_SIZE);
@@ -322,8 +318,12 @@ visir.Breadboard.prototype._AddComponentEvents = function($comp)
             'left'     : (1 - CIRCLE_OVERLAP) * ICON_SIZE,
             'top'      : (1 - CIRCLE_OVERLAP) * ICON_SIZE
         });
+        $circleImg.click(function() {
+            $blockSpan.remove();
+        });
         $blockSpan.append($circleImg);
 
+        // Trash button
         // http://openclipart.org/detail/68/trash-can-by-andy
         var $trashImg = $('<img src="instruments/breadboard/images/trash.png"/>');
         $trashImg.width(ICON_SIZE);
@@ -335,9 +335,11 @@ visir.Breadboard.prototype._AddComponentEvents = function($comp)
         })
         $trashImg.click(function() {
             $blockSpan.remove();
+            $comp.remove();
         });
         $blockSpan.append($trashImg);
 
+        // Rotation button
         // Public domain
         // http://openclipart.org/detail/33685/tango-view-refresh-by-warszawianka
         var $rotateImg = $('<img src="instruments/breadboard/images/rotate.png"/>');
@@ -349,7 +351,7 @@ visir.Breadboard.prototype._AddComponentEvents = function($comp)
             'top'      : CIRCLE_SIZE - ICON_SIZE
         });
         $rotateImg.click(function() {
-            // TODO: refactor
+            // TODO: refactor to avoid duplicating this code
             var $next = $comp.find("img.active").next();
             $comp.find("img").removeClass("active");
             if ($next.length > 0) {					
@@ -360,6 +362,7 @@ visir.Breadboard.prototype._AddComponentEvents = function($comp)
         });
         $blockSpan.append($rotateImg);
 
+        // Drag and drop button
         // XXX Gentleface; CC Attribution-NonCommercial 3.0
         // http://www.softicons.com/free-icons/toolbar-icons/black-wireframe-toolbar-icons-by-gentleface/cursor-hand-icon
         // http://www.softicons.com/free-icons/toolbar-icons/black-wireframe-toolbar-icons-by-gentleface/cursor-drag-hand-icon
@@ -373,9 +376,9 @@ visir.Breadboard.prototype._AddComponentEvents = function($comp)
         });
         $blockSpan.append($dragImg);
 
-        $parentNode.append($blockSpan);
 
-        $comp.css('position', 'static');
+        $parentNode.append($blockSpan);
+        //$comp.css('position', 'static');
     });
 }
 
