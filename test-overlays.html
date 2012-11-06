@@ -1,0 +1,93 @@
+<html>
+<head>
+<style>
+
+span.componentcircle{
+  display:block;
+  position:relative;
+}
+
+span.componentcircle span.innercomponent{
+  position:absolute;
+}
+
+</style>
+<script>
+
+    var CIRCLE_SIZE = 140;
+
+    function decorate_component(component) {
+
+        if(component.parentNode.className == 'innercomponent') {
+            undecorate_component(component);
+            return;
+        }
+
+        var originalTop        = parseInt(component.style.top.replace('px',''));
+        var originalLeft       = parseInt(component.style.left.replace('px',''));
+
+        var relativeTop  = (CIRCLE_SIZE - component.height) / 2;
+        var relativeLeft = (CIRCLE_SIZE - component.width)  / 2;
+
+        var newTop  = originalTop  - relativeTop;
+        var newLeft = originalLeft - relativeLeft;
+
+        var parentNode = component.parentNode;
+        parentNode.removeChild(component);
+
+        var circleSpan         = document.createElement('span');
+        circleSpan.className   = "componentcircle";
+        circleSpan.width       = CIRCLE_SIZE + 'px';
+
+        circleSpan.style.position = "absolute";
+        circleSpan.style.top      = newTop; 
+        circleSpan.style.left     = newLeft;
+
+        var circleImg = document.createElement('img');
+        circleImg.src = 'instruments/breadboard/images/circle_components.png';
+        circleImg.width  = CIRCLE_SIZE;
+        circleImg.height = CIRCLE_SIZE;
+        
+        circleSpan.appendChild(circleImg);
+
+        var innerComponentSpan = document.createElement('span');
+        innerComponentSpan.className = "innercomponent";
+        innerComponentSpan.appendChild(component);
+        innerComponentSpan.style.left = relativeLeft;
+        innerComponentSpan.style.top  = relativeTop;
+
+        circleSpan.appendChild(innerComponentSpan);
+        parentNode.appendChild(circleSpan);
+
+        component.style.position = 'static';
+    }
+    
+    function undecorate_component(component) {
+        if(component.parentNode.className != 'innercomponent') {
+            decorate_component(component);
+            return;
+        }
+        
+        var parentNode = component.parentNode.parentNode.parentNode;
+        parentNode.removeChild(component.parentNode.parentNode);
+        parentNode.appendChild(component);
+        component.style.position = 'absolute';
+    }
+
+    
+    function test() {
+        var resistor = document.getElementById('resistor1');
+        decorate_component(resistor);
+    }
+
+</script>
+</head>
+<body>
+
+<button onclick="test();">Press me</button>
+
+
+    <img id="resistor1" src="instruments/breadboard/images/r_1.5k.png" style="position: absolute; top: 300px; left: 300px"/>
+
+</body>
+</html>
