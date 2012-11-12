@@ -18,8 +18,10 @@ visir.TripleDC = function(id, elem)
 		"25V-": { voltage: 0, current: 5000, digit: 2 }
 	 }
 	
+	var imgbase = "instruments/tripledc/images";
+	
 	var tpl = '<div class="tripledc">\
-	<img src="instruments/tripledc/3dc.png" />\
+	<img src="%img%/3dc.png" />\
 	<div class="bigtext voltage"><span class="green">0</span>.000V</div>\
 	<div class="bigtext current">0.500A</div>\
 	<div class="channelselect">\
@@ -27,17 +29,19 @@ visir.TripleDC = function(id, elem)
 	<div class="smalltext p25v hide">+25V</div>\
 	<div class="smalltext m25v hide">-25V</div>\
 	</div>\
-	<div class="button button_p6v"><img class="up active" src="instruments/tripledc/6v_up.png" alt="+6v button" /><img class="down" src="instruments/tripledc/6v_down.png" alt="+6v button" /></div>\
-	<div class="button button_p25v"><img class="up active" src="instruments/tripledc/25plusv_up.png" alt="+25v button" /><img class="down" src="instruments/tripledc/25plusv_down.png" alt="+25v button" /></div>\
-	<div class="button button_m25v"><img class="up active" src="instruments/tripledc/25minusv_up.png" alt="-25v button" /><img class="down" src="instruments/tripledc/25minusv_down.png" alt="-25v button" /></div>\
-	<div class="button button_left"><img class="up active" src="instruments/tripledc/arrowleft_up.png" alt="left button" /><img class="down" src="instruments/tripledc/arrowleft_down.png" alt="left button" /></div>\
-	<div class="button button_right"><img class="up active" src="instruments/tripledc/arrowright_up.png" alt="right button" /><img class="down" src="instruments/tripledc/arrowright_down.png" alt="right button" /></div>\
+	<div class="button button_p6v"><img class="up active" src="%img%/6v_up.png" alt="+6v button" /><img class="down" src="%img%/6v_down.png" alt="+6v button" /></div>\
+	<div class="button button_p25v"><img class="up active" src="%img%/25plusv_up.png" alt="+25v button" /><img class="down" src="%img%/25plusv_down.png" alt="+25v button" /></div>\
+	<div class="button button_m25v"><img class="up active" src="%img%/25minusv_up.png" alt="-25v button" /><img class="down" src="%img%/25minusv_down.png" alt="-25v button" /></div>\
+	<div class="button button_left"><img class="up active" src="%img%/arrowleft_up.png" alt="left button" /><img class="down" src="%img%/arrowleft_down.png" alt="left button" /></div>\
+	<div class="button button_right"><img class="up active" src="%img%/arrowright_up.png" alt="right button" /><img class="down" src="%img%/arrowright_down.png" alt="right button" /></div>\
 	<div class="knob">\
 		<div class="top">\
-			<img src="instruments/tripledc/3dc_wheel.png" alt="handle" />\
+			<img src="%img%/3dc_wheel.png" alt="handle" />\
 		</div>\
 	</div>\
 	</div>';
+	
+	tpl = tpl.replace(/%img%/g, imgbase);
 		
 	elem.append(tpl);
 	
@@ -51,7 +55,7 @@ visir.TripleDC = function(id, elem)
 		if (diff > 180) diff = -360 + diff;
 		else if (diff < -180) diff = 360 + diff;
 		
-		if (Math.abs(diff) > 36) {
+		if (Math.abs(diff) > 360/10) {
 			prev = deg;
 			//trace("diff: " + diff);
 			if (diff < 0) me._DecDigit();
