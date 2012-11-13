@@ -101,29 +101,6 @@ visir.TripleDC = function(id, elem)
 
 extend(visir.TripleDC, visir.DCPower)
 
-function _lightNum(strnum, digit) {
-	var out = "";
-	//trace("lightnum: " + strnum + " " + digit)
-	
-	var idx = 0;
-	for(var i=strnum.length - 1; i >= 0; i--)
-	{
-		if (strnum[i] == ".") {
-			out = strnum[i] + out;
-			continue;
-		}
-		
-		if (idx == digit) {
-			out = '<span class="green">'+ strnum[i] + '</span>' + out;
-		} else {
-			out = strnum[i] + out;
-		}
-		idx++;
-	}
-	
-	return out;
-}
-
 visir.TripleDC.prototype._UpdateDisplay = function(ch) {
 	var aCh = this._GetActiveChannel();
 	var digitoffset = 0;
@@ -132,7 +109,7 @@ visir.TripleDC.prototype._UpdateDisplay = function(ch) {
 	} 
 	//var fixed = (aCh.voltage >= 10000) ? 2 : 3;
 	var num = (aCh.voltage / 1000).toFixed(3 - digitoffset);
-	this._elem.find(".voltage").html( _lightNum(num, aCh.digit - digitoffset) + "V" );
+	this._elem.find(".voltage").html(visir.LightNum(num, aCh.digit - digitoffset) + "V" );
 }
 
 visir.TripleDC.prototype._GetActiveChannel = function() {
