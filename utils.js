@@ -1,3 +1,4 @@
+var visir = visir || {};
 
 function extend(Child, Parent) {
   Child.prototype = inherit(Parent.prototype)
@@ -29,4 +30,27 @@ function setRotation(elem, deg)
 
 function AddXMLValue(where, name, value) {
 	where.append('<' + name + ' value="'+ value + '"/>');
+}
+
+visir.LightNum = function(strnum, digit) {
+	var out = "";
+	trace("lightnum: " + strnum + " " + digit)
+	
+	var idx = 0;
+	for(var i=strnum.length - 1; i >= 0; i--)
+	{
+		if (strnum[i] == "." || strnum[i] == "-") {
+			out = strnum[i] + out;
+			continue;
+		}
+		
+		if (idx == digit) {
+			out = '<span class="green">'+ strnum[i] + '</span>' + out;
+		} else {
+			out = strnum[i] + out;
+		}
+		idx++;
+	}
+	
+	return out;
 }
