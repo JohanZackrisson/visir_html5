@@ -21,6 +21,7 @@ visir.DCPower.prototype.GetChannel = function(ch)
 visir.DCPower.prototype.WriteRequest = function()
 {
 	var $xml = $("<dcpower><dc_outputs/></dcpower>");
+	$xml.attr("id", this._id);
 	var $outputs = $xml.find("dc_outputs");
 	for(var key in this._channels)
 	{
