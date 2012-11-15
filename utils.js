@@ -34,7 +34,6 @@ function AddXMLValue(where, name, value) {
 
 visir.LightNum = function(strnum, digit) {
 	var out = "";
-	trace("lightnum: " + strnum + " " + digit)
 	
 	var idx = 0;
 	for(var i=strnum.length - 1; i >= 0; i--)
