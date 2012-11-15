@@ -29,7 +29,7 @@ visir.FlukeMultimeter = function(id, elem)
 	
 	var handle = elem.find(".rot");
 	
-	function handleTurn(deg)
+	function handleTurn(elem, deg)
 	{
 		deg = ( deg - deg % 30 )  + 15;
 

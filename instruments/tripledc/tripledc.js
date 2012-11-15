@@ -49,7 +49,7 @@ visir.TripleDC = function(id, elem)
 	
 	var prev = 0;
 	
-	function handleTurn(deg) {
+	function handleTurn(elem, deg) {
 		var diff = deg - prev;
 		// fixup the wrapping
 		if (diff > 180) diff = -360 + diff;

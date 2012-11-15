@@ -3,7 +3,7 @@
 		init : function( props ) {
 			var options = $.extend({
 				offset: 0,
-				turn: function(deg){ return deg; }
+				turn: function(elem, deg){ return deg; }
 				}, props || {});
 			
 			return this.each(function(){
@@ -21,7 +21,6 @@
 						e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
 
 						var offset = handle.offset();
-						//console.log("move: " + offset.left + " " + offset.top + " " + e.pageX + " " + e.pageY);
 						var center = { x: top.width() / 2, y: top.height() / 2 };
 						var origin = top.css("transform-origin");
 						if (origin) {
@@ -34,7 +33,7 @@
 
 						var deg = Math.atan2(dy, dx) * 180 / Math.PI;
 						deg = (deg + 360) % 360;
-						var userdeg = options.turn(deg);
+						var userdeg = options.turn(handle, deg);
 						if (userdeg != undefined) {
 							setRotation(top, userdeg + options.offset); // XXX: not portable..
 						}
