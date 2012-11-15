@@ -1,0 +1,140 @@
+.ag_osc
+{
+	position: relative;
+}
+
+.ag_osc .button, .ag_osc .button img, .ag_osc .stepwheel, .ag_osc .stepwheel img {
+	position:absolute;
+}
+
+.ag_osc .button img { display: none; }
+.ag_osc .button img.active {	display: inline; }
+
+.ag_osc .stepwheel img { display: none; }
+.ag_osc .stepwheel img.active {	display: inline; }
+
+
+.ag_osc .horz { top: 28px; left: 435px; }
+.ag_osc .vert_ch1 { top: 182px; left: 444px; }
+.ag_osc .vert_ch2 { top: 182px; left: 521px; }
+
+.ag_osc .horz_offset { top: 33px; left: 577px; }
+.ag_osc .offset_ch1 { top: 284px; left: 451px; }
+.ag_osc .offset_ch2 { top: 284px; left: 529px; }
+.ag_osc .offset_trg { top: 92px; left: 747px; }
+
+.ag_osc .button.channel_1 {	top: 237px; left: 454px; }
+.ag_osc .button.channel_2 {	top: 237px; left: 533px; }
+
+/* to avoid having to do the layouting we let the browser do it for us */
+.ag_osc .display_buttons {
+	position: absolute;
+	top: 345px;
+	left: 53px;
+	width: 320px;
+}
+
+.ag_osc .display_buttons .button {
+	display: inline-block;
+	position: relative;
+	width: 30px;
+	height: 30px;
+	margin-right: 20px;
+}
+
+.ag_osc .small img {
+	transform-origin: 18px 18px;
+	-webkit-transform-origin: 18px 18px;
+	-moz-transform-origin: 18px 18px;
+}
+
+.ag_osc .large img {
+	transform-origin: 25.5px 25.5px;
+	-webkit-transform-origin: 25.5px 25.5px;
+	-moz-transform-origin: 25.5px 25.5px;
+}
+
+.ag_osc .display {
+	position: absolute;
+	background: black;
+	top: 61px; left: 33px;
+	width: 349px; height: 281px;
+	border-radius: 8px;
+}
+
+.ag_osc .display .background {
+	background: green;
+	width: 341px; height: 269px;
+	margin: 4px;
+}
+
+.ag_osc .display .graph {
+	position: absolute;
+	background: black;
+	width: 330px; height: 208px;
+	top: 20px; left: 14px;
+}
+
+.ag_osc .display canvas {
+	position:absolute;
+	top: 0; left: 0;
+}
+
+.ag_osc .display .channelname {
+	font-size: 10pt;
+	font-family: sans-serif;
+	font-weight: bold;
+}
+
+.ag_osc .display .voltage {
+	border-radius: 2px;
+	background: #00ff00;
+	font-size: 8pt;
+	font-family: sans-serif;
+	margin-left: 4px;
+	padding-right: 2px;
+	padding-left: 1px;
+}
+
+.ag_osc .display .channel {
+	position: absolute;
+}
+
+.ag_osc .display .ch1 {
+	top: 1px; left: 7px;
+}
+
+.ag_osc .display .ch2 {
+	top: 1px; left: 67px;
+}
+
+.ag_osc .display .timedelay {
+	position: absolute;
+	top: 1px; left: 177px;
+}
+
+.ag_osc .display .timedelay .arrow {
+	position: relative;
+	top: 4px;
+}
+
+.ag_osc .display .timescale {
+	position: absolute;
+	top: 1px; left: 218px;
+}
+
+.ag_osc .display .trigtype {
+	position: absolute;
+	top: 1px; left: 256px;
+}
+
+.ag_osc .display .trigtype .flank{
+	position: relative;
+	margin-bottom: -2px;
+	top: 2px;
+}
+
+.ag_osc .display .triglevel {
+	position: absolute;
+	top: 1px; left: 309px;
+}
