@@ -150,7 +150,7 @@ function GetLightNumOffset(value, digits)
 
 visir.HPFunctionGenerator.prototype._GetDisplayDigitInfo = function(realval, digits, activedigit, valunit)
 {
-	var unit = GetUnit(realval);
+	var unit = this._GetUnit(realval);
 	realval /= Math.pow(10, unit.pow); // compensate for prefixes
 	
 	var num = numDigits(realval); // count the number of digits before .
@@ -203,7 +203,7 @@ visir.HPFunctionGenerator.prototype.SetActiveValue = function(val)
 	this._UpdateDisplay();
 }
 
-function GetUnit(val)
+visir.HPFunctionGenerator.prototype._GetUnit = function(val)
 {
 	var units = [
 		, ["M", 6 ]
