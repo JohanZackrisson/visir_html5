@@ -11,6 +11,8 @@
 				var doc = $(document);
 				var handle = $(this);
 				var top = handle.find(".top");
+				
+				var newTouch = true;
 
 				handle.on("mousedown touchstart", function(e) {
 
@@ -33,16 +35,18 @@
 
 						var deg = Math.atan2(dy, dx) * 180 / Math.PI;
 						deg = (deg + 360) % 360;
-						var userdeg = options.turn(handle, deg);
+						var userdeg = options.turn(handle, deg, newTouch);
 						if (userdeg != undefined) {
 							setRotation(top, userdeg + options.offset); // XXX: not portable..
 						}
 						
+						newTouch = false;
 					});
 
 					doc.on("mouseup.rem touchend.rem", function(e) {
 						handle.off(".rem");
 						doc.off(".rem");
+						newTouch = true;
 					});
 				});
 
