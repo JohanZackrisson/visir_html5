@@ -9,11 +9,14 @@ visir.AgilentOscilloscope = function(id, elem)
 	this._voltages = [5, 2, 1, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001];
 	this._voltIdx = [2,2];
 	
-	this._timedivs = [0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001, 0.00005, 0.00002, 0.00001];
+	this._timedivs = [0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001, 0.00005, 0.00002, 0.00001, 0.000005, 0.000002, 0.000001, 0.0000005];
 	this._timeIdx = 1;
 	
 	var me = this;
 	this._$elem = elem;
+	
+	this._channels[0].visible = true;
+	this._channels[1].visible = true;
 	
 	var imgbase = "instruments/ag_oscilloscope/images";
 		
@@ -75,7 +78,8 @@ visir.AgilentOscilloscope = function(id, elem)
 	{
 		up = up || function() {};
 		down = down || function() {};
-		return function(elem, deg) {
+		return function(elem, deg, newTouch) {
+			if (newTouch) prev = deg;
 			var diff = deg - prev;
 			// fixup the wrapping
 			if (diff > 180) diff = -360 + diff;
@@ -91,6 +95,7 @@ visir.AgilentOscilloscope = function(id, elem)
 		}
 	}
 	
+	/*
 	function handleTurn(elem, deg)
 	{
 		//trace("turn: " + deg);
@@ -109,6 +114,7 @@ visir.AgilentOscilloscope = function(id, elem)
 		
 		// dont return, we want it undefined
 	}
+	*/
 	
 	// abuses the turnable to get events, but not turning the component at all
 	elem.find(".horz_offset").turnable({turn: newHandleFunc(function() { trace("up");}, function() {trace("down");}) });
@@ -129,9 +135,11 @@ visir.AgilentOscilloscope = function(id, elem)
 	me._DrawGrid(elem.find(".grid"));
 	me._DrawPlot(elem.find(".plot"));
 	
+	/*
 	setInterval(function() {
 		me._DrawPlot(elem.find(".plot"));
 	},500);
+	*/
 	
 	me._UpdateDisplay();
 
@@ -193,22 +201,32 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 {
 	var context = $elem[0].getContext('2d');
 	context.strokeStyle = "#00ff00";
-	context.lineWidth		= 0.7;
+	context.lineWidth		= 1.2;
 	
 	var w = $elem.width();
 	var h = $elem.height();
 	context.clearRect(0,0, $elem.width(), $elem.height());
 	context.beginPath();
-	
-	var first = true;
-	
-	for(var i=0;i<400;i++) {
-		var x = i*w / 400;
-		var y = Math.sin(i/50) * h/3 + ((Math.random()-0.5) * h / 4) + h/2;
-		if (first) context.moveTo(x,y);
-		else context.lineTo(x,y);
-		first = false;
+
+	var me = this;
+	// local draw function
+	function DrawChannel(chnr) {
+		if (!me._channels[chnr].visible) return;
+		var ch = me._channels[chnr];
+		var graph = ch.graph;
+		var len = graph.length;
+		for(var i=0;i<len;i++) {
+			var x = i*w / len;
+			var y = -((graph[i] / ch.range) + ch.offset) * (h / 8.0) + h/2;
+			y+=0.5;
+			if (i==0) context.moveTo(x,y);
+			else context.lineTo(x,y);
+		}
 	}
+	
+	DrawChannel(0);
+	DrawChannel(1);
+
 	context.stroke();
 }
 
@@ -219,6 +237,7 @@ visir.AgilentOscilloscope.prototype._SetVoltIdx = function(ch, idx)
 	this._voltIdx[ch] = idx;
 	trace("idx: " + ch + " " + idx);
 	// XXX: update osc settings for xml serialization
+	this._channels[ch].range = this._voltages[idx];
 	// XXX: light indicator
 	this._UpdateDisplay();
 }
@@ -229,15 +248,54 @@ visir.AgilentOscilloscope.prototype._SetTimedivIdx = function(idx)
 	if (idx > this._timedivs.length - 1) idx = this._timedivs.length - 1;
 	this._timeIdx = idx;
 	trace("timediv idx: " + idx);
-	// XXX: update osc settings for xml serialization
+	this._sampleRate = 1.0 / this._timedivs[this._timeIdx]; // sets value in baseclass
+	trace("new sample rate: " + this._sampleRate);
 	// XXX: light indicator
 	this._UpdateDisplay();
 }
 
+visir.AgilentOscilloscope.prototype._GetUnit = function(val)
+{
+	var units = [
+		, ["M", 6 ]
+		, ["K", 3 ]
+		, ["", 0]
+		, ["m", -3]
+		, ["u", -6]
+		, ["n", -9]
+		];
+	val = Math.abs(val);
+	var unit = "";
+	var div = 0;
+	if (val == 0) return { unit: unit, pow: div };
+	
+	for (var key in units) {
+		var unit = units[key];
+		if (val >= Math.pow(10, unit[1])) {
+			return {unit: unit[0], pow: unit[1] };
+		}
+	}
+	
+	var last = units[units.length - 1];
+	return {unit: last[0], pow: last[1] };
+}
+
+visir.AgilentOscilloscope.prototype._FormatValue = function(val)
+{
+	var unit = this._GetUnit(val);
+	val /= Math.pow(10,unit.pow);
+	return val.toPrecision(3) + unit.unit;
+}
 
 visir.AgilentOscilloscope.prototype._UpdateDisplay = function()
 {
-		this._$elem.find(".voltage_ch1").text(this._voltages[this._voltIdx[0]]);
-		this._$elem.find(".voltage_ch2").text(this._voltages[this._voltIdx[1]]);
-		this._$elem.find(".timediv").text(this._timedivs[this._timeIdx]);
+		this._$elem.find(".voltage_ch1").text(this._FormatValue(this._voltages[this._voltIdx[0]]) + "V");
+		this._$elem.find(".voltage_ch2").text(this._FormatValue(this._voltages[this._voltIdx[1]]) + "V");
+		this._$elem.find(".timediv").text(this._FormatValue(this._timedivs[this._timeIdx]) + "s");
+		this._DrawPlot(this._$elem.find(".plot"));
+}
+
+visir.AgilentOscilloscope.prototype.ReadResponse = function(response) {
+	visir.AgilentOscilloscope.parent.ReadResponse.apply(this, arguments)
+	this._DrawPlot(this._$elem.find(".plot"));
 }
