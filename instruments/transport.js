@@ -122,6 +122,7 @@ visir.JSTransport.prototype._SendAuthentication = function(request, cookie, call
 */
 visir.JSTransport.prototype._SendXML = function(data, callback)
 {
+	var me = this;
 	// for some reason the jquery post doesn't work as it should, try again in the future.
 	if (window.XDomainRequest) {
 		// ie..
@@ -133,12 +134,12 @@ visir.JSTransport.prototype._SendXML = function(data, callback)
 	} else {
 		var req = new XMLHttpRequest();
 		req.open('POST', this._url, true);
-		req.onerror = function(e) { trace("XMLHttpRequest error: " + e); this.Error(e); }
+		req.onerror = function(e) { trace("XMLHttpRequest error: " + e); me.Error(e); }
 		req.onreadystatechange = function(response)
 		{
 			if (req.readyState != 4) return;
 			if (req.status != "200" && req.status != "304") {
-				this.Error("unexpected request return status");
+				me.Error("unexpected request return status");
 				return;
 			}
 			trace("XMLHttpRequest response: " + req.responseText);
