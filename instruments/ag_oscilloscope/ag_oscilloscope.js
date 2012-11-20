@@ -16,12 +16,14 @@ visir.AgilentOscilloscope = function(id, elem)
 	this._$elem = elem;
 	
 	this._channels[0].visible = true;
+	this._channels[0].display_offset = 0.0;
 	this._channels[1].visible = true;
+	this._channels[1].display_offset = 0.0;
 	
 	var imgbase = "instruments/ag_oscilloscope/images";
 		
 	var tpl = '<div class="ag_osc">\
-	<img src="%img%/osc.jpg" />\
+	<img src="%img%/osc.jpg" width="800" height="449" />\
 	<div class="stepwheel small horz_offset"><img class="active top" src="%img%/osc_wheel_small_1.png" alt="stepwheel" /><img class="top" src="%img%/osc_wheel_small_2.png" alt="stepwheel" /></div>\
 	<div class="stepwheel small offset_ch1"><img class="active top" src="%img%/osc_wheel_small_1.png" alt="stepwheel" /><img class="top" src="%img%/osc_wheel_small_2.png" alt="stepwheel" /></div>\
 	<div class="stepwheel small offset_ch2"><img class="active top" src="%img%/osc_wheel_small_1.png" alt="stepwheel" /><img class="top" src="%img%/osc_wheel_small_2.png" alt="stepwheel" /></div>\
@@ -54,12 +56,24 @@ visir.AgilentOscilloscope = function(id, elem)
 	</div>\
 	<div class="display">\
 		<div class="background">\
-			<div class="channel ch1"><span class="channelname">1</span><span class="voltage voltage_ch1">1.00V/</span></div>\
-			<div class="channel ch2"><span class="channelname">2</span><span class="voltage voltage_ch2">1.00V/</span></div>\
-			<div class="timedelay"><img class="arrow" src="%img%/delay_arrow.png" alt="delay arrow" /><span class="voltage">0.00s</span></div>\
-			<div class="timescale"><span class="voltage timediv">500us</span></div>\
-			<div class="trigtype"><span class="voltage">Level</span><img class="flank" src="%img%/osc_trig_edge_up_small.png" alt="trigger flank" /><span class="channelname">1</span></div>\
-			<div class="triglevel"><span class="voltage">0.00V</span></div>\
+			<div class="channel ch1"><span class="channelname">1</span><span class="lighttext voltage_ch1">1.00V/</span></div>\
+			<div class="channel ch2"><span class="channelname">2</span><span class="lighttext voltage_ch2">1.00V/</span></div>\
+			<div class="timedelay"><img class="arrow" src="%img%/delay_arrow.png" alt="delay arrow" /><span class="lighttext">0.00s</span></div>\
+			<div class="timescale"><span class="lighttext timediv">500us</span></div>\
+			<div class="trigtype"><span class="lighttext">Level</span><img class="flank" src="%img%/osc_trig_edge_up_small.png" alt="trigger flank" /><span class="channelname">1</span></div>\
+			<div class="triglevel"><span class="lighttext">0.00V</span></div>\
+			<div class="vertical">\
+				<div class="group offset_group_ch1">\
+					<div class="ch_offset normal visible"><span class="offsetchannel">1</span><img class="offsetarrow" src="%img%/offset_arrow.png" alt="offset arrow" /></div>\
+					<div class="ch_offset overflow_up"><span class="offsetchannel overflow_up">1</span><img class="offsetarrow" src="%img%/offset_arrow_up.png" alt="offset arrow" /></div>\
+					<div class="ch_offset overflow_down"><span class="offsetchannel overflow_down">1</span><img class="offsetarrow" src="%img%/offset_arrow_down.png" alt="offset arrow" /></div>\
+				</div>\
+				<div class="group offset_group_ch2">\
+					<div class="ch_offset normal visible"><span class="offsetchannel">2</span><img class="offsetarrow" src="%img%/offset_arrow.png" alt="offset arrow" /></div>\
+					<div class="ch_offset overflow_up"><span class="offsetchannel overflow_up">2</span><img class="offsetarrow" src="%img%/offset_arrow_up.png" alt="offset arrow" /></div>\
+					<div class="ch_offset overflow_down"><span class="offsetchannel overflow_down">2</span><img class="offsetarrow" src="%img%/offset_arrow_down.png" alt="offset arrow" /></div>\
+				</div>\
+			</div>\
 			<div class="graph">\
 				<canvas class="grid" width="330" height="208"></canvas>\
 				<canvas class="plot" width="330" height="208"></canvas>\
@@ -92,34 +106,16 @@ visir.AgilentOscilloscope = function(id, elem)
 				else if (diff > 0) up();
 				elem.find("img").toggleClass("active");
 			}
+			// dont return, we want it undefined
 		}
 	}
-	
-	/*
-	function handleTurn(elem, deg)
-	{
-		//trace("turn: " + deg);
-		var diff = deg - prev;
-		// fixup the wrapping
-		if (diff > 180) diff = -360 + diff;
-		else if (diff < -180) diff = 360 + diff;
 		
-		if (Math.abs(diff) > 360/10) {
-			prev = deg;
-			//trace("diff: " + diff + " " + elem.html());
-			//if (diff < 0) me._DecDigit();
-			//else if (diff > 0) me._IncDigit();
-			elem.find("img").toggleClass("active");
-		}
-		
-		// dont return, we want it undefined
-	}
-	*/
-	
 	// abuses the turnable to get events, but not turning the component at all
 	elem.find(".horz_offset").turnable({turn: newHandleFunc(function() { trace("up");}, function() {trace("down");}) });
-	elem.find(".offset_ch1").turnable({turn: newHandleFunc(function() { trace("up");}, function() {trace("down");}) });
-	elem.find(".offset_ch2").turnable({turn: newHandleFunc(function() { trace("up");}, function() {trace("down");}) });
+	
+	elem.find(".offset_ch1").turnable({turn: newHandleFunc(function() { me._StepDisplayOffset(0, true); }, function() { me._StepDisplayOffset(0, false); }) });
+	elem.find(".offset_ch2").turnable({turn: newHandleFunc(function() { me._StepDisplayOffset(1, true); }, function() { me._StepDisplayOffset(1, false); }) });
+	
 	elem.find(".offset_trg").turnable({turn: newHandleFunc(function() { trace("up");}, function() {trace("down");}) });
 	elem.find(".horz").turnable({turn: newHandleFunc(function() { me._SetTimedivIdx(me._timeIdx+1); }, function() { me._SetTimedivIdx(me._timeIdx-1); }) });
 	elem.find(".vert_ch1").turnable({turn: newHandleFunc(function() { me._SetVoltIdx(0, me._voltIdx[0]+1); }, function() { me._SetVoltIdx(0, me._voltIdx[0]-1);}) });
@@ -217,7 +213,7 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 		var len = graph.length;
 		for(var i=0;i<len;i++) {
 			var x = i*w / len;
-			var y = -((graph[i] / ch.range) + ch.offset) * (h / 8.0) + h/2;
+			var y = -((graph[i] / ch.range) + ch.display_offset) * (h / 8.0) + h/2;
 			y+=0.5;
 			if (i==0) context.moveTo(x,y);
 			else context.lineTo(x,y);
@@ -235,10 +231,12 @@ visir.AgilentOscilloscope.prototype._SetVoltIdx = function(ch, idx)
 	if (idx < 0) idx = 0;
 	if (idx > this._voltages.length - 1) idx = this._voltages.length - 1;
 	this._voltIdx[ch] = idx;
-	trace("idx: " + ch + " " + idx);
-	// XXX: update osc settings for xml serialization
+	//trace("idx: " + ch + " " + idx);
+	 // sets value for serialization
 	this._channels[ch].range = this._voltages[idx];
-	// XXX: light indicator
+	this._channels[ch].offset = this._voltages[idx] * -this._channels[ch].display_offset;
+	
+	this._LightIndicator(this._$elem.find(ch == 0 ? ".voltage_ch1" : ".voltage_ch2"));
 	this._UpdateDisplay();
 }
 
@@ -247,12 +245,48 @@ visir.AgilentOscilloscope.prototype._SetTimedivIdx = function(idx)
 	if (idx < 0) idx = 0;
 	if (idx > this._timedivs.length - 1) idx = this._timedivs.length - 1;
 	this._timeIdx = idx;
-	trace("timediv idx: " + idx);
-	this._sampleRate = 1.0 / this._timedivs[this._timeIdx]; // sets value in baseclass
-	trace("new sample rate: " + this._sampleRate);
-	// XXX: light indicator
+	//trace("timediv idx: " + idx);
+	this._sampleRate = 1.0 / this._timedivs[this._timeIdx]; // sets value for serialization
+	this._LightIndicator(this._$elem.find(".timediv"));
 	this._UpdateDisplay();
 }
+
+visir.AgilentOscilloscope.prototype._StepDisplayOffset = function(ch, up)
+{
+	var stepsize = 0.05;
+	var val = this._channels[ch].display_offset + (up ? stepsize : -stepsize);
+	this._SetDisplayOffset(ch, val);
+}
+
+visir.AgilentOscilloscope.prototype._SetDisplayOffset = function(ch, offset)
+{
+	var stepsize = 0.05;
+	offset = Math.round(offset / stepsize) * stepsize;
+	this._channels[ch].display_offset = offset;
+	trace("offset: " + offset);
+	
+	// set values for serialization
+	this._channels[ch].offset = this._voltages[this._voltIdx[ch]] * -this._channels[ch].display_offset;
+	
+	// move and update offset indicators
+	var $group = this._$elem.find(ch == 0 ? ".offset_group_ch1" : ".offset_group_ch2");
+	$group.find(".ch_offset").removeClass("visible");
+	if (offset >= 4) { // show overflow indicator
+		$group.find(".overflow_up").addClass("visible");
+	} else if (offset <= -4) { // show underflow indicator
+		$group.find(".overflow_down").addClass("visible");
+	} else { // show normal indicator and move it into position
+		var $indicator = $group.find(".normal");
+		var h = this._$elem.find(".plot").height();
+		var top = -offset * (h / 8.0) + h/2;
+		$indicator.addClass("visible");
+		$indicator.css("top", top + "px");
+	}
+	
+	// XXX: add offset indicator
+	this._UpdateDisplay();
+}
+
 
 visir.AgilentOscilloscope.prototype._GetUnit = function(val)
 {
@@ -278,6 +312,15 @@ visir.AgilentOscilloscope.prototype._GetUnit = function(val)
 	
 	var last = units[units.length - 1];
 	return {unit: last[0], pow: last[1] };
+}
+
+visir.AgilentOscilloscope.prototype._LightIndicator = function($elem)
+{
+	$elem.addClass("light");
+	var timer = setTimeout(function() {
+		$elem.removeClass("light");
+		clearInterval(timer);
+	}, 2000);
 }
 
 visir.AgilentOscilloscope.prototype._FormatValue = function(val)
