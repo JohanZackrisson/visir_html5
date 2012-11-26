@@ -26,6 +26,9 @@
 .ag_osc .button.channel_1 {	top: 237px; left: 454px; }
 .ag_osc .button.channel_2 {	top: 237px; left: 533px; }
 
+.ag_osc .button.edge {top: 99px; left: 654px; }
+.ag_osc .button.modecoupling {top: 99px; left: 699px; }
+
 /* to avoid having to do the layouting we let the browser do it for us */
 .ag_osc .display_buttons {
 	position: absolute;
@@ -41,6 +44,9 @@
 	height: 30px;
 	margin-right: 20px;
 }
+
+.ag_osc .multibutton div { display: none; }
+.ag_osc .multibutton div.visible { display: inline; }
 
 .ag_osc .small img {
 	transform-origin: 18px 18px;
@@ -104,6 +110,11 @@
 
 .ag_osc .display .channel {
 	position: absolute;
+	display: none;
+}
+
+.ag_osc .display .channel.visible {
+	display: inline;
 }
 
 .ag_osc .display .ch1 {
@@ -134,10 +145,19 @@
 	top: 1px; left: 256px;
 }
 
-.ag_osc .display .trigtype .flank{
-	position: relative;
-	margin-bottom: -2px;
-	top: 2px;
+.ag_osc .display .triggerslope {
+	position: absolute;
+	top: 3px;
+	left: 288px;
+}
+
+.ag_osc .display .triggerslope .flank {	position: absolute;	display: none; }
+.ag_osc .display .triggerslope .flank.selected { display: block; }
+
+.ag_osc .display .triggersource
+{
+	position: absolute;
+	top: 1px; left: 301px;
 }
 
 .ag_osc .display .triglevel {
@@ -175,44 +195,179 @@
 
 .ag_osc .display .vertical .normal .offsetarrow {	top: -2px; }
 .ag_osc .display .vertical .normal .offsetchannel {	top: -13px; }
+.ag_osc .display .vertical .normal { top: 104px; }
 
-.ag_osc .display .vertical .overflow_up {
-	left: 3px;
-}
+.ag_osc .display .vertical .overflow_up {	left: 3px;}
+.ag_osc .display .vertical .ch_offset .overflow_up { top: 6px; left: -1px; }
 
-.ag_osc .display .vertical .ch_offset .overflow_up {
-	top: 6px;
-	left: -1px;
-}
+.ag_osc .display .vertical .overflow_down {	top: 200px;	left: 3px; }
+.ag_osc .display .vertical .ch_offset .overflow_down { left: -1px; }
 
-.ag_osc .display .vertical .overflow_down {
-	top: 200px;
-	left: 3px;
-}
+.ag_osc .display .vertical .group .ch_offset { display: none; }
+.ag_osc .display .vertical .group .ch_offset.visible { display: inline; }
 
-.ag_osc .display .vertical .ch_offset .overflow_down {
-	left: -1px;
-}
+.ag_osc .display .vertical .group { display: none; }
+.ag_osc .display .vertical .group.visible { display: inline; }
 
-.ag_osc .display .vertical .offset_group_ch1
+/* menus */
+
+.ag_osc .display .menubar
 {
-	display: inline;
+	position: absolute;
+	top: 243px;
+	left: 15px;
+	width: 333px;
+	height: 28px;
+	
+	font-size: 7pt;
+	font-family: sans-serif;
 }
 
-.ag_osc .display .vertical .offset_group_ch2
+.ag_osc .display .menubar .menu {	display:none; }
+.ag_osc .display .menubar .menu.visible {	display:block; }
+
+.ag_osc .display .menubar .menubox
 {
-	display: inline;
+	background: #00ff00;
+	height: 28px;
+	width: 51px;
+	margin: 0px;
+	padding: 0px;
+	border-radius: 5px;
+	display: inline-block;
+	border-top: 1px solid #86FE85;
+	border-left: 1px solid #86FE85;
+	border-right: 1px solid #006633;
+	border-bottom: 1px solid #006633;
+	/* #006633 */
+	margin: -1px;
+	text-align: center;
 }
 
-.ag_osc .display .vertical .normal {
-	top: 104px;
+.ag_osc .display .menubar .menubox .title
+{
+	position: absolute;
+	top: 2px;
+	width: 50px;
 }
 
-.ag_osc .display .vertical .group .ch_offset {
+.ag_osc .display .menubar .menubox .title.bigfont
+{
+	font-size: 8pt;
+}
+
+.ag_osc .display .menubar .menubox .value
+{
+	position: absolute;
+	top: 15px;
+	width: 50px;
+}
+
+.ag_osc .display .menubar .menubox .edgeselect
+{
+	top: 2px;
+	width: 20px;
+	display: inline-block;
+}
+
+.ag_osc .display .menubar .menubox .edgeselect .checkmark_holder
+{
+	display: inline-block;
+	position: relative;
+	width:7px;
+	height:7px;
+	top:-4px;
+}
+
+.ag_osc .display .menubar .menubox .edgeselect .checkmark
+{
 	display: none;
 }
 
-.ag_osc .display .vertical .group .ch_offset.visible {
-	display: inline;
+.ag_osc .display .menubar .menubox .edgeselect.selected .checkmark
+{
+	display: inline-block;
 }
 
+.ag_osc .display .menubar .menubox .value .checkmark { display: none; }
+.ag_osc .display .menubar .menubox .value .checkmark.selected { display: inline-block; }
+
+
+.ag_osc .display .menubar .menubox .menuicon
+{
+	display: inline;
+	margin-right: 1px;
+}
+
+.ag_osc .display .menubar .menu_selection
+{
+	background: #00ff00;
+	border-top: 1px solid #86FE85;
+	border-left: 1px solid #86FE85;
+	border-right: 1px solid #006633;
+	border-bottom: 1px solid #006633;
+	border-radius: 5px 5px 2px 2px;
+	padding: 2px;
+	
+	position: absolute;
+	bottom: 34px;
+	width: 60px;
+	display: none;
+}
+
+.ag_osc .display .menubar .menu_selection.pos2 { left: 53px; }
+
+.ag_osc .display .menubar .menu_selection.visible
+{
+	display: block;
+}
+
+.ag_osc .display .menubar .menu_selection hr
+{
+	height:1px;
+	border:0;
+	background-color: black;
+	margin: 2px 0 2px 0;
+}
+
+.ag_osc .checkmark {
+	display: inline-block;
+	background: url("images/checkmark.png") no-repeat;
+	width: 7px; height: 7px;
+}
+
+/* placeholder that we don't want to hide when we hide the checkmark */
+.ag_osc .display .menubar .menu_selection .checkmark_holder
+{
+	width:10px;
+	display: inline-block;
+}
+
+.ag_osc .display .menubar .menu_selection .selection .checkmark { display: none; }
+.ag_osc .display .menubar .menu_selection .selection.selected .checkmark { display: inline-block; }
+
+/*
+.ag_osc .display .menubar .menu_selection .selection img { display: none; }
+.ag_osc .display .menubar .menu_selection .selection.selected img{ display: inline; }
+*/
+
+.ag_osc .display .menubar .menutitle {
+	position: absolute;
+	bottom: 50px;
+	width: 328px;
+	text-align: center;
+	display: none;
+}
+
+.ag_osc .display .menubar .menutitle.visible {
+	display: block;
+}
+
+.ag_osc .display .menubar .menutitle .titlebox {
+	border: 2px solid #00ff00;
+	background: black;
+	color: #00ff00;
+	padding: 2px;
+	font-size: 10pt;
+	border-radius: 5px;
+}
