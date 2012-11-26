@@ -13,7 +13,7 @@ visir.FlukeMultimeter = function(id, elem)
 	visir.FlukeMultimeter.parent.constructor.apply(this, arguments)
 	
 	var tpl = '<div class="flukedmm">\
-	<img src="instruments/flukemultimeter/fluke23.png" />\
+	<img src="instruments/flukemultimeter/fluke23.png" width="300" height="460" />\
 	<div class="dmm_value" id="value">12.3</div>\
 	<div class="rot">\
 		<div class="top vred">\
