@@ -78,12 +78,6 @@
 		transport.onerror = function(err) { alert("Error: " + err); }
 		
 		transport.Connect("http://194.47.134.182:8080/measureserver", "fnord");
-
-		/*var flukedmm = new visir.FlukeMultimeter(1, $("#dmm"));
-		var flukedmm2 = new visir.FlukeMultimeter(2, $("#dmm2"));
-				
-		var tripledc = new visir.TripleDC(1, $("#tripledc"));
-		*/
 		
 		var hp_func = new visir.HPFunctionGenerator(1, $("#hp_funcgen"));
 		
@@ -99,8 +93,6 @@
 				+ hp_func.WriteRequest()
 				,
 			function(res) {
-				//flukedmm.ReadResponse(res);
-				//flukedmm2.ReadResponse(res);
 				osc.ReadResponse(res);
 			});
 		});
