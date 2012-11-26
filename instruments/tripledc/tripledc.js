@@ -21,7 +21,7 @@ visir.TripleDC = function(id, elem)
 	var imgbase = "instruments/tripledc/images";
 	
 	var tpl = '<div class="tripledc">\
-	<img src="%img%/3dc.png" />\
+	<img src="%img%/3dc.png" width="720" height="449" />\
 	<div class="bigtext voltage"><span class="green">0</span>.000V</div>\
 	<div class="bigtext current">0.500A</div>\
 	<div class="channelselect">\
