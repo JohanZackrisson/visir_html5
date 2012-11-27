@@ -66,8 +66,10 @@ visir.Breadboard = function(id, $elem)
 	
 	var tpl = '<div class="breadboard">\
 	<img class="background" src="instruments/breadboard/breadboard.png" alt="breadboard"/>\
-	<div class="bin"></div>\
 	<div class="clickarea"></div>\
+	<div class="bin">\
+    	<div class="teacher">+</div>\
+    </div>\
 	<div class="components"></div>\
 	<canvas id="wires" width="715" height="450"></canvas>\
 	<div class="colorpicker">\
@@ -78,6 +80,12 @@ visir.Breadboard = function(id, $elem)
 		<div class="color blue"></div>\
 		<div class="color brown"></div>\
 	</div>\
+	<div class="componentbox">\
+        <div class="componentlist"></div>\
+        <div class="componentbutton">\
+            <button class="closebutton">Close</button>\
+        </div>\
+    </div>\
 	</div>';
 		
 	$elem.append(tpl);
@@ -88,6 +96,37 @@ visir.Breadboard = function(id, $elem)
 	var $doc = $(document);
 	var context = $wires[0].getContext('2d');
 	var $click = $elem.find(".clickarea");
+
+    var teacher_mode = true; // TODO: make it configurable (argument?)
+    if(!teacher_mode)
+        $elem.find(".teacher").hide();
+
+    $elem.find(".teacher").click(function(e) {
+        $elem.find(".componentbox").show();
+        var $components = me._$library.find("component").each(function() {
+            var img   = $(this).find("rotation").attr("image");
+            var type  = $(this).attr("type");
+            var value = $(this).attr("value");
+            var img_html = '<div class="component-list">\
+                               <div class="component-list-img">\
+                                    <img src="instruments/breadboard/images/' + img + '"/>\
+                               </div>\
+                               <div class="component-list-type">' + type + '</div>\
+                               <div class="component-list-value">' + value + '</div>\
+                            </div>';
+            $elem.find(".componentlist").append(img_html);
+        });
+
+//        alert($components.find("rotation").attr("image"));
+        /*each(function() {
+            alert($(this).attr("image"));
+        });*/
+    });
+
+    $elem.find(".closebutton").click(function(e) {
+        $elem.find(".componentbox").hide();
+    });
+
 	
 	$click.on("mousedown touchstart", function(e) {
 		if (!me._color) return;
