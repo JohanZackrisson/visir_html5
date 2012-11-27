@@ -81,9 +81,12 @@ visir.Breadboard = function(id, $elem)
 		<div class="color brown"></div>\
 	</div>\
 	<div class="componentbox">\
-        <div class="componentlist"></div>\
+        <div class="componentlist">\
+            <table class="componentlist-table">\
+            </table>\
+        </div>\
         <div class="componentbutton">\
-            <button class="closebutton">Close</button>\
+            <button>Close</button>\
         </div>\
     </div>\
 	</div>';
@@ -107,23 +110,22 @@ visir.Breadboard = function(id, $elem)
             var img   = $(this).find("rotation").attr("image");
             var type  = $(this).attr("type");
             var value = $(this).attr("value");
-            var img_html = '<div class="component-list">\
-                               <div class="component-list-img">\
+            var img_html = '<tr class="component-list-row">\
+                               <td>\
                                     <img src="instruments/breadboard/images/' + img + '"/>\
-                               </div>\
-                               <div class="component-list-type">' + type + '</div>\
-                               <div class="component-list-value">' + value + '</div>\
-                            </div>';
-            $elem.find(".componentlist").append(img_html);
-        });
+                               </td>\
+                               <td>' + type + '</td>\
+                               <td>' + value + '</td>\
+                            </tr>';
+            $elem.find(".componentlist-table").append(img_html);
 
-//        alert($components.find("rotation").attr("image"));
-        /*each(function() {
-            alert($(this).attr("image"));
-        });*/
+            $($elem.find('.component-list-row').get(-1)).click(function(e){
+                me.CreateComponent(type, value);
+            });
+        });
     });
 
-    $elem.find(".closebutton").click(function(e) {
+    $elem.find(".componentbutton button").click(function(e) {
         $elem.find(".componentbox").hide();
     });
 
