@@ -56,6 +56,153 @@ function drawWire(context, start, end, color)
 	context.closePath();
 }
 
+// Component container
+visir.Component = function($elem, breadboard)
+{
+   this._$elem      = $elem;
+   this._breadboard = breadboard;
+   this._$circle    = null;
+}
+
+visir.Component.prototype.width = function() 
+{
+    return this._$elem.find('.active').width();
+}
+
+visir.Component.prototype.height = function() 
+{
+    return this._$elem.find('.active').height();
+}
+
+visir.Component.prototype.remove = function() 
+{
+    this._$elem.remove();
+    this._breadboard._RemoveComponent(this);
+}
+
+visir.Component.prototype._RemoveCircle = function() 
+{
+    if(this._$circle != null) {
+        this._$circle.remove();
+        this._$circle = null;
+    }
+}
+
+
+visir.Component.prototype._AddCircle = function() 
+{
+    var me = this;
+
+    // Placed here for math operations
+    // var CIRCLE_SIZE    =  140;
+    var CIRCLE_SIZE    =  me.width() + 100;
+    var ICON_SIZE      =  40;
+
+    // If the circle may be slightly bigger than the four 
+    // corner icons, since circles don't have corners. This
+    // constant establishes the level of overlap between the 
+    // square that surrounds a circle and the square that
+    // surrounds the icons. Example: establishing it to 0 
+    // the circle will not overlap at all; establishing it to
+    // 1 will overlap completely.
+    var CIRCLE_OVERLAP =  0.4;
+
+    // Where is the component?
+    var originalTop        = parseInt(this._$elem.css('top'),  10);
+    var originalLeft       = parseInt(this._$elem.css('left'), 10);
+
+    // Where should be located inside the circle?
+    var relativeTop  = (CIRCLE_SIZE - this._$elem.height()) / 2;
+    var relativeLeft = (CIRCLE_SIZE - this._$elem.width())  / 2;
+
+    // Where should the whole circle be located?
+    var newTop  = originalTop  - relativeTop;
+    var newLeft = originalLeft - relativeLeft;
+
+    // Later they are removed
+    var $parentNode = this._$elem.parent();
+    // this._$elem.remove();
+
+    // Overall block
+    me._$circle = $('<span class="componentcircle"></span>');
+    me._$circle.width(CIRCLE_SIZE);
+    me._$circle.css({
+        'position' : 'absolute',
+        'top'      : newTop + 'px',
+        'left'     : newLeft + 'px'
+    });
+
+    // Circle
+    var $circleImg = $('<img src="instruments/breadboard/images/empty_circle.png"/>');
+    $circleImg.width(CIRCLE_SIZE - 2 * (1 - CIRCLE_OVERLAP) * ICON_SIZE);
+    $circleImg.height(CIRCLE_SIZE - 2 * (1 - CIRCLE_OVERLAP) * ICON_SIZE);
+    $circleImg.css({
+        'position' : 'absolute',
+        'left'     : (1 - CIRCLE_OVERLAP) * ICON_SIZE,
+        'top'      : (1 - CIRCLE_OVERLAP) * ICON_SIZE
+    });
+    $circleImg.click(function() {
+        me._$circle.remove();
+    });
+    me._$circle.append($circleImg);
+
+    // Trash button
+    // http://openclipart.org/detail/68/trash-can-by-andy
+    var $trashImg = $('<img src="instruments/breadboard/images/trash.png"/>');
+    $trashImg.width(ICON_SIZE);
+    $trashImg.height(ICON_SIZE);
+    $trashImg.css({
+        'position' : 'absolute',
+        'left'     : 0,
+        'top'      : CIRCLE_SIZE - ICON_SIZE
+    })
+    $trashImg.click(function() {
+        me._RemoveCircle();
+        me.remove();
+    });
+    me._$circle.append($trashImg);
+
+    // Rotation button
+    // Public domain
+    // http://openclipart.org/detail/33685/tango-view-refresh-by-warszawianka
+    var $rotateImg = $('<img src="instruments/breadboard/images/rotate.png"/>');
+    $rotateImg.width(ICON_SIZE);
+    $rotateImg.height(ICON_SIZE);
+    $rotateImg.css({
+        'position' : 'absolute',
+        'left'     : CIRCLE_SIZE - ICON_SIZE,
+        'top'      : CIRCLE_SIZE - ICON_SIZE
+    });
+    $rotateImg.click(function() {
+        // TODO: refactor to avoid duplicating this code
+        var $next = me._$elem.find("img.active").next();
+        me._$elem.find("img").removeClass("active");
+        if ($next.length > 0) {					
+            $next.addClass("active");
+        } else {
+            me._$elem.find("img").first().addClass("active");
+        }
+    });
+    me._$circle.append($rotateImg);
+
+    // Drag and drop button
+    // XXX Gentleface; CC Attribution-NonCommercial 3.0
+    // http://www.softicons.com/free-icons/toolbar-icons/black-wireframe-toolbar-icons-by-gentleface/cursor-hand-icon
+    // http://www.softicons.com/free-icons/toolbar-icons/black-wireframe-toolbar-icons-by-gentleface/cursor-drag-hand-icon
+    var $dragImg = $('<img src="instruments/breadboard/images/drop.png" />');
+    $dragImg.width(ICON_SIZE);
+    $dragImg.height(ICON_SIZE);
+    $dragImg.css({
+        'position' : 'absolute',
+        'left'     : CIRCLE_SIZE - ICON_SIZE,
+        'top'      : 0
+    });
+    me._$circle.append($dragImg);
+
+
+    $parentNode.append(me._$circle);
+}
+
 visir.Breadboard = function(id, $elem)
 {
 	//visir.Breadboard.parent.constructor.apply(this, arguments)
@@ -63,6 +210,7 @@ visir.Breadboard = function(id, $elem)
 	var me = this;
 	this._$elem = $elem;
 	this._$library = null;
+    this._components = [];
 	
 	var tpl = '<div class="breadboard">\
 	<img class="background" src="instruments/breadboard/breadboard.png" alt="breadboard"/>\
@@ -237,12 +385,25 @@ visir.Breadboard.prototype.CreateComponent = function(type, value)
 		idx++;
 	});
 	
-	me._AddComponentEvents($comp);
-	
+    var comp_obj = new visir.Component($comp, me);
+    me._components.push(comp_obj);
+
+	me._AddComponentEvents(comp_obj, $comp);
+
 	me._$elem.find(".components").append($comp);
 }
 
-visir.Breadboard.prototype._AddComponentEvents = function($comp)
+visir.Breadboard.prototype._RemoveComponent = function(comp_obj)
+{
+    for (var i = 0; i < this._components.length; i++) {
+        if(this._components[i] == comp_obj) {
+            this._components.splice(i, 1);
+            break;
+        }
+    }
+}
+
+visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
 {
 	var me = this;
 	var $doc = $(document);
@@ -312,114 +473,10 @@ visir.Breadboard.prototype._AddComponentEvents = function($comp)
 	});
 
     $comp.on("click", function() {
-        // TODO XXX Where should I place constants / settings?
-        var CIRCLE_SIZE    =  140;
-        var ICON_SIZE      =   40;
-
-        // If the circle may be slightly bigger than the four 
-        // corner icons, since circles don't have corners. This
-        // constant establishes the level of overlap between the 
-        // square that surrounds a circle and the square that
-        // surrounds the icons. Example: establishing it to 0 
-        // the circle will not overlap at all; establishing it to
-        // 1 will overlap completely.
-        var CIRCLE_OVERLAP =  0.4;
-
-        // Where is the component?
-        var originalTop        = parseInt($comp.css('top'), 10);
-        var originalLeft       = parseInt($comp.css('left'), 10);
-
-        // Where should be located inside the circle?
-        var relativeTop  = (CIRCLE_SIZE - $comp.height()) / 2;
-        var relativeLeft = (CIRCLE_SIZE - $comp.width())  / 2;
-
-        // Where should the whole circle be located?
-        var newTop  = originalTop  - relativeTop;
-        var newLeft = originalLeft - relativeLeft;
-
-        // Later they are removed
-        var $parentNode = $comp.parent();
-        // $comp.remove();
-
-        // Overall block
-        var $blockSpan = $('<span class="componentcircle"></span>');
-        $blockSpan.width(CIRCLE_SIZE);
-        $blockSpan.css({
-            'position' : 'absolute',
-            'top'      : newTop + 'px',
-            'left'     : newLeft + 'px'
+        $(me._components).each(function() {
+            this._RemoveCircle();
         });
-
-        // Circle
-        var $circleImg = $('<img src="instruments/breadboard/images/empty_circle.png"/>');
-        $circleImg.width(CIRCLE_SIZE - 2 * (1 - CIRCLE_OVERLAP) * ICON_SIZE);
-        $circleImg.height(CIRCLE_SIZE - 2 * (1 - CIRCLE_OVERLAP) * ICON_SIZE);
-        $circleImg.css({
-            'position' : 'absolute',
-            'left'     : (1 - CIRCLE_OVERLAP) * ICON_SIZE,
-            'top'      : (1 - CIRCLE_OVERLAP) * ICON_SIZE
-        });
-        $circleImg.click(function() {
-            $blockSpan.remove();
-        });
-        $blockSpan.append($circleImg);
-
-        // Trash button
-        // http://openclipart.org/detail/68/trash-can-by-andy
-        var $trashImg = $('<img src="instruments/breadboard/images/trash.png"/>');
-        $trashImg.width(ICON_SIZE);
-        $trashImg.height(ICON_SIZE);
-        $trashImg.css({
-            'position' : 'absolute',
-            'left'     : 0,
-            'top'      : CIRCLE_SIZE - ICON_SIZE
-        })
-        $trashImg.click(function() {
-            $blockSpan.remove();
-            $comp.remove();
-        });
-        $blockSpan.append($trashImg);
-
-        // Rotation button
-        // Public domain
-        // http://openclipart.org/detail/33685/tango-view-refresh-by-warszawianka
-        var $rotateImg = $('<img src="instruments/breadboard/images/rotate.png"/>');
-        $rotateImg.width(ICON_SIZE);
-        $rotateImg.height(ICON_SIZE);
-        $rotateImg.css({
-            'position' : 'absolute',
-            'left'     : CIRCLE_SIZE - ICON_SIZE,
-            'top'      : CIRCLE_SIZE - ICON_SIZE
-        });
-        $rotateImg.click(function() {
-            // TODO: refactor to avoid duplicating this code
-            var $next = $comp.find("img.active").next();
-            $comp.find("img").removeClass("active");
-            if ($next.length > 0) {					
-                $next.addClass("active");
-            } else {
-                $comp.find("img").first().addClass("active");
-            }
-        });
-        $blockSpan.append($rotateImg);
-
-        // Drag and drop button
-        // XXX Gentleface; CC Attribution-NonCommercial 3.0
-        // http://www.softicons.com/free-icons/toolbar-icons/black-wireframe-toolbar-icons-by-gentleface/cursor-hand-icon
-        // http://www.softicons.com/free-icons/toolbar-icons/black-wireframe-toolbar-icons-by-gentleface/cursor-drag-hand-icon
-        var $dragImg = $('<img src="instruments/breadboard/images/drop.png" />');
-        $dragImg.width(ICON_SIZE);
-        $dragImg.height(ICON_SIZE);
-        $dragImg.css({
-            'position' : 'absolute',
-            'left'     : CIRCLE_SIZE - ICON_SIZE,
-            'top'      : 0
-        });
-        $blockSpan.append($dragImg);
-
-
-        $parentNode.append($blockSpan);
-        //$comp.css('position', 'static');
+        comp_obj._AddCircle();
     });
 }
 
