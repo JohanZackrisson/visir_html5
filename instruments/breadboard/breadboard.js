@@ -210,7 +210,7 @@ visir.Component.prototype.Rotate = function(step)
 	var $imgs = this._$elem.find("img");
 	if (step >= $imgs.length) 
         step = step % $imgs.length;
-	trace("step: " + step);
+	// trace("step: " + step);
 	var idx = 0;
     var currentImage = null;
 	$imgs.each(function() {
@@ -222,7 +222,6 @@ visir.Component.prototype.Rotate = function(step)
 		}
 		idx++;
 	});
-    trace(currentImage);
     this._current_step = step;
     this.translation   = this.translations[step];
     // trace("New translation: " + this.translation.x + "; " + this.translation.y);
@@ -235,7 +234,7 @@ visir.Component.prototype._AddCircle = function()
 
     // Placed here for math operations
     // var CIRCLE_SIZE    =  140;
-    var CIRCLE_SIZE    =  me.width() + 100;
+    var CIRCLE_SIZE    =  this.width() + 100;
     var ICON_SIZE      =  40;
 
     // If the circle may be slightly bigger than the four 
@@ -248,28 +247,32 @@ visir.Component.prototype._AddCircle = function()
     var CIRCLE_OVERLAP =  0.4;
 
     // Where is the component?
-    var originalTop        = parseInt(this._$elem.css('top'),  10);
-    var originalLeft       = parseInt(this._$elem.css('left'), 10);
+    var originalTop  = parseInt(this._$elem.css('top'),  10);
+    var originalLeft = parseInt(this._$elem.css('left'), 10);
 
     // Where should be located inside the circle?
-    var relativeTop  = (CIRCLE_SIZE - this._$elem.height()) / 2;
-    var relativeLeft = (CIRCLE_SIZE - this._$elem.width())  / 2;
+    var relativeTop  = this._$elem.height() / 2;
+    var relativeLeft = this._$elem.width()  / 2;
 
     // Where should the whole circle be located?
-    var newTop  = originalTop  - relativeTop;
-    var newLeft = originalLeft - relativeLeft;
+    var newTop       = originalTop  - relativeTop;
+    var newLeft      = originalLeft - relativeLeft;
 
     // Later they are removed
     var $parentNode = this._$elem.parent();
     // this._$elem.remove();
 
     // Overall block
-    me._$circle = $('<span class="componentcircle"></span>');
-    me._$circle.width(CIRCLE_SIZE);
-    me._$circle.css({
-        'position' : 'absolute',
-        'top'      : newTop + 'px',
-        'left'     : newLeft + 'px'
+    this._$circle = $('<span class="componentcircle"></span>');
+    this._$circle.width(CIRCLE_SIZE);
+    var transform = 'translate(-' + (CIRCLE_SIZE / 2) + 'px,-' + (CIRCLE_SIZE / 2) + 'px)';
+    this._$circle.css({
+        'position'  : 'absolute',
+        'top'       : newTop + 'px',
+        'left'      : newLeft + 'px',
+        'transform' : transform,
+        '-moz-transform' : transform,
+        '-webkit-transform' : transform
     });
 
     // Circle
@@ -284,7 +287,7 @@ visir.Component.prototype._AddCircle = function()
     $circleImg.click(function() {
         me._RemoveCircle();
     });
-    me._$circle.append($circleImg);
+    this._$circle.append($circleImg);
 
     // Trash button
     // http://openclipart.org/detail/68/trash-can-by-andy
@@ -300,7 +303,7 @@ visir.Component.prototype._AddCircle = function()
         me._RemoveCircle();
         me.remove();
     });
-    me._$circle.append($trashImg);
+    this._$circle.append($trashImg);
 
     // Rotation button
     // Public domain
@@ -316,7 +319,7 @@ visir.Component.prototype._AddCircle = function()
     $rotateImg.click(function() {
         me.Rotate();
     });
-    me._$circle.append($rotateImg);
+    this._$circle.append($rotateImg);
 
     // Drag and drop button
     // XXX Gentleface; CC Attribution-NonCommercial 3.0
@@ -330,10 +333,11 @@ visir.Component.prototype._AddCircle = function()
         'left'     : CIRCLE_SIZE - ICON_SIZE,
         'top'      : 0
     });
-    me._$circle.append($dragImg);
+    this._$circle.append($dragImg);
 
+    $parentNode.append(this._$circle);
 
-    $parentNode.append(me._$circle);
+    this._$circle.on("mousedown touchstart", this.generateHandler(this._$circle, this._$elem));
 }
 
 visir.Breadboard = function(id, $elem)
@@ -351,8 +355,6 @@ visir.Breadboard = function(id, $elem)
 	<div class="bin">\
     	<div class="teacher">+</div>\
     </div>\
-	<div class="components"></div>\
-	<canvas id="wires" width="715" height="450"></canvas>\
 	<div class="colorpicker">\
 		<div class="color red"></div>\
 		<div class="color black"></div>\
@@ -361,6 +363,8 @@ visir.Breadboard = function(id, $elem)
 		<div class="color blue"></div>\
 		<div class="color brown"></div>\
 	</div>\
+	<div class="components"></div>\
+	<canvas id="wires" width="715" height="450"></canvas>\
 	<div class="componentbox">\
         <div class="componentlist">\
             <table class="componentlist-table">\
@@ -542,59 +546,68 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
 	
 	var touches = 0;
 
-	$comp.on("mousedown touchstart", function(e) {
-		e.preventDefault();
-		touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
-		e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
-		//var start = { x: e.pageX - offset.x, y: e.pageY - offset.y};
-		
-		$doc.on("keypress.rem", function(e) {
-			trace("key: " + e.which);
-			if (e.which == 114) { // 'r'
-                comp_obj.Rotate();
-			}
-		});
+    var generateHandler = function(component, internalComponent) {
+        return function(e) {
+            e.preventDefault();
+            touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
+            e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
+            //var start = { x: e.pageX - offset.x, y: e.pageY - offset.y};
+            
+            $doc.on("keypress.rem", function(e) {
+                // trace("key: " + e.which);
+                if (e.which == 114) // 'r'
+                    comp_obj.Rotate();
+            });
 
-		$doc.on("mousemove.rem touchmove.rem", function(e) {
-			touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
-			var touch = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
-			
+            $doc.on("mousemove.rem touchmove.rem", function(e) {
+                touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
+                var touch = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
+                
 
-			var p = { x: touch.pageX - offset.left, y: touch.pageY - offset.top };
-			snapPoint(p);
-			//trace("move");
-			$comp.css({
-				"left": p.x + "px",
-				"top": p.y + "px"
-			});
-			
-			// if two fingers are down, turn the component around towards the second finger
-			if (e.originalEvent.touches && e.originalEvent.touches.length > 1) {
-				var turn = e.originalEvent.touches[1];
-				var angle = Math.atan2( touch.pageY - turn.pageY, touch.pageX - turn.pageX ) * 180 / Math.PI;
-				angle = (angle + 360) % 360;
-				var step = 0;
-				if (angle < 45 || angle > 315) step = 0;
-				else if (angle > 45 && angle < 135) step = 1;
-				else if (angle >135 && angle < 225) step = 2;
-				else step = 3;
-				
-                comp_obj.Rotate(step);
-			}
-			
-		});
+                var p = { x: touch.pageX - offset.left, y: touch.pageY - offset.top };
+                snapPoint(p);
+                //trace("move");
+                component.css({
+                    "left": p.x + "px",
+                    "top": p.y + "px"
+                });
+                if(internalComponent != null) {
+                    internalComponent.css({
+                        "left": p.x + "px",
+                        "top": p.y + "px"
+                    });
+                }
+                
+                // if two fingers are down, turn the component around towards the second finger
+                if (e.originalEvent.touches && e.originalEvent.touches.length > 1) {
+                    var turn = e.originalEvent.touches[1];
+                    var angle = Math.atan2( touch.pageY - turn.pageY, touch.pageX - turn.pageX ) * 180 / Math.PI;
+                    angle = (angle + 360) % 360;
+                    var step = 0;
+                    if (angle < 45 || angle > 315) step = 0;
+                    else if (angle > 45 && angle < 135) step = 1;
+                    else if (angle >135 && angle < 225) step = 2;
+                    else step = 3;
+                    
+                    comp_obj.Rotate(step);
+                }
+                
+            });
 
-		$doc.on("mouseup.rem touchend.rem", function(e) {
-			trace("up: " + touches);
-			if (touches > 1) {
-				touches--;
-				return;
-			}
-			//if (e.originalEvent.touches && e.originalEvent.touches.length > 1) return;
-			$comp.off(".rem");
-			$doc.off(".rem");
-		});
-	});
+            $doc.on("mouseup.rem touchend.rem", function(e) {
+                trace("up: " + touches);
+                if (touches > 1) {
+                    touches--;
+                    return;
+                }
+                //if (e.originalEvent.touches && e.originalEvent.touches.length > 1) return;
+                component.off(".rem");
+                $doc.off(".rem");
+            });
+        };
+    };
+	$comp.on("mousedown touchstart", generateHandler($comp, true));
+    comp_obj.generateHandler = generateHandler;
 
     $comp.on("click", function() {
         $(me._components).each(function() {
