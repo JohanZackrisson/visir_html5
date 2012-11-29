@@ -189,10 +189,11 @@ visir.Component.prototype._PlaceInBin = function()
     var availablePos = grid._FindSlot(height, width);
     var bin_position = this._breadboard._GetBin().position();
 
+    // TODO: Take into account: this.translation.rot
     var new_left = availablePos.x * 13 + bin_position.left + 5 - parseInt(this.translation.x);
     var new_top  = availablePos.y * 13 + bin_position.top  + 5 - parseInt(this.translation.y);
 
-    trace("Available position found: [x=" + availablePos.x + ", y=" + availablePos.y + "] (which is [" + new_left + ", " + new_top + "])");
+    // trace("Available position found: [x=" + availablePos.x + ", y=" + availablePos.y + "] (which is [" + new_left + ", " + new_top + "])");
 
     this._$elem.css({
         "left" : new_left,
@@ -507,11 +508,12 @@ visir.Breadboard.prototype.CreateComponent = function(type, value)
 //			, 'left': ox + 'px'
 		})
 	
-        comp_obj.translations.push({ 'x' : ox, 'y' : oy });
+        var current_translation = { 'x' : ox, 'y' : oy, 'rot' : rot };
+        comp_obj.translations.push(current_translation);
         trace("Adding " + ox + ", " + oy);
 		if (idx == 0) {
 			$img.addClass("active");
-            comp_obj.translation = { 'x' : ox, 'y' : oy };
+            comp_obj.translation = current_translation;
 		}
 		$comp.append($img);
 		idx++;
