@@ -325,7 +325,7 @@ visir.Component.prototype._AddCircle = function()
                     '-webkit-transform' : currentRotation,
                 });
             },
-            duration : 'fast'
+            duration : 'slow'
         });
     });
     this._$circle.append($rotateImg);
