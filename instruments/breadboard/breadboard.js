@@ -203,6 +203,10 @@ visir.Component.prototype._PlaceInBin = function()
 
 visir.Component.prototype.Rotate = function(step)
 {
+    if(step == undefined) {
+        step = this._current_step + 1;
+    }
+
 	var $imgs = this._$elem.find("img");
 	if (step >= $imgs.length) 
         step = step % $imgs.length;
@@ -218,6 +222,7 @@ visir.Component.prototype.Rotate = function(step)
 		}
 		idx++;
 	});
+    trace(currentImage);
     this._current_step = step;
     this.translation   = this.translations[step];
     // trace("New translation: " + this.translation.x + "; " + this.translation.y);
@@ -309,7 +314,7 @@ visir.Component.prototype._AddCircle = function()
         'top'      : CIRCLE_SIZE - ICON_SIZE
     });
     $rotateImg.click(function() {
-        me.Rotate(me._current_step + 1);
+        me.Rotate();
     });
     me._$circle.append($rotateImg);
 
@@ -546,13 +551,7 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
 		$doc.on("keypress.rem", function(e) {
 			trace("key: " + e.which);
 			if (e.which == 114) { // 'r'
-				var $next = $comp.find("img.active").next();
-				$comp.find("img").removeClass("active");
-				if ($next.length > 0) {					
-					$next.addClass("active");
-				} else {
-					$comp.find("img").first().addClass("active");
-				}
+                comp_obj.Rotate();
 			}
 		});
 
