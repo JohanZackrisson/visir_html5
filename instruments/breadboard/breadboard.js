@@ -112,12 +112,12 @@ visir.Grid.prototype._set = function(x, y, value)
 
 visir.Grid.prototype._FindSlot = function(height, width) 
 {
-    for (var x = 0; x < this._cols - width; x++) { // x = 0 .. ~54
-        for (var y = 0; y < this._rows - height; y++) { // y = 0 .. ~7
+    for (var x = 0; x <= this._cols - width; x++) { // x = 0 .. ~54
+        for (var y = 0; y <= this._rows - height; y++) { // y = 0 .. ~7
             if (this._get(x, y)) {
                 var potentialHole = true;
-                for (var x2 = x; x2 < this._cols - width && x2 < x + width && potentialHole; x2++) {
-                    for (var y2 = y; y2 < this._rows - height && y2 < y + height && potentialHole; y2++) {
+                for (var x2 = x; x2 < this._cols && x2 < x + width && potentialHole; x2++) {
+                    for (var y2 = y; y2 < this._rows && y2 < y + height && potentialHole; y2++) {
                         // trace(" " + x2 + " " + y2);
                         // trace(this._grid);
                         if (!this._get(x2, y2))
@@ -137,10 +137,12 @@ visir.Grid.prototype._FindSlot = function(height, width)
 // Component container
 visir.Component = function($elem, breadboard)
 {
-   this._$elem      = $elem;
-   this._breadboard = breadboard;
-   this._$circle    = null;
-   this.translation = { 'x' : 0, 'y' : 0 };
+   this._$elem        = $elem;
+   this._breadboard   = breadboard;
+   this._$circle      = null;
+   this._current_step = 0;
+   this.translation   = { 'x' : 0, 'y' : 0 };
+   this.translations  = [];
 }
 
 visir.Component.prototype.width = function() 
@@ -197,6 +199,29 @@ visir.Component.prototype._PlaceInBin = function()
         "top"  : new_top,
     });
 }
+
+visir.Component.prototype.Rotate = function(step)
+{
+	var $imgs = this._$elem.find("img");
+	if (step >= $imgs.length) 
+        step = step % $imgs.length;
+	trace("step: " + step);
+	var idx = 0;
+    var currentImage = null;
+	$imgs.each(function() {
+		if (idx == step) {
+			$(this).addClass("active");
+            currentImage = $(this);
+		} else {
+			$(this).removeClass("active");
+		}
+		idx++;
+	});
+    this._current_step = step;
+    this.translation   = this.translations[step];
+    // trace("New translation: " + this.translation.x + "; " + this.translation.y);
+}
+
 
 visir.Component.prototype._AddCircle = function() 
 {
@@ -283,14 +308,7 @@ visir.Component.prototype._AddCircle = function()
         'top'      : CIRCLE_SIZE - ICON_SIZE
     });
     $rotateImg.click(function() {
-        // TODO: refactor to avoid duplicating this code
-        var $next = me._$elem.find("img.active").next();
-        me._$elem.find("img").removeClass("active");
-        if ($next.length > 0) {					
-            $next.addClass("active");
-        } else {
-            me._$elem.find("img").first().addClass("active");
-        }
+        me.Rotate(me._current_step + 1);
     });
     me._$circle.append($rotateImg);
 
@@ -488,7 +506,9 @@ visir.Breadboard.prototype.CreateComponent = function(type, value)
 //			, 'top': oy + 'px'
 //			, 'left': ox + 'px'
 		})
-		
+	
+        comp_obj.translations.push({ 'x' : ox, 'y' : oy });
+        trace("Adding " + ox + ", " + oy);
 		if (idx == 0) {
 			$img.addClass("active");
             comp_obj.translation = { 'x' : ox, 'y' : oy };
@@ -558,7 +578,7 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
 				else if (angle >135 && angle < 225) step = 2;
 				else step = 3;
 				
-				me._SetComponentRotation($comp, step);
+                comp_obj.Rotate(step);
 			}
 			
 		});
@@ -602,25 +622,6 @@ visir.Breadboard.prototype._GetBin = function()
 {
     return this._$elem.find(".bin");
 }
-
-visir.Breadboard.prototype._SetComponentRotation = function($comp, step)
-{
-	var $imgs = $comp.find("img");
-	//if ($imgs.length <= 2) step = step % 2;
-	if (step >= $imgs.length) step = step % $imgs.length;
-	trace("step: " + step);
-	var idx = 0;
-	$imgs.each(function() {
-		if (idx == step) {
-			$(this).addClass("active");
-		} else {
-			$(this).removeClass("active");
-		}
-		idx++;
-	});
-}
-
-
 
 
 
