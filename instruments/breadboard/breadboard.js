@@ -318,6 +318,18 @@ visir.Component.prototype._AddCircle = function()
     });
     $rotateImg.click(function() {
         me.Rotate();
+
+        $rotateImg.animate({'rotation' : '+=360'}, {
+            step : function(now, fx){
+                var currentRotation  = 'rotate(' + (now % 360) + 'deg)';
+                $rotateImg.css({
+                    'transform'         : currentRotation,
+                    '-moz-transform'    : currentRotation,
+                    '-webkit-transform' : currentRotation,
+                });
+            },
+            duration : 'fast'
+        });
     });
     this._$circle.append($rotateImg);
 
@@ -337,7 +349,11 @@ visir.Component.prototype._AddCircle = function()
 
     $parentNode.append(this._$circle);
 
-    this._$circle.on("mousedown touchstart", this.generateHandler(this._$circle, this._$elem));
+    this._$circle.on("mousedown touchstart", this.generateHandler(this._$circle, this._$elem, function() {
+        $dragImg.attr("src", "instruments/breadboard/images/drag.png");
+    }, function () {
+        $dragImg.attr("src", "instruments/breadboard/images/drop.png");
+    }));
 }
 
 visir.Breadboard = function(id, $elem)
@@ -546,7 +562,7 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
 	
 	var touches = 0;
 
-    var generateHandler = function(component, internalComponent) {
+    var generateHandler = function(component, internalComponent, callbackPressed, callbackReleased) {
         return function(e) {
             e.preventDefault();
             touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
@@ -560,6 +576,9 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
             });
 
             $doc.on("mousemove.rem touchmove.rem", function(e) {
+                if(callbackPressed != undefined)
+                    callbackPressed();
+
                 touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
                 var touch = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
                 
@@ -571,7 +590,7 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
                     "left": p.x + "px",
                     "top": p.y + "px"
                 });
-                if(internalComponent != null) {
+                if(internalComponent != undefined) {
                     internalComponent.css({
                         "left": p.x + "px",
                         "top": p.y + "px"
@@ -600,13 +619,17 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
                     touches--;
                     return;
                 }
+
+                if(callbackReleased != undefined)
+                    callbackReleased();
+
                 //if (e.originalEvent.touches && e.originalEvent.touches.length > 1) return;
                 component.off(".rem");
                 $doc.off(".rem");
             });
         };
     };
-	$comp.on("mousedown touchstart", generateHandler($comp, true));
+	$comp.on("mousedown touchstart", generateHandler($comp));
     comp_obj.generateHandler = generateHandler;
 
     $comp.on("click", function() {
