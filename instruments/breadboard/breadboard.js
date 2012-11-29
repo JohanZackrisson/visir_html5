@@ -56,12 +56,91 @@ function drawWire(context, start, end, color)
 	context.closePath();
 }
 
+// Ocuppation grid for the bin (to know which positions are available)
+visir.Grid = function(componentList, $bin) {
+    var me = this;
+
+    // Being true = "available", and false = "busy"
+    this._grid = [
+        // row 0 (y=0): [ true, true, true ... ],
+        // row 1 (y=1): [ true, true, true ... ],
+    ];
+
+    this._rows = 7;
+    this._cols = 54;
+
+    for(var y = 0; y < this._rows; y++) {
+        var rowOccupation = [];
+        for(var x = 0; x < this._cols; x++)
+            rowOccupation.push(true);
+        this._grid.push(rowOccupation);
+    }
+
+    var bin_position = $bin.position();
+    var bin_left = bin_position.left;
+    var bin_top  = bin_position.top;
+
+    $(componentList).each(function(pos, component) {
+        var position = component._$elem.position();
+        var relative_top  = Math.floor((position.top  - bin_top  - 5 + parseInt(component.translation.y)) / 13);
+        var relative_left = Math.floor((position.left - bin_left - 5 + parseInt(component.translation.x)) / 13);
+
+        // trace("Component found in: " + relative_top + ", " + relative_left);
+
+        if(relative_top >= 0 && relative_top < me._rows && relative_left >= 0 && relative_left < me._cols) {
+            for(var x = relative_left; x < relative_left + component.widthInPoints(); x++) 
+                for(var y = relative_top; y < relative_top + component.heightInPoints(); y++) {
+                    me._set(x,y, false);
+//                    trace("Marking busy..." + x + "; " + y);
+                }
+        }
+    });
+}
+
+visir.Grid.prototype._get = function(x, y)
+{
+    // trace("Attempting " + x + ", " + y);
+    return this._grid[y][x];
+}
+
+visir.Grid.prototype._set = function(x, y, value)
+{
+    // trace("Attempting " + x + ", " + y);
+    this._grid[y][x] = value;
+}
+
+
+visir.Grid.prototype._FindSlot = function(height, width) 
+{
+    for (var x = 0; x < this._cols - width; x++) { // x = 0 .. ~54
+        for (var y = 0; y < this._rows - height; y++) { // y = 0 .. ~7
+            if (this._get(x, y)) {
+                var potentialHole = true;
+                for (var x2 = x; x2 < this._cols - width && x2 < x + width && potentialHole; x2++) {
+                    for (var y2 = y; y2 < this._rows - height && y2 < y + height && potentialHole; y2++) {
+                        // trace(" " + x2 + " " + y2);
+                        // trace(this._grid);
+                        if (!this._get(x2, y2))
+                            potentialHole = false;
+                    }
+                }
+                if (potentialHole)
+                    return { 'x' : x, 'y' : y };
+            }
+        }
+    }
+
+    return { 'x' : 0, 'y' : 0 };
+}
+
+
 // Component container
 visir.Component = function($elem, breadboard)
 {
    this._$elem      = $elem;
    this._breadboard = breadboard;
    this._$circle    = null;
+   this.translation = { 'x' : 0, 'y' : 0 };
 }
 
 visir.Component.prototype.width = function() 
@@ -72,6 +151,16 @@ visir.Component.prototype.width = function()
 visir.Component.prototype.height = function() 
 {
     return this._$elem.find('.active').height();
+}
+
+visir.Component.prototype.heightInPoints = function()
+{
+    return Math.ceil(this.height() / 13);
+}
+
+visir.Component.prototype.widthInPoints = function()
+{
+    return Math.ceil(this.width() / 13);
 }
 
 visir.Component.prototype.remove = function() 
@@ -88,6 +177,26 @@ visir.Component.prototype._RemoveCircle = function()
     }
 }
 
+visir.Component.prototype._PlaceInBin = function()
+{
+    var grid = this._breadboard._BuildOccupationGrid();
+
+    var height = this.heightInPoints();
+    var width  = this.widthInPoints();
+
+    var availablePos = grid._FindSlot(height, width);
+    var bin_position = this._breadboard._GetBin().position();
+
+    var new_left = availablePos.x * 13 + bin_position.left + 5 - parseInt(this.translation.x);
+    var new_top  = availablePos.y * 13 + bin_position.top  + 5 - parseInt(this.translation.y);
+
+    trace("Available position found: [x=" + availablePos.x + ", y=" + availablePos.y + "] (which is [" + new_left + ", " + new_top + "])");
+
+    this._$elem.css({
+        "left" : new_left,
+        "top"  : new_top,
+    });
+}
 
 visir.Component.prototype._AddCircle = function() 
 {
@@ -142,7 +251,7 @@ visir.Component.prototype._AddCircle = function()
         'top'      : (1 - CIRCLE_OVERLAP) * ICON_SIZE
     });
     $circleImg.click(function() {
-        me._$circle.remove();
+        me._RemoveCircle();
     });
     me._$circle.append($circleImg);
 
@@ -268,7 +377,8 @@ visir.Breadboard = function(id, $elem)
             $elem.find(".componentlist-table").append(img_html);
 
             $($elem.find('.component-list-row').get(-1)).click(function(e){
-                me.CreateComponent(type, value);
+                var comp_obj = me.CreateComponent(type, value);
+                comp_obj._PlaceInBin();
             });
         });
     });
@@ -336,7 +446,7 @@ visir.Breadboard.prototype._ReadLibrary = function(url)
 		success: function(xml) {
 			trace("xml: " + xml);
 			me._$library = $(xml);
-			me.CreateComponent("D", "1N4002")
+			//me.CreateComponent("D", "1N4002")
 			//me.CreateComponent("R", "10k")
 		}
 	});
@@ -349,6 +459,7 @@ visir.Breadboard.prototype.CreateComponent = function(type, value)
 	var me = this;
 	var $libcomp = this._$library.find('component[type="'+ type+'"][value="'+ value+ '"]');
 	var $comp = $('<div class="component"></div>');
+    var comp_obj = new visir.Component($comp, me);
 	
 	var idx = 0;
 	
@@ -371,36 +482,28 @@ visir.Breadboard.prototype.CreateComponent = function(type, value)
 		transform += ' rotate(' + rot + 'deg)';
 				
 		$img.css( {
-			'transform': transform
-			,'-moz-transform': transform
-			,'-webkit-transform': transform
+			'transform': transform,
+			'-moz-transform': transform,
+			'-webkit-transform': transform,
 //			, 'top': oy + 'px'
 //			, 'left': ox + 'px'
 		})
 		
 		if (idx == 0) {
 			$img.addClass("active");
+            comp_obj.translation = { 'x' : ox, 'y' : oy };
 		}
 		$comp.append($img);
 		idx++;
 	});
 	
-    var comp_obj = new visir.Component($comp, me);
     me._components.push(comp_obj);
 
 	me._AddComponentEvents(comp_obj, $comp);
 
 	me._$elem.find(".components").append($comp);
-}
 
-visir.Breadboard.prototype._RemoveComponent = function(comp_obj)
-{
-    for (var i = 0; i < this._components.length; i++) {
-        if(this._components[i] == comp_obj) {
-            this._components.splice(i, 1);
-            break;
-        }
-    }
+    return comp_obj;
 }
 
 visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
@@ -480,6 +583,26 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
     });
 }
 
+visir.Breadboard.prototype._RemoveComponent = function(comp_obj)
+{
+    for (var i = 0; i < this._components.length; i++) {
+        if(this._components[i] == comp_obj) {
+            this._components.splice(i, 1);
+            break;
+        }
+    }
+}
+
+visir.Breadboard.prototype._BuildOccupationGrid = function() 
+{
+    return new visir.Grid(this._components, this._GetBin());
+}
+
+visir.Breadboard.prototype._GetBin = function()
+{
+    return this._$elem.find(".bin");
+}
+
 visir.Breadboard.prototype._SetComponentRotation = function($comp, step)
 {
 	var $imgs = $comp.find("img");
@@ -496,9 +619,6 @@ visir.Breadboard.prototype._SetComponentRotation = function($comp, step)
 		idx++;
 	});
 }
-
-
-
 
 
 
