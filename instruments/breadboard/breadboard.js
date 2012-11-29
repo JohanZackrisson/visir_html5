@@ -167,6 +167,7 @@ visir.Component.prototype.widthInPoints = function()
 
 visir.Component.prototype.remove = function() 
 {
+    this._RemoveCircle();
     this._$elem.remove();
     this._breadboard._RemoveComponent(this);
 }
@@ -284,9 +285,6 @@ visir.Component.prototype._AddCircle = function()
         'left'     : (1 - CIRCLE_OVERLAP) * ICON_SIZE,
         'top'      : (1 - CIRCLE_OVERLAP) * ICON_SIZE
     });
-    $circleImg.click(function() {
-        me._RemoveCircle();
-    });
     this._$circle.append($circleImg);
 
     // Trash button
@@ -300,7 +298,6 @@ visir.Component.prototype._AddCircle = function()
         'top'      : CIRCLE_SIZE - ICON_SIZE
     })
     $trashImg.click(function() {
-        me._RemoveCircle();
         me.remove();
     });
     this._$circle.append($trashImg);
@@ -349,11 +346,17 @@ visir.Component.prototype._AddCircle = function()
 
     $parentNode.append(this._$circle);
 
-    this._$circle.on("mousedown touchstart", this.generateHandler(this._$circle, this._$elem, function() {
+    var handler = this.generateHandler(this._$circle, function() {
+        // On clicked
+        me._RemoveCircle();
+    }, this._$elem, function() {
         $dragImg.attr("src", "instruments/breadboard/images/drag.png");
     }, function () {
         $dragImg.attr("src", "instruments/breadboard/images/drop.png");
-    }));
+    })
+
+    $circleImg.on("mousedown touchstart", handler);
+    $dragImg.on("mousedown touchstart", handler);
 }
 
 visir.Breadboard = function(id, $elem)
@@ -561,10 +564,14 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
 	var offset = this._$elem.offset();
 	
 	var touches = 0;
+    var initialTouchTime = 0;
 
-    var generateHandler = function(component, internalComponent, callbackPressed, callbackReleased) {
+    var generateHandler = function(component, callbackClicked, internalComponent, callbackPressed, callbackReleased) {
         return function(e) {
             e.preventDefault();
+
+            initialTouchTime = new Date().getTime();
+
             touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
             e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
             //var start = { x: e.pageX - offset.x, y: e.pageY - offset.y};
@@ -574,6 +581,11 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
                 if (e.which == 114) // 'r'
                     comp_obj.Rotate();
             });
+
+            $doc.on("keyup.rem", function(e){
+                if(e.keyCode == 46)
+                    comp_obj.remove();
+            }) 
 
             $doc.on("mousemove.rem touchmove.rem", function(e) {
                 if(callbackPressed != undefined)
@@ -620,6 +632,11 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
                     return;
                 }
 
+                var timeSincePressed = new Date().getTime() - initialTouchTime;
+                trace("Time since pressed: " + timeSincePressed);
+                if(timeSincePressed < 300) // Less than this time is considered a click
+                    callbackClicked();
+
                 if(callbackReleased != undefined)
                     callbackReleased();
 
@@ -629,15 +646,14 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
             });
         };
     };
-	$comp.on("mousedown touchstart", generateHandler($comp));
-    comp_obj.generateHandler = generateHandler;
-
-    $comp.on("click", function() {
+	$comp.on("mousedown touchstart", generateHandler($comp, function() {
+        // On clicked, add circle
         $(me._components).each(function() {
             this._RemoveCircle();
         });
         comp_obj._AddCircle();
-    });
+    }));
+    comp_obj.generateHandler = generateHandler;
 }
 
 visir.Breadboard.prototype._RemoveComponent = function(comp_obj)
