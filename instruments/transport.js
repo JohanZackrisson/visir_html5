@@ -10,13 +10,15 @@ visir.JSTransport = function(workingCallback)
 	this._workCall = workingCallback;
 	this._sessionKey = null;
 	this._error = null;
-	this.onerror = null;
+	this.onerror = function(err) {};
+	
+	this._request = this._CreateRequest();
 }
 
 /*
 	If not authenticated, this will first try to get a session key from the server
 	If that succeeds, it will send the request to the server, get a response and pass that back through the callback
-	On error, throw an exception?
+	On error, call onerror
 	
 	request: instrument xml to transport
 	callback: a function that takes a xml blob with reponse data
@@ -51,8 +53,9 @@ visir.JSTransport.prototype.Connect = function(url, cookie)
 	this._cookie = cookie;
 }
 
-visir.JSTransport.prototype.SetWorking = function(xx,yy)
+visir.JSTransport.prototype.SetWorking = function(isWorking, shouldContinue)
 {
+	this._isWorking = isWorking;
 }
 
 /*
@@ -66,10 +69,10 @@ visir.JSTransport.prototype._SendRequest = function(xmlstring, callback)
 	if (this._sessionKey) $req.find("protocol > request").attr("sessionkey", this._sessionKey);
 	
 	var data = $req.html();
-	trace(data);
+	//trace(data);
 	var tprt = this;
 	this._SendXML(data, function(response) {
-		trace("reponse: " + response);
+		//trace("reponse: " + response);
 		tprt.SetWorking(false, false);
 		if (typeof callback == "function") {
 			// this will check for errors in the request
@@ -117,6 +120,18 @@ visir.JSTransport.prototype._SendAuthentication = function(request, cookie, call
 	});
 }
 
+visir.JSTransport.prototype._CreateRequest = function()
+{
+	if (window.XDomainRequest) {
+		// ie.. untested..
+		var req = new window.XDomainRequest();
+	} else {
+		var req = new XMLHttpRequest();
+	}
+	
+	return req;	
+}
+
 /*
 * XXX: I can't find a way to make sure that requests are pipelined in the same connection to the webserver
 */
@@ -125,14 +140,14 @@ visir.JSTransport.prototype._SendXML = function(data, callback)
 	var me = this;
 	// for some reason the jquery post doesn't work as it should, try again in the future.
 	if (window.XDomainRequest) {
-		// ie..
-		var req = new window.XDomainRequest();
+		// ie.. untested
+		var req = this._request; //new window.XDomainRequest();
 		req.onload = function() { trace("xdomain: " + req.responseText); };
 		req.open('POST', this._url, true);
 		req.send(data);
 
 	} else {
-		var req = new XMLHttpRequest();
+		var req = this._request; //new XMLHttpRequest();
 		req.open('POST', this._url, true);
 		req.onerror = function(e) { trace("XMLHttpRequest error: " + e); me.Error(e); }
 		req.onreadystatechange = function(response)
@@ -142,7 +157,7 @@ visir.JSTransport.prototype._SendXML = function(data, callback)
 				me.Error("unexpected request return status");
 				return;
 			}
-			trace("XMLHttpRequest response: " + req.responseText);
+			//trace("XMLHttpRequest response: " + req.responseText);
 			callback(req.responseText);
 		};
 		req.send(data);
@@ -157,7 +172,7 @@ visir.JSTransport.prototype._IsAuthenticated = function()
 visir.JSTransport.prototype.Error = function(errormsg) {
 	this.SetWorking(false, false);
 	trace(errormsg);
-	if (typeof this.onerror == "function") this.onerror(errormsg);
+	this.onerror(errormsg);
 	this._error = errormsg;
 	this._sessionKey = null; // XXX: all errors lead to requthentication
 }
