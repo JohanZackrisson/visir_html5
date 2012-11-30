@@ -17,11 +17,22 @@
 				handle.on("mousedown touchstart", function(e) {
 
 					e.preventDefault();
+					
+					// try to avoid having to calculate the size and offset of the turnable each move event
+					var offset = handle.offset();
+					var center = { x: top.width() / 2, y: top.height() / 2 };
+					var origin = top.css("transform-origin");
+					if (origin) {
+						var sp = origin.split(" ");
+						center.x = parseInt(sp[0]);
+						center.y = parseInt(sp[1]);
+					}					
 
 					doc.on("mousemove.rem touchmove.rem", function(e) {
 
 						e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
 
+						/*
 						var offset = handle.offset();
 						var center = { x: top.width() / 2, y: top.height() / 2 };
 						var origin = top.css("transform-origin");
@@ -30,6 +41,7 @@
 							center.x = parseInt(sp[0]);
 							center.y = parseInt(sp[1]);
 						}
+						*/
 						var dx = e.pageX - offset.left - center.x;
 						var dy = e.pageY - offset.top - center.y;
 
