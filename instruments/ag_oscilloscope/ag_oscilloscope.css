@@ -216,10 +216,9 @@
 .ag_osc .display .vertical .group.visible { display: inline; }
 
 /* fixup for trigger marker group */
-.ag_osc .display .vertical .group.trigger_group { position: relative; left: -4px; }
-.ag_osc .display .vertical .group.trigger_group .normal .offsetarrow { top: -8px; }
-.ag_osc .display .vertical .group.trigger_group .overflow_up .offsetarrow { top: -2px; }
-.ag_osc .display .vertical .group.trigger_group .overflow_down .offsetarrow { top: -12px; }
+.ag_osc .display .vertical .group.trigger_group .normal .offsetarrow { top: -8px; left: -4px; }
+.ag_osc .display .vertical .group.trigger_group .overflow_up .offsetarrow { top: -2px; left: -4px; }
+.ag_osc .display .vertical .group.trigger_group .overflow_down .offsetarrow { top: -12px; left: -4px;}
 
 
 /* menus */
