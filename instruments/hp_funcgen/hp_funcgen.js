@@ -13,12 +13,11 @@ visir.HPFunctionGenerator = function(id, elem)
 	/* the multipliers are used to avoid storing the values in floating point
 	which will cause problems when trying to display the values */	
 	this._values = {
-		"freq": { value: 1000 * 100000000, multiplier: 100000000, digit: 8, numDigits: 8, unit: "Hz", max: 16*1000*1000*100000000, min: 10000},
+		"freq": { value: 1000 * 100000000, multiplier: 100000000, digit: 8, numDigits: 8, unit: "Hz", max: 1*1000*1000*100000000, min: 10000},
 		"ampl": { value: 1 * 10000, multiplier: 10000, digit: 4, numDigits: 4, unit: "Vpp", max: 10*10000, min: 500 },
 		"offset": { value: 0, multiplier: 10000, digit: 4, numDigits: 4, unit: "VDC", max: 10*10000, min: -10*10000 }
 	 }
 
-	// XXX: regexp replace..
 	var imgbase = "instruments/hp_funcgen/images";
 		
 	var tpl = '<div class="hp_funcgen">\
