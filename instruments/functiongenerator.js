@@ -18,7 +18,7 @@ visir.FunctionGenerator.prototype.WriteRequest = function()
 	
 	AddXMLValue($xml, "fg_waveform", this._waveform);
 	AddXMLValue($xml, "fg_frequency", this._frequency);
-	AddXMLValue($xml, "fg_amplitude", this._amplitude);
+	AddXMLValue($xml, "fg_amplitude", this._amplitude / 2.0);
 	AddXMLValue($xml, "fg_offset", this._offset);
 		
 	// XXX: trick to get a valid root doc
