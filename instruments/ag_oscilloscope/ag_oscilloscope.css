@@ -386,13 +386,12 @@
 
 .ag_osc .unitstring
 {
-	position: relative;
 	display: inline-block;
 	font-size: 10pt;
 	width: 8px;
 	height: 13px;
 	text-align: center;
-	vertical-align:center;
+	margin-top: -2px; /* fix for mozilla */
 }
 
 .ag_osc .unitstring .large
