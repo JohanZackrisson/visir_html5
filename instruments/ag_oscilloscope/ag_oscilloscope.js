@@ -1,10 +1,12 @@
-//"use strict";
+/*global trace, extend */
+/*jshint laxcomma:true, multistr:true */
 
+"use strict";
 var visir = visir || {};
 
 visir.AgilentOscilloscope = function(id, elem, props)
 {
-	visir.AgilentOscilloscope.parent.constructor.apply(this, arguments)
+	visir.AgilentOscilloscope.parent.constructor.apply(this, arguments);
 	
 	var options = $.extend({
 		MeasureCalling: function() {}
@@ -225,7 +227,7 @@ visir.AgilentOscilloscope = function(id, elem, props)
 		
 	elem.append(tpl);
 	
-	var unitstring_tpl = '<div class="large strings visible">V</div><div class="small strings"><div class="top">m</div><div class="bottom">v</div></div>'
+	var unitstring_tpl = '<div class="large strings visible">V</div><div class="small strings"><div class="top">m</div><div class="bottom">v</div></div>';
 	elem.find(".unitstring").append(unitstring_tpl);
 	elem.find(".timescale .bottom").text("s");
 
@@ -236,21 +238,20 @@ visir.AgilentOscilloscope = function(id, elem, props)
 		up = up || function() {};
 		down = down || function() {};
 		return function(elem, deg, newTouch) {
-			if (newTouch) prev = deg;
+			if (newTouch) { prev = deg; }
 			var diff = deg - prev;
 			// fixup the wrapping
-			if (diff > 180) diff = -360 + diff;
-			else if (diff < -180) diff = 360 + diff;
+			if (diff > 180) { diff = -360 + diff; }
+			else if (diff < -180) { diff = 360 + diff; }
 		
 			if (Math.abs(diff) > 360/10) {
 				prev = deg;
-				//trace("diff: " + diff + " " + elem.html());
-				if (diff < 0) down();
-				else if (diff > 0) up();
+				if (diff < 0) { down(); }
+				else if (diff > 0) { up(); }
 				elem.find("img").toggleClass("active");
 			}
 			// dont return, we want it undefined
-		}
+		};
 	}
 		
 	// abuses the turnable to get events, but not turning the component at all
@@ -286,20 +287,18 @@ visir.AgilentOscilloscope = function(id, elem, props)
 	});
 	
 	elem.find(".button.single").click( function() {
-		trace("single");
 		me._MakeMeasurement("single");
 	});
 	elem.find(".button.runstop").click( function() {
-		trace("runstop");
 		me._MakeMeasurement("runstop");
 	});
 	
-	elem.find(".display_button_1").click( function() { me._DisplayButtonClicked(1); })
-	elem.find(".display_button_2").click( function() { me._DisplayButtonClicked(2); })
-	elem.find(".display_button_3").click( function() { me._DisplayButtonClicked(3); })
-	elem.find(".display_button_4").click( function() { me._DisplayButtonClicked(4); })
-	elem.find(".display_button_5").click( function() { me._DisplayButtonClicked(5); })
-	elem.find(".display_button_6").click( function() { me._DisplayButtonClicked(6); })
+	elem.find(".display_button_1").click( function() { me._DisplayButtonClicked(1); });
+	elem.find(".display_button_2").click( function() { me._DisplayButtonClicked(2); });
+	elem.find(".display_button_3").click( function() { me._DisplayButtonClicked(3); });
+	elem.find(".display_button_4").click( function() { me._DisplayButtonClicked(4); });
+	elem.find(".display_button_5").click( function() { me._DisplayButtonClicked(5); });
+	elem.find(".display_button_6").click( function() { me._DisplayButtonClicked(6); });
 	
 	this._plotWidth = this._$elem.find(".plot").width();
 	this._plotHeight = this._$elem.find(".plot").height();
@@ -315,10 +314,10 @@ visir.AgilentOscilloscope = function(id, elem, props)
 		, 'menu_channel_2': CreateChannelMenu(this, 1, this._$elem.find(".menu_channel_2"))
 		, 'menu_edge': CreateEdgeMenu(this, this._$elem.find(".menu_edge"))
 		, 'menu_modecoupling': CreateTriggerModeCouplingMenu(this, this._$elem.find(".menu_modecoupling"))
-	}
-}
+	};
+};
 
-extend(visir.AgilentOscilloscope, visir.Oscilloscope)
+extend(visir.AgilentOscilloscope, visir.Oscilloscope);
 
 visir.AgilentOscilloscope.prototype._DrawGrid = function($elem)
 {
@@ -334,32 +333,33 @@ visir.AgilentOscilloscope.prototype._DrawGrid = function($elem)
 	var h = $elem.height();
 	var xspacing = w / 10;
 	var yspacing = h / 8;
+	var i, x, y;
 	
-	for(var i=1;i<=9;i++) {
-		var x = xspacing * i;
+	for(i=1;i<=9;i++) {
+		x = xspacing * i;
 		x += 0.5;
 		context.moveTo(x, 0);
 		context.lineTo(x, h);
 	}
 
-	for(var i=1;i<=10*5 ;i++) {
-		if (i % 5 == 0) continue;
-		var x = (xspacing / 5) * i;
+	for(i=1;i<=10*5 ;i++) {
+		if (i % 5 === 0) { continue; }
+		x = (xspacing / 5) * i;
 		x += 0.5;
 		var h2 = (h / 2) + 0.5;
 		context.moveTo(x, h2 - len);
 		context.lineTo(x, h2 + len);
 	}
 
-	for(var i=1;i<=7;i++) {
-		var y = yspacing * i;
+	for(i=1;i<=7;i++) {
+		y = yspacing * i;
 		context.moveTo(0, y+0.5);
 		context.lineTo(w, y+0.5);
 	}
 	
-	for(var i=1;i<=7*5 ;i++) {
-		if (i % 4 == 0) continue;
-		var y = (yspacing / 4) * i;
+	for(i=1;i<=7*5 ;i++) {
+		if (i % 4 === 0) { continue; }
+		y = (yspacing / 4) * i;
 		y += 0.5;
 		var w2 = (w / 2);
 		w2 = Math.floor(w2) + 0.5;
@@ -368,7 +368,7 @@ visir.AgilentOscilloscope.prototype._DrawGrid = function($elem)
 	}
 	
 	context.stroke();
-}
+};
 
 visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 {
@@ -384,7 +384,7 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 	var me = this;
 	// local draw function
 	function DrawChannel(chnr) {
-		if (!me._channels[chnr].visible) return;
+		if (!me._channels[chnr].visible) { return; }
 		var ch = me._channels[chnr];
 		var graph = ch.graph;
 		var len = graph.length;
@@ -392,8 +392,11 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 			var x = i*w / len;
 			var y = -((graph[i] / ch.range) + ch.display_offset) * (h / 8.0) + h/2;
 			y+=0.5;
-			if (i==0) context.moveTo(x,y);
-			else context.lineTo(x,y);
+			if (i===0) {
+				context.moveTo(x,y);
+			} else {
+				context.lineTo(x,y);
+			}
 		}
 	}
 	
@@ -401,60 +404,55 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 	DrawChannel(1);
 
 	context.stroke();
-}
+};
 
 visir.AgilentOscilloscope.prototype._SetVoltIdx = function(ch, idx)
 {
-	if (idx < 0) idx = 0;
-	if (idx > this._voltages.length - 1) idx = this._voltages.length - 1;
+	if (idx < 0) { idx = 0; }
+	if (idx > this._voltages.length - 1) { idx = this._voltages.length - 1; }
 	this._voltIdx[ch] = idx;
-	//trace("idx: " + ch + " " + idx);
-	 // sets value for serialization
+	
+	// sets value for serialization
 	this._channels[ch].range = this._voltages[idx];
 	this._channels[ch].offset = this._voltages[idx] * -this._channels[ch].display_offset;
 	
-	var indicatorName = (ch == 0 ? ".voltage_ch1" : ".voltage_ch2");
-	var $indicator = this._$elem.find(indicatorName);
-	/*$indicator.text(this._FormatValue(this._voltages[this._voltIdx[ch]]) + "V");
-	*/
-	
+	var indicatorName = (ch === 0 ? ".voltage_ch1" : ".voltage_ch2");
+	var $indicator = this._$elem.find(indicatorName);	
 	this._LightIndicator($indicator);
 	this._UpdateTriggerLevel();
 	this._UpdateDisplay();
-}
+};
 
 visir.AgilentOscilloscope.prototype._SetTimedivIdx = function(idx)
 {
-	if (idx < 0) idx = 0;
-	if (idx > this._timedivs.length - 1) idx = this._timedivs.length - 1;
+	if (idx < 0) { idx = 0; }
+	if (idx > this._timedivs.length - 1) { idx = this._timedivs.length - 1; }
 	this._timeIdx = idx;
-	//trace("timediv idx: " + idx);
 	this._sampleRate = 1.0 / this._timedivs[this._timeIdx]; // sets value for serialization
+	
 	var $indicator = this._$elem.find(".timediv");
-	//$indicator.text(this._FormatValue(this._timedivs[this._timeIdx]) + "s");
 	this._LightIndicator($indicator);
 	this._UpdateDisplay();
-}
+};
 
 visir.AgilentOscilloscope.prototype._StepDisplayOffset = function(ch, up)
 {
 	var stepsize = 0.05;
 	var val = this._channels[ch].display_offset + (up ? stepsize : -stepsize);
 	this._SetDisplayOffset(ch, val);
-}
+};
 
 visir.AgilentOscilloscope.prototype._SetDisplayOffset = function(ch, offset)
 {
 	var stepsize = 0.05;
 	offset = Math.round(offset / stepsize) * stepsize;
 	this._channels[ch].display_offset = offset;
-	//trace("offset: " + offset);
 	
 	// set values for serialization
 	this._channels[ch].offset = this._voltages[this._voltIdx[ch]] * -this._channels[ch].display_offset;
 	
 	// move and update offset indicators
-	var $group = this._$elem.find(".display .vertical " + (ch == 0 ? ".offset_group_ch1" : ".offset_group_ch2"));
+	var $group = this._$elem.find(".display .vertical " + (ch === 0 ? ".offset_group_ch1" : ".offset_group_ch2"));
 	$group.find(".ch_offset").removeClass("visible");
 	if (offset >= 4) { // show overflow indicator
 		$group.find(".overflow_up").addClass("visible");
@@ -470,7 +468,7 @@ visir.AgilentOscilloscope.prototype._SetDisplayOffset = function(ch, offset)
 	
 	this._UpdateTriggerLevel();
 	this._UpdateDisplay();
-}
+};
 
 /*
 	The trigger level should stay the same until its steped
@@ -481,7 +479,9 @@ visir.AgilentOscilloscope.prototype._SetDisplayOffset = function(ch, offset)
 visir.AgilentOscilloscope.prototype._StepTriggerLevel = function(up)
 {
 	// side effect, if trigger mode is auto level, set to auto
-	if (this._triggerModeIdx == 0) this._SetTriggerMode(1);
+	if (this._triggerModeIdx === 0) {
+		this._SetTriggerMode(1);
+	}
 	
 	var level = this._ClampTriggerLevel(this._triggerLevelUnclamped);
 	
@@ -491,7 +491,7 @@ visir.AgilentOscilloscope.prototype._StepTriggerLevel = function(up)
 	this._triggerLevelUnclamped = newval;
 	
 	this._SetTriggerLevel(newval, true);
-}
+};
 
 // clamps the trigger level, sets up the serialized data and updates the display
 visir.AgilentOscilloscope.prototype._SetTriggerLevel = function(level, showLight)
@@ -505,7 +505,7 @@ visir.AgilentOscilloscope.prototype._SetTriggerLevel = function(level, showLight
 	//this._$elem.find(".triglevel .lighttext").text(this._FormatValue(level) + "V");
 	this._LightIndicator($indicator);
 	this._UpdateTriggerLevel();
-}
+};
 
 visir.AgilentOscilloscope.prototype._ClampTriggerLevel = function(level)
 {
@@ -514,10 +514,10 @@ visir.AgilentOscilloscope.prototype._ClampTriggerLevel = function(level)
 	level = Math.round(level / stepsize) * stepsize;
 	var max = -trigch.offset + (6*trigch.range);
 	var min = -trigch.offset - (6*trigch.range);
-	if (level > max) level = max;
-	if (level < min) level = min;
+	if (level > max) { level = max; }
+	if (level < min) { level = min; }
 	return level;
-}
+};
 
 visir.AgilentOscilloscope.prototype._UpdateTriggerLevel = function()
 {
@@ -525,7 +525,7 @@ visir.AgilentOscilloscope.prototype._UpdateTriggerLevel = function()
 	var level = this._ClampTriggerLevel(this._triggerLevelUnclamped);
 	this._trigger.level = level; // XXX: updating the serialized value here is not optimal..
 	
-	trace("update trigger level: " + (this._trigger.source - 1) + " " + level);
+	//trace("update trigger level: " + (this._trigger.source - 1) + " " + level);
 
 	var markerPos = (((-level + trigch.offset) / trigch.range) ) * (this._plotHeight / 8.0) + (this._plotHeight / 2.0);
 	markerPos = Math.round(markerPos);
@@ -546,58 +546,61 @@ visir.AgilentOscilloscope.prototype._UpdateTriggerLevel = function()
 	this._SetIndicatorValue(this._$elem.find(".triglevel .lighttext"), level);
 	//SetText(this._$elem.find(".triglevel .lighttext"), this._FormatValue(level));
 	//this._$elem.find(".triglevel .lighttext").text(this._FormatValue(level));
-}
+};
 
 // XXX: maybe rename to ChButtonPressed or something..
 visir.AgilentOscilloscope.prototype._ToggleChEnabled = function(ch)
 {
 	var showMenu = "menu_channel_" + (ch+1);
-	var visibile = this._activeMenu != showMenu || !this._channels[ch].visible;
+	var visibile = this._activeMenu !== showMenu || !this._channels[ch].visible;
 	this._ShowMenu(showMenu);
-	//this._SetChEnabled(ch, !this._channels[ch].visible);
 	this._SetChEnabled(ch, visibile);
-}
+};
 
 visir.AgilentOscilloscope.prototype._ToggleChCoupling = function(ch)
 {
-	this._channels[ch].coupling = (this._channels[ch].coupling == "dc") ? "ac" : "dc";
-}
+	this._channels[ch].coupling = (this._channels[ch].coupling === "dc") ? "ac" : "dc";
+};
 
 visir.AgilentOscilloscope.prototype._SetChEnabled = function(ch, enabled)
 {
 	this._channels[ch].visible = enabled;
 	this._UpdateChannelDisplay(ch);
 	this._UpdateDisplay();
-}
+};
 
 visir.AgilentOscilloscope.prototype._SetTriggerSlope = function(slope)
 {
 	this._trigger.slope = slope;
 	this._$elem.find(".display .triggerslope .flank.selected").removeClass("selected");
 	this._$elem.find(".display .triggerslope .flank." +slope).addClass("selected");
-}
+};
 
 visir.AgilentOscilloscope.prototype._SetTriggerSource = function(ch)
 {
 	this._trigger.source = ch;
 	this._$elem.find(".display .triggersource .channelname").text(ch);
 	this._UpdateTriggerLevel();
-}
+};
 
 visir.AgilentOscilloscope.prototype._SetTriggerMode = function(modeIdx)
 {
-	if (modeIdx < 0 || modeIdx >= this._triggerModes.length) throw "invalid trigger mode index";
+	if (modeIdx < 0 || modeIdx >= this._triggerModes.length) {
+		throw "invalid trigger mode index";
+	}
 	this._triggerModeIdx = modeIdx;
 	this._trigger.mode = this._triggerModes[modeIdx];
 	
 	this._$elem.find(".lighttext.triggermode").text(this._triggerModesLight[modeIdx]);
 	this._$elem.find(".menu_modecoupling .value.mode").text(this._triggerModesDisplay[this._triggerModeIdx]); // need to update the menu (if its active)
-}
+};
 
 visir.AgilentOscilloscope.prototype._ShowMenu = function(menuname)
 {
 	var $menu = this._$elem.find(".menu." + menuname);
-	if ($menu.length == 0) throw "unable to find menu: " + menuname;
+	if ($menu.length === 0) {
+		throw "unable to find menu: " + menuname;
+	}
 	this._$elem.find(".display .menubar .menu").removeClass("visible");
 	$menu.addClass("visible");
 	
@@ -607,22 +610,24 @@ visir.AgilentOscilloscope.prototype._ShowMenu = function(menuname)
 	this._$elem.find(".display .menubar .menutitle .titlebox").text(name);
 	this._$elem.find(".display .menubar .menutitle").addClass("visible");
 
-	if (this._menuTitleTimer) clearInterval(this._menuTitleTimer);
+	if (this._menuTitleTimer) {
+		clearInterval(this._menuTitleTimer);
+	}
 	var me = this;
-	this._menuTitleTimer = setTimeout( function() { me._$elem.find(".display .menubar .menutitle").removeClass("visible"); this._menuTitleTimer = null; }, 1000)
-}
+	this._menuTitleTimer = setTimeout( function() { me._$elem.find(".display .menubar .menutitle").removeClass("visible"); this._menuTitleTimer = null; }, 1000);
+};
 
 visir.AgilentOscilloscope.prototype._DisplayButtonClicked = function(button)
 {
 	if (this._activeMenuHandler && this._activeMenuHandler.ButtonPressed) {
 		this._activeMenuHandler.ButtonPressed(button);
 	}
-}
+};
 
 visir.AgilentOscilloscope.prototype._GetUnit = function(val)
 {
 	var units = [
-		, ["M", 6 ]
+		["M", 6 ]
 		, ["K", 3 ]
 		, ["", 0]
 		, ["m", -3]
@@ -630,9 +635,9 @@ visir.AgilentOscilloscope.prototype._GetUnit = function(val)
 		, ["n", -9]
 		];
 	val = Math.abs(val);
-	var unit = "";
-	var div = 0;
-	if (val == 0) return { unit: unit, pow: div };
+	if (val === 0) {
+		return { unit: "", pow: 0 };
+	}
 	
 	for (var key in units) {
 		var unit = units[key];
@@ -643,7 +648,7 @@ visir.AgilentOscilloscope.prototype._GetUnit = function(val)
 	
 	var last = units[units.length - 1];
 	return {unit: last[0], pow: last[1] };
-}
+};
 
 // takes care of updating the light indicator value and sets the unit string correctly if present
 visir.AgilentOscilloscope.prototype._SetIndicatorValue = function($elem, value)
@@ -653,11 +658,11 @@ visir.AgilentOscilloscope.prototype._SetIndicatorValue = function($elem, value)
 	var str = value.toPrecision(3);
 
 	$elem.find(".strings").removeClass("visible");
-	$elem.find((unit.unit == "") ? ".large" : ".small").addClass("visible");
+	$elem.find((unit.unit === "") ? ".large" : ".small").addClass("visible");
 	$elem.find(".top").text(unit.unit);
 	$elem.find(".value").text(this._FormatValue(str));
 	//SetText($elem, this._FormatValue(str));
-}
+};
 
 visir.AgilentOscilloscope.prototype._LightIndicator = function($elem)
 {
@@ -675,22 +680,22 @@ visir.AgilentOscilloscope.prototype._LightIndicator = function($elem)
 	
 	this._activeIndicator = {
 		Destroy: function() { $elem.removeClass("light"); clearInterval(timer); }
-	}
-}
+	};
+};
 
 visir.AgilentOscilloscope.prototype._FormatValue = function(val)
 {
 	var unit = this._GetUnit(val);
 	val /= Math.pow(10,unit.pow);
 	return val.toPrecision(3) + unit.unit;
-}
+};
 
 // this should be called when the channel properties have changed
 // currently: visible is tracked
 visir.AgilentOscilloscope.prototype._UpdateChannelDisplay = function(ch)
 {
-		var css_ch_name = ".channel." + (ch==0 ? "ch1" : "ch2");
-		var css_group_name = ".display .vertical .offset_group_" + (ch==0 ? "ch1" : "ch2");
+		var css_ch_name = ".channel." + (ch===0 ? "ch1" : "ch2");
+		var css_group_name = ".display .vertical .offset_group_" + (ch===0 ? "ch1" : "ch2");
 		var css_button_name = ".multibutton.channel_" + (ch+1);
 		if (this._channels[ch].visible) {
 			this._$elem.find(css_ch_name).addClass("visible");
@@ -703,7 +708,7 @@ visir.AgilentOscilloscope.prototype._UpdateChannelDisplay = function(ch)
 			this._$elem.find(css_button_name).find(".state").removeClass("visible");
 			this._$elem.find(css_button_name).find(".dark").addClass("visible");
 		}
-}
+};
 
 visir.AgilentOscilloscope.prototype._UpdateDisplay = function()
 {
@@ -715,10 +720,10 @@ visir.AgilentOscilloscope.prototype._UpdateDisplay = function()
 	//this._$elem.find(".timediv").text(this._FormatValue(this._timedivs[this._timeIdx]) + "s");
 						
 	this._DrawPlot(this._$elem.find(".plot"));
-}
+};
 
 visir.AgilentOscilloscope.prototype.ReadResponse = function(response) {
-	visir.AgilentOscilloscope.parent.ReadResponse.apply(this, arguments)
+	visir.AgilentOscilloscope.parent.ReadResponse.apply(this, arguments);
 	this._DrawPlot(this._$elem.find(".plot"));
 	
 	// check if we should continue measuring
@@ -731,11 +736,12 @@ visir.AgilentOscilloscope.prototype.ReadResponse = function(response) {
 		this._$elem.find(".button.single .state").removeClass("visible");
 		this._$elem.find(".button.single .state.dark").addClass("visible");
 	}
-}
+};
 
 visir.AgilentOscilloscope.prototype._MakeMeasurement = function(button) {
+	/*
 	var me = this;
-	/*function callback(status)
+	function callback(status)
 	{
 		trace("callback: " + status);
 		switch(status)
@@ -782,11 +788,10 @@ visir.AgilentOscilloscope.prototype._MakeMeasurement = function(button) {
 			}
 		break;
 	}
-}
+};
 
 function CreateChannelMenu(osc, ch, $menu)
 {
-	var me = osc;
 	var timer = null;
 	return {
 		GetName: function() { return "Channel " + (ch+1) + " Menu"; },
@@ -805,6 +810,9 @@ function CreateChannelMenu(osc, ch, $menu)
 					osc._ToggleChCoupling(ch);
 					this.Redraw();
 				break;
+				
+				default:
+				break;
 			}
 			
 		},
@@ -817,20 +825,18 @@ function CreateChannelMenu(osc, ch, $menu)
 		HideMenu: function() {
 			$menu.find(".menu_selection.sel_ch_" + (ch+1)).removeClass("visible");
 		}
-	}
+	};
 }
 
 function CreateEdgeMenu(osc, $menu)
 {
-	var me = osc;
-	var timer = null;
 	return {
 		GetName: function() { return "Edge Menu"; },
 		ButtonPressed: function(nr) {
 			switch(nr) {
 				case 1:
 					// move this to function, we need to update other stuff
-					osc._SetTriggerSlope((osc._trigger.slope == "positive") ? "negative" : "positive");
+					osc._SetTriggerSlope((osc._trigger.slope === "positive") ? "negative" : "positive");
 				break;
 				case 2:
 					osc._SetTriggerSource(1);
@@ -847,12 +853,11 @@ function CreateEdgeMenu(osc, $menu)
 			$menu.find(".menubox .value .checkmark").removeClass("selected");
 			$menu.find(".menubox .value .checkmark.ch"+ osc._trigger.source).addClass("selected");
 		}
-	}
+	};
 }
 
 function CreateTriggerModeCouplingMenu(osc, $menu)
 {
-	var me = osc;
 	var timer = null;
 	return {
 		GetName: function() { this.Redraw(); return "Mode / Coupling Menu"; },
@@ -860,14 +865,14 @@ function CreateTriggerModeCouplingMenu(osc, $menu)
 			this.Redraw();
 			switch(nr) {
 				case 1:
-					if (!this.ShowMenu("sel_trigger_mode")) return;
+					if (!this.ShowMenu("sel_trigger_mode")) { return; }
 					var tmp = osc._triggerModeIdx + 1;
-					if (tmp >= osc._triggerModes.length) tmp = 0;
+					if (tmp >= osc._triggerModes.length) { tmp = 0; }
 					osc._SetTriggerMode(tmp);
 				break;
 				case 2:
-					if (!this.ShowMenu("sel_trigger_coupling")) return;
-					osc._trigger.coupling = (osc._trigger.coupling == "dc") ? "ac" : "dc";
+					if (!this.ShowMenu("sel_trigger_coupling")) { return; }
+					osc._trigger.coupling = (osc._trigger.coupling === "dc") ? "ac" : "dc";
 				break;
 			}
 			this.Redraw();
@@ -895,5 +900,5 @@ function CreateTriggerModeCouplingMenu(osc, $menu)
 		HideMenu: function() {
 			$menu.find(".menu_selection").removeClass("visible");
 		}
-	}
+	};
 }
