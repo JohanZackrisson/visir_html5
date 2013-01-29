@@ -102,6 +102,18 @@ visir.Wire.prototype.Draw = function(context)
 	*/
 }
 
+visir.Wire.prototype._RawDraw = function(context, color, width)
+{	
+	context.lineCap = 'round';
+	context.strokeStyle = color;
+	context.lineWidth   = width;
+	context.beginPath();
+	context.moveTo(this._start.x, this._start.y);
+	context.quadraticCurveTo(this._mid.x, this._mid.y, this._end.x, this._end.y);
+	context.stroke();
+	context.closePath();
+}
+
 /*
 function drawWire(context, start, end, color)
 {
@@ -486,6 +498,8 @@ visir.Breadboard = function(id, $elem)
         </div>\
     </div>\
 	</div>';
+	
+	//tpl += '<div id="debug"></div>'
 		
 	$elem.append(tpl);
 	
@@ -497,6 +511,13 @@ visir.Breadboard = function(id, $elem)
 	this._wireCtx = context;
 	this._$wires = $wires;
 	var $click = $elem.find(".clickarea");
+	
+	// create offsceen canvas for wire picking
+	var offscreen_canvas = document.createElement('canvas');
+	offscreen_canvas.width = $wires.width();
+	offscreen_canvas.height = $wires.height();
+	this._offWireCtx = offscreen_canvas.getContext('2d');
+	//document.getElementById("debug").appendChild(offscreen_canvas);
 
     var teacher_mode = true; // TODO: make it configurable (argument?)
     if(!teacher_mode)
@@ -532,6 +553,10 @@ visir.Breadboard = function(id, $elem)
 	$click.on("mousedown touchstart", function(e) {
 		if (!me._color) {
 			// do picking against the wires
+			e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
+			var start = new visir.Point(e.pageX - offset.x, e.pageY - offset.y);
+			var idx = me._PickWire(start.x, start.y);
+			if (idx !== null) alert("picked: " + idx);
 			
 			// nothing was picked
 			return;
@@ -575,6 +600,34 @@ visir.Breadboard = function(id, $elem)
 	});
 	
 	me._ReadLibrary("instruments/breadboard/library.xml");
+}
+
+visir.Breadboard.prototype._PickWire = function(x, y)
+{
+	var pickWidth = 10;
+	this._offWireCtx.clearRect(0,0, this._$wires.width(), this._$wires.height());
+	for(var i=0;i<this._wires.length; i++)
+	{
+		this._wires[i]._RawDraw(this._offWireCtx, 'rgba(' + (i+1) + ', 0, 0, 1)', pickWidth);
+	}
+	var c = this._offWireCtx.getImageData(x, y, 1, 1).data;
+	trace("c: " + c[0] + " " + c[1] + " " + c[2] + " " + c[3]);
+	var r = c[0] - 1;
+	
+	for(var i=0;i<this._wires.length; i++)
+	{
+		this._wires[i].Draw(this._offWireCtx);
+	}
+	
+	this._offWireCtx.strokeStyle = "#ff0000";
+	this._offWireCtx.lineWidth = 1;
+	this._offWireCtx.beginPath();	
+	this._offWireCtx.arc(x, y, 2, 0, Math.PI*2, true);
+	this._offWireCtx.closePath();
+	this._offWireCtx.stroke();
+
+	
+	return (r >= 0) ? r : null;
 }
 
 visir.Breadboard.prototype._DrawWires = function()
