@@ -471,6 +471,7 @@ visir.Breadboard = function(id, $elem)
 	this._$library = null;
 	this._components = [];
 	this._wires = [];
+	this._selectedWire = null;
 	
 	var tpl = '<div class="breadboard">\
 	<img class="background" src="instruments/breadboard/breadboard.png" alt="breadboard"/>\
@@ -488,6 +489,9 @@ visir.Breadboard = function(id, $elem)
 	</div>\
 	<div class="components"></div>\
 	<canvas id="wires" width="715" height="450"></canvas>\
+	<div id="wire_start" class="wirepoint start" />\
+	<div id="wire_mid" class="wirepoint mid" />\
+	<div id="wire_end" class="wirepoint end" />\
 	<div class="componentbox">\
         <div class="componentlist">\
             <table class="componentlist-table">\
@@ -553,12 +557,23 @@ visir.Breadboard = function(id, $elem)
 	$click.on("mousedown touchstart", function(e) {
 		if (!me._color) {
 			// do picking against the wires
+			
+			// don't care if we got more than one touch
+			// we can probably do something smarter here, to avoid problems when scrolling etc.
+			if (e.originalEvent.touches && e.originalEvent.touches.length > 1) return;
+			
 			e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
 			var start = new visir.Point(e.pageX - offset.x, e.pageY - offset.y);
 			var idx = me._PickWire(start.x, start.y);
-			if (idx !== null) alert("picked: " + idx);
+			if (idx !== null) {
+				e.preventDefault();
+				me.SelectWire(idx);
+				return;
+			}
 			
 			// nothing was picked
+			// XXX: should deselect component if selected
+			me.SelectWire(null);
 			return;
 		}
 		//trace("mouse down");
@@ -597,8 +612,42 @@ visir.Breadboard = function(id, $elem)
 		me._color = $(this).css("background-color");
 		me._$elem.find(".color").removeClass("selected");
 		$(this).addClass("selected");
+		me.SelectWire(null);
 	});
 	
+	$elem.find("#wire_start").draggable( {
+			move: function($elem, x, y) {
+				if (me._selectedWire === null) return;
+				var p = new visir.Point(x, y);
+				p.SnapToGrid();
+				me._wires[me._selectedWire]._start = p;
+				me._DrawWires();
+				return {x: p.x - $elem.width() / 2, y: p.y - $elem.height() / 2};
+			}
+		});
+		
+	$elem.find("#wire_end").draggable( {
+			move: function($elem, x, y) {
+				if (me._selectedWire === null) return;
+				var p = new visir.Point(x, y);
+				p.SnapToGrid();
+				me._wires[me._selectedWire]._end = p;
+				me._DrawWires();
+				return {x: p.x - $elem.width() / 2, y: p.y - $elem.height() / 2};
+			}
+		});
+		
+	$elem.find("#wire_mid").draggable( {
+			move: function($elem, x, y) {
+				if (me._selectedWire === null) return;
+				var p = new visir.Point(x, y);
+				//p.SnapToGrid();
+				me._wires[me._selectedWire]._mid = p;
+				me._DrawWires();
+				return {x: p.x - $elem.width() / 2, y: p.y - $elem.height() / 2};
+			}
+		});
+		
 	me._ReadLibrary("instruments/breadboard/library.xml");
 }
 
@@ -614,7 +663,7 @@ visir.Breadboard.prototype._PickWire = function(x, y)
 	trace("c: " + c[0] + " " + c[1] + " " + c[2] + " " + c[3]);
 	var r = c[0] - 1;
 	
-	for(var i=0;i<this._wires.length; i++)
+	/*for(var i=0;i<this._wires.length; i++)
 	{
 		this._wires[i].Draw(this._offWireCtx);
 	}
@@ -625,7 +674,7 @@ visir.Breadboard.prototype._PickWire = function(x, y)
 	this._offWireCtx.arc(x, y, 2, 0, Math.PI*2, true);
 	this._offWireCtx.closePath();
 	this._offWireCtx.stroke();
-
+	*/
 	
 	return (r >= 0) ? r : null;
 }
@@ -633,10 +682,44 @@ visir.Breadboard.prototype._PickWire = function(x, y)
 visir.Breadboard.prototype._DrawWires = function()
 {
 	this._wireCtx.clearRect(0,0, this._$wires.width(), this._$wires.height());
+	if (this._selectedWire !== null) {
+		this._wires[this._selectedWire]._RawDraw(this._wireCtx, "#000", 5);
+	}
 	for(var i=0;i<this._wires.length; i++)
 	{
 		this._wires[i].Draw(this._wireCtx);
 	}
+}
+
+visir.Breadboard.prototype.SelectWire = function(idx)
+{
+	trace("selected wire: " + idx);
+	this._selectedWire = idx;
+	this._DrawWires();
+	
+	if (idx === null) {
+		this._$elem.find(".wirepoint").removeClass("enabled");
+		return;
+	}
+	
+	this._$elem.find(".wirepoint").addClass("enabled");
+	
+	function UpdatePoint($e, p) {
+			var x = p.x - $e.width() / 2;
+			var y = p.y - $e.height() / 2;
+			$e.css("left", x).css("top", y);
+	}
+	
+	var w = this._wires[idx];
+	UpdatePoint(this._$elem.find("#wire_start"), w._start);
+	UpdatePoint(this._$elem.find("#wire_mid"), w._mid);
+	UpdatePoint(this._$elem.find("#wire_end"), w._end);
+	/*var $e = this._$elem.find("#wire_start");
+	var x = w._start.x - $e.width() / 2;
+	var y = w._start.y - $e.height() / 2;
+	
+	this._$elem.find("#wire_start").css("left", x).css("top", y);
+	*/
 }
 
 visir.Breadboard.prototype._UpdateDisplay = function(ch)
