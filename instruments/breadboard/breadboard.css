@@ -3,6 +3,8 @@
 	width: 714px;
 	height: 450px;
 	position:relative;
+	
+	-webkit-user-select: none;
 }
 
 /* canvas for drawing wires, should be drawn in the forground above components */
@@ -175,4 +177,21 @@
 
 .breadboard .wirepoint.enabled {
 	display: block;
+}
+
+.breadboard .delete {
+	background-image: url('images/trash.png');
+	width: 40px; height: 40px;
+	position: absolute;
+	bottom: 0; right: 0;
+	opacity: 0.4;	
+}
+
+.breadboard .delete.enabled {
+	opacity: 1.0;	
+}
+
+.breadboard .componentcircle .circle {
+	border-radius: 50%;
+	border: 2px solid black;
 }
