@@ -11,6 +11,12 @@ function snapPoint(p)
 	p.y += 3;
 }
 
+function toBoardCoords(p)
+{
+	p.x = p.x / 13 | 0;
+	p.y = p.y / 13 | 0;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Point
 
@@ -27,6 +33,11 @@ visir.Point.prototype.SnapToGrid = function()
 	this.y = this.y - (this.y % 13);
 	this.x -= 5;
 	this.y += 3;
+}
+
+visir.Point.prototype.toString = function()
+{
+	return "(x: " + this.x + " y: " + this.y + ")";
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -63,7 +74,7 @@ visir.Wire.prototype.SetBentPoints = function(start, end)
 	mid.y = start.y + (end.y - start.y) / 2;
 	mid.x += cross.x;
 	mid.y += cross.y;
-	
+		
 	this.SetPoints(start, mid, end);
 }
 
@@ -78,6 +89,33 @@ visir.Wire.prototype.Draw = function(context)
 {
 	this._RawDraw(context, this._color, this._lineWidth);
 }
+
+visir.Wire.prototype.DrawShadow = function(context, color, width)
+{
+	var diff = { x: this._end.x - this._start.x, y: this._end.y - this._start.y };
+	var len = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
+		
+	var scale = 20.0;
+	var midx = this._mid.x + len / scale;
+	var midy = this._mid.y + len / scale;
+	
+	context.save();
+	
+	context.shadowBlur=7;
+	context.shadowColor="black";
+	context.lineCap = 'round';
+	context.strokeStyle = 'rgba(0,0,0,0.2)';
+	context.lineWidth   = width-1;
+	context.beginPath();
+	context.moveTo(this._start.x, this._start.y);
+	 // +1 is for avoiding having same start and end, which leads to no painting at all
+	context.quadraticCurveTo(midx, midy, this._end.x+1, this._end.y);
+	context.stroke();
+	context.closePath();
+
+	context.restore();
+}
+
 
 visir.Wire.prototype._RawDraw = function(context, color, width)
 {	
@@ -179,12 +217,13 @@ visir.Grid.prototype._FindSlot = function(height, width)
 // Component container
 visir.Component = function($elem, breadboard)
 {
-   this._$elem        = $elem;
-   this._breadboard   = breadboard;
-   this._$circle      = null;
-   this._current_step = 0;
-   this.translation   = { 'x' : 0, 'y' : 0 };
-   this.translations  = [];
+	this._$elem        = $elem;
+	this._breadboard   = breadboard;
+	this._$circle      = null;
+	this._current_step = 0;
+	this.translation   = { 'x' : 0, 'y' : 0 };
+	this.translations  = [];
+	this._pins = []; // one entry per rotation, each entry contains an array of points with offsets to where each pin is located
 }
 
 visir.Component.prototype.width = function() 
@@ -270,7 +309,7 @@ visir.Component.prototype.Rotate = function(step)
 	// trace("New translation: " + this.translation.x + "; " + this.translation.y);
 }
 
-visir.Component.prototype._AddCircle = function() 
+visir.Component.prototype._AddCircle = function()
 {
     var me = this;
 		this._breadboard._selectedCompnent = this;
@@ -360,7 +399,8 @@ visir.Component.prototype._AddCircle = function()
     $rotateImg.click(function() {
         me.Rotate();
 
-        $rotateImg.animate({'rotation' : '+=360'}, {
+				// XXX: a bit to fancy to rotate the icon, disabled for now
+        /*$rotateImg.animate({'rotation' : '+=360'}, {
             step : function(now, fx){
                 var currentRotation  = 'rotate(' + (now % 360) + 'deg)';
                 $rotateImg.css({
@@ -371,6 +411,7 @@ visir.Component.prototype._AddCircle = function()
             },
             duration : 'slow'
         });
+				*/
     });
     this._$circle.append($rotateImg);
 
@@ -403,18 +444,48 @@ visir.Component.prototype._AddCircle = function()
     $dragImg.on("mousedown touchstart", handler);
 }
 
+visir.Component.prototype.GenCircuitIfUsed = function()
+{
+	var out = this._type + "_X";
+	
+	var rot = this._current_step;
+	var pins = this._pins[rot];
+	if (pins.length == 0) return null; // assert?
+	
+	for(var i = 0; i< pins.length; i++) {
+		var p = this._breadboard._GetNodeName(this._GetPinPoint(pins[i]));
+		if (!p) return null;
+		out += " " + p;
+	}
+	return out + " " + this._value + "\n";
+}
+
+visir.Component.prototype._GetPinPoint = function(p)
+{
+	var mx = parseInt(this._$elem.css('left'));
+	var my = parseInt(this._$elem.css('top'));	
+	//trace("mx/y: " + mx + " " + my + "-" + p);
+	return new visir.Point(mx + p.x, my + p.y);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Breadboard
+
+var debugbb;
 
 visir.Breadboard = function(id, $elem)
 {
 	var me = this;
+	debugbb = this;
 	this._$elem = $elem;
 	this._$library = null;
 	this._components = [];
 	this._wires = [];
+	this._instruments = [];
 	this._selectedWire = null; // index in _wires
 	this._selectedCompnent = null;
+	
+	this.IMAGE_URL = "instruments/breadboard/images/";
 	
 	var tpl = '<div class="breadboard">\
 	<img class="background" src="instruments/breadboard/breadboard.png" alt="breadboard"/>\
@@ -432,6 +503,9 @@ visir.Breadboard = function(id, $elem)
 	</div>\
 	<div class="delete"></div>\
 	<div class="components"></div>\
+	<div class="instruments">\
+		<div class="left"></div>\
+	</div>\
 	<canvas id="wires" width="715" height="450"></canvas>\
 	<div id="wire_start" class="wirepoint start" />\
 	<div id="wire_mid" class="wirepoint mid" />\
@@ -506,8 +580,8 @@ visir.Breadboard = function(id, $elem)
 			// we can probably do something smarter here, to avoid problems when scrolling etc.
 			if (e.originalEvent.touches && e.originalEvent.touches.length > 1) return;
 			
-			e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
-			var start = new visir.Point(e.pageX - offset.x, e.pageY - offset.y);
+			var touch = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
+			var start = new visir.Point(touch.pageX - offset.x, touch.pageY - offset.y);
 			var idx = me._PickWire(start.x, start.y);
 			if (idx !== null) {
 				e.preventDefault();
@@ -518,6 +592,7 @@ visir.Breadboard = function(id, $elem)
 			// nothing was picked
 			// XXX: should deselect component if selected
 			me.SelectWire(null);
+			me.SelectComponent(null);
 
 			return;
 		}
@@ -593,6 +668,12 @@ visir.Breadboard = function(id, $elem)
 	});
 		
 	me._ReadLibrary("instruments/breadboard/library.xml");
+	
+	me._AddMultimeters(1 + 13*45,8 + 13*22,2);
+	me._AddOSC(1 + 13*45, 8 + 13 * 16, 1);
+	me._AddGND(1 + 13*45, 8 + 13 * 30);
+	me._AddDCPower(0, 6+13*5, 2);
+	me._AddFGEN(0, 6+13*16, 2);
 }
 
 visir.Breadboard.prototype._PickWire = function(x, y)
@@ -626,13 +707,34 @@ visir.Breadboard.prototype._PickWire = function(x, y)
 visir.Breadboard.prototype._DrawWires = function()
 {
 	this._wireCtx.clearRect(0,0, this._$wires.width(), this._$wires.height());
+	
+	// draw outline if selected
+	/*this._wireCtx.save();
 	if (this._selectedWire !== null) {
 		this._wires[this._selectedWire]._RawDraw(this._wireCtx, "#000", 5);
 	}
+	this._wireCtx.restore();
+	*/
+	
 	for(var i=0;i<this._wires.length; i++)
 	{
+		this._wires[i].DrawShadow(this._wireCtx, "#000", 5);
+	}
+	
+	for(var i=0;i<this._wires.length; i++)
+	{
+		if (this._selectedWire === i) continue;
 		this._wires[i].Draw(this._wireCtx);
 	}
+	
+	// always draw the selected wired on top
+	this._wireCtx.save();
+	if (this._selectedWire !== null) {
+		this._wires[this._selectedWire]._RawDraw(this._wireCtx, "#000", 5);
+		this._wires[this._selectedWire].Draw(this._wireCtx);
+	}
+	this._wireCtx.restore();	
+	
 }
 
 visir.Breadboard.prototype.SelectWire = function(idx)
@@ -664,7 +766,7 @@ visir.Breadboard.prototype.SelectWire = function(idx)
 
 visir.Breadboard.prototype.SelectComponent = function(comp)
 {
-	
+	if (this._selectedCompnent) this._selectedCompnent._RemoveCircle();
 }
 
 visir.Breadboard.prototype._UpdateDisplay = function(ch)
@@ -680,7 +782,6 @@ visir.Breadboard.prototype._ReadLibrary = function(url)
 		dataType: "xml",
 		async: true,
 		success: function(xml) {
-			trace("xml: " + xml);
 			me._$library = $(xml);
 		}
 	});
@@ -693,7 +794,11 @@ visir.Breadboard.prototype.CreateComponent = function(type, value)
 	var me = this;
 	var $libcomp = this._$library.find('component[type="'+ type+'"][value="'+ value+ '"]');
 	var $comp = $('<div class="component"></div>');
-    var comp_obj = new visir.Component($comp, me);
+	var comp_obj = new visir.Component($comp, me);
+
+	//XXX: should be in ctor
+	comp_obj._type = type;
+	comp_obj._value = value;
 	
 	var idx = 0;
 	
@@ -723,14 +828,22 @@ visir.Breadboard.prototype.CreateComponent = function(type, value)
 //			, 'left': ox + 'px'
 		})
 	
-        var current_translation = { 'x' : ox, 'y' : oy, 'rot' : rot };
-        comp_obj.translations.push(current_translation);
-        trace("Adding " + ox + ", " + oy);
+		var current_translation = { 'x' : ox, 'y' : oy, 'rot' : rot };
+		comp_obj.translations.push(current_translation);
+		trace("Adding " + ox + ", " + oy);
 		if (idx == 0) {
 			$img.addClass("active");
-            comp_obj.translation = current_translation;
+			comp_obj.translation = current_translation;
 		}
 		$comp.append($img);
+		
+		$(this).find("pin").each( function() {
+			var x = parseInt($(this).attr("x"));
+			var y = parseInt($(this).attr("y"));
+			if (!comp_obj._pins[idx]) comp_obj._pins[idx] = [];
+			comp_obj._pins[idx].push(new visir.Point(x,y));
+		});		
+		
 		idx++;
 	});
 	
@@ -847,7 +960,7 @@ visir.Breadboard.prototype._RemoveWire = function(wire)
 			this._wires.splice(i, 1);
 			return;
 		}
-	}	
+	}
 }
 
 visir.Breadboard.prototype._RemoveComponent = function(comp_obj)
@@ -870,9 +983,305 @@ visir.Breadboard.prototype._GetBin = function()
     return this._$elem.find(".bin");
 }
 
+visir.Breadboard.prototype.CreateInstr = function(instr_type, instr_name)
+{
+	var me = this;
+	
+	var newinstr = {
+		_type: instr_type,
+		_name: instr_name,
+		_connections: [],		
+		AddConnection: function(board_point, fixed_output) {
+			//var p = new visir.Point(point.x / 13 | 0, point.y / 13 | 0);
+			trace("adding to instr: " + board_point + " " + instr_type);
+			this._connections.push( { _point: board_point, fixed: fixed_output, marked: false });
+			return this;
+		},
+		GetNameAndMarkIfUsed: function(point) {
+			trace("instr: " + this._type + " " + this._name + " " + point);
+			for(var i=0;i<this._connections.length; i++) {
+				trace("checking against: " + this._connections[i]._point);
+				if (point.x == this._connections[i]._point.x && point.y == this._connections[i]._point.y) {
+					this._connections[i].marked = true;
+					return this._ConnectionName(i);
+				}
+			}
+		},
+		GenInstrIfUsed: function() {
+			if (this._type == "0") return; // special case for 0/GND instruments
+			
+			// if any of the points are marked, generate the instrument string
+			var isUsed = false;
+			var conStr = "";
+			for(var i=0;i<this._connections.length; i++) {
+				conStr += " " + this._ConnectionName(i);
+				if (this._connections[i].marked) {
+					isUsed = true;
+				}
+			}
+			if (isUsed) {
+				return this._type + "_" + this._name + conStr + "\n";
+			}
+			return null;
+		},
+		ClearMarks: function() {
+			for(var i=0;i<this._connections.length; i++) {
+				this._connections[i].marked = false;
+			}
+		},
+		_ConnectionName: function(i) {
+			if (this._connections[i].fixed) return this._connections[i].fixed;
+			return this._type + "_" + this._name + "_" + (i+1);
+		}
+	};
+	this._instruments.push(newinstr);
+	return newinstr;
+}
 
+visir.Breadboard.prototype._GetAndMarkInstrNodeName = function(p)
+{
+	for(var i=0;i<this._instruments.length;i++)
+	{
+		var r = this._instruments[i].GetNameAndMarkIfUsed(p);
+		if (r) return r;
+	}
+	return null;
+}
 
+visir.Breadboard.prototype._GetNodeName = function(p)
+{
+	var px = p.x / 13 | 0;
+	var py = p.y / 13 | 0;
+	trace("px/y: " + px + " " + py);
+	
+	// upper half, vertical
+	if (px >= 11 && px <= 42 && py >= 16 && py <= 20) {	return "A" + (px - 10);	}
+	// lower half, vertical
+	if (px >= 11 && px <= 42 && py >= 23 && py <= 27) {	return "F" + (px - 10);	}
+	// horizontal rows
+	if (px >= 13 && px <= 41 && py == 11 && (px % 6 != 0)) { return "X"; }
+	if (px >= 13 && px <= 41 && py == 12 && (px % 6 != 0)) { return "Y"; }
+	if (px >= 13 && px <= 41 && py == 31 && (px % 6 != 0)) { return "S"; }
+	if (px >= 13 && px <= 41 && py == 32 && (px % 6 != 0)) { return "T"; }
+	
+	var instrp = this._GetAndMarkInstrNodeName(new visir.Point(px, py));
+	if (instrp) return instrp;
+	
+	return null;
+}
 
+visir.Breadboard.prototype._GenerateCircuit = function()
+{
+	for(var i=0; i < this._instruments.length; i++) {
+		var r = this._instruments[i].ClearMarks();
+	}
+	
+	var out = "";
+	for (var i = 0; i < this._wires.length; i++) {
+		var wire = this._wires[i];
+		var s = this._GetNodeName(wire._start);
+		var e = this._GetNodeName(wire._end);
+		if (s && e) out += "W_X " + s + " " + e + "\n";
+	}
+	
+	for(var i=0;i < this._components.length; i++) {
+		var r = this._components[i].GenCircuitIfUsed();
+		if (r) out += r;
+	}
+	
+	for(var i=0; i < this._instruments.length; i++) {
+		var r = this._instruments[i].GenInstrIfUsed();
+		if (r) out += r;
+	}
+	
+	return out;
+}
 
+visir.Breadboard.prototype.WriteRequest = function()
+{
+	var $xml = $('<circuit><circuitlist/></circuit>');
+	$xml.find("circuitlist").append(this._GenerateCircuit());
+	return $("<root />").append($xml).html();
+}
 
+//////////////////////////////////////////////////////////////////////////////
+// Breadboard Instruments handling
 
+visir.Breadboard.prototype._AddMultimeters = function(x, y, num)
+{
+	var i = 0;
+	var $dmm = $('<div class="instrument dmm">\
+	<table border="0" cellspacing="0" cellpadding="0">\
+	<tr class="top"></tr>\
+	<tr class="Vhi"></tr>\
+	<tr class="Vlo"></tr>\
+	<tr class="spacer"></tr>\
+	<tr class="Ahi"></tr>\
+	<tr class="Alo"></tr>\
+	</table>\
+	</div>');
+	
+	$dmm.css("left", x + "px").css("top", y + "px");
+	
+	var $top = $dmm.find("table tr.top");
+	for(i=0;i<num; i++) {
+		var n = (num > 1) ? i+1 : "&nbsp;";
+		$top.append('<td class="cell">' + n + '</td>');
+		$top.append('<td class="cell">&nbsp;</td>');
+	}
+	$top.append('<td class="">DMM</td>');
+	
+	var $Vhi = $dmm.find("table tr.Vhi");
+	var $Vlo = $dmm.find("table tr.Vlo");
+	for(i=0;i<num; i++) {
+		$Vhi.append('<td class="cell" rowspan="2" ><img src="' + 	this.IMAGE_URL + 'connections_2.png" /></td>');
+		if (i != num - 1) $Vhi.append('<td class="cell" rowspan="2">&nbsp;</td>');
+	}
+	$Vhi.append('<td>Hi</td><td rowspan="2">V/&Omega;</td>');
+	$Vlo.append('<td>Lo</td>');
+	
+	var $Ahi = $dmm.find("table tr.Ahi");
+	var $Alo = $dmm.find("table tr.Alo");
+	for(i=0;i<num; i++) {
+		$Ahi.append('<td class="cell" rowspan="2" ><img src="' + 	this.IMAGE_URL + 'connections_2.png" /></td>');
+		if (i != num - 1) $Ahi.append('<td class="cell" rowspan="2">&nbsp;</td>');
+	}
+	$Ahi.append('<td>Hi</td><td rowspan="2">mA</td>');
+	$Alo.append('<td>Lo</td>');	
+	this._$elem.find(".instruments").append($dmm);
+	
+	for(i=0;i<num; i++) {
+		var p = new visir.Point(x / 13 | 0, y / 13 | 0);
+		var off_x = i * 2;
+		this.CreateInstr("DMM", i+1).AddConnection(new visir.Point(p.x + off_x, p.y + 2)).AddConnection(new visir.Point(p.x + off_x, p.y + 3));
+		this.CreateInstr("IPROBE", i+1).AddConnection(new visir.Point(p.x + off_x, p.y + 4)).AddConnection(new visir.Point(p.x + off_x, p.y + 5));
+	}
+}
+
+visir.Breadboard.prototype._AddOSC = function(x, y, num)
+{
+	var $osc = $(
+	'<div class="instrument osc">\
+		<table border="0" cellspacing="0" cellpadding="0">\
+			<tr class="top"></tr>\
+			<tr class="ch1"></tr>\
+			<tr class="spacer"></tr>\
+			<tr class="ch2"></tr>\
+		</table>\
+	</div>');
+	
+	var $top = $osc.find("table tr.top"); // channel numbers
+	$top.append('<td>&nbsp;</td>');
+	
+	var $ch1 = $osc.find("table tr.ch1");
+	$ch1.append('<td class="cell"><img src="' + 	this.IMAGE_URL + 'connections_1.png" /></td>');
+	$ch1.append('<td class="cell">Ch1</td>');
+	$ch1.append('<td class="cell" rowspan="3">Oscilloscope</td>');
+	
+	var $ch2 = $osc.find("table tr.ch2");
+	$ch2.append('<td class="cell"><img src="' + 	this.IMAGE_URL + 'connections_1.png" /></td>');
+	$ch2.append('<td class="cell">Ch2</td>');
+	
+	
+	$osc.css("left", x + "px").css("top", y + "px");
+	this._$elem.find(".instruments").append($osc);
+	
+	var p = new visir.Point(x / 13 | 0, y / 13 | 0);
+	this.CreateInstr("PROBE1", 1).AddConnection(new visir.Point(p.x, p.y + 2));
+	this.CreateInstr("PROBE2", 1).AddConnection(new visir.Point(p.x, p.y + 4));
+}
+
+visir.Breadboard.prototype._AddGND = function(x, y)
+{
+	var $gnd = $(
+	'<div class="instrument gnd">\
+		<table border="0" cellspacing="0" cellpadding="0">\
+		<tr class=""><td class="cell"><img src="' + 	this.IMAGE_URL + 'connections_1.png" /></td><td>GND</td></tr>\
+		</table>\
+	</div>');
+	$gnd.css("left", x + "px").css("top", y + "px");
+	this._$elem.find(".instruments").append($gnd);
+	
+	var p = new visir.Point(x / 13 | 0, (y / 13 | 0) + 1)
+	this.CreateInstr("0").AddConnection(p, "0");
+}
+
+visir.Breadboard.prototype._AddDCPower = function(x, y, num)
+{
+	var $dcpower = $(
+	'<div class="instrument dcpower">\
+		<table border="0" cellspacing="0" cellpadding="0">\
+			<tr class="top"></tr>\
+			<tr class="p25v"></tr>\
+			<tr class="com"></tr>\
+			<tr class="m25v"></tr>\
+			<tr class="spacer"></tr>\
+			<tr class="p6v"></tr>\
+			<tr class="gnd"></tr>\
+		</table>\
+	</div>');
+	
+	var $top = $dcpower.find("table tr.top"); // channel numbers
+	$top.append('<td rowspan="7">DC Power Supply</td>');
+	
+	var $p25v = $dcpower.find("table tr.p25v");
+	$p25v.append('<td class="cell">+25V</td>');
+	$p25v.append('<td class="cell" rowspan="3"><img src="' + 	this.IMAGE_URL + 'connections_3.png" /></td>');
+	
+	var $com = $dcpower.find("table tr.com");
+	$com.append('<td>COM</td>');
+	
+	var $m25v = $dcpower.find("table tr.m25v");
+	$m25v.append('<td>-25V</td>');
+	
+	var $p6v = $dcpower.find("table tr.p6v");
+	$p6v.append('<td>+6V</td>');
+	$p6v.append('<td class="cell" rowspan="2"><img src="' + 	this.IMAGE_URL + 'connections_2.png" /></td>');
+	
+	var $gnd = $dcpower.find("table tr.gnd");
+	$gnd.append('<td>GND</td>');
+	
+	$dcpower.css("right", x + "px").css("top", y + "px");
+	this._$elem.find(".instruments .left").append($dcpower);
+	
+	var p = new visir.Point(x / 13 | 0, y / 13 | 0);
+	var off_x = 8;
+	var off_y = 9;
+
+	this.CreateInstr("VDC+25V", "1").AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 2));
+	this.CreateInstr("VDCCOM", "1").AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 3));
+	this.CreateInstr("VDC-25V", "1").AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 4));
+	this.CreateInstr("VDC+6V", "1").AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 6));
+	this.CreateInstr("0").AddConnection(new visir.Point(p.x + off_x, p.y + off_y + 7), "0");
+}
+
+visir.Breadboard.prototype._AddFGEN = function(x, y, num)
+{
+	var $fgen = $(
+	'<div class="instrument fgen">\
+		<table border="0" cellspacing="0" cellpadding="0">\
+			<tr class="top"></tr>\
+			<tr class="FGEN"></tr>\
+			<tr class="GND"></tr>\
+		</table>\
+	</div>');
+	
+	var $top = $fgen.find("table tr.top"); // channel numbers
+	$top.append('<td>&nbsp;</td>');
+	
+	var $funcgen = $fgen.find("table tr.FGEN");
+	$funcgen.append('<td class="cell">Function&nbsp;Generator</td>');
+	$funcgen.append('<td class="cell" rowspan="2"><img src="' + 	this.IMAGE_URL + 'connections_2.png" /></td>');
+	
+	var $gnd = $fgen.find("table tr.GND");
+	$gnd.append('<td class="cell">GND</td>');
+	
+	$fgen.css("right", x + "px").css("top", y + "px");
+	this._$elem.find(".instruments .left").append($fgen);
+	
+	var p = new visir.Point(x / 13 | 0, y / 13 | 0);
+	var off_x = 8;
+	var off_y = 9;
+	this.CreateInstr("VFGENA", 1).AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 2)).AddConnection(new visir.Point(1000,1000),"0");
+	this.CreateInstr("0").AddConnection(new visir.Point(p.x + off_x, p.y + off_y + 3), "0");
+}
