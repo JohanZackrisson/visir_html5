@@ -547,6 +547,7 @@ visir.Breadboard = function(id, $elem)
 
     $elem.find(".teacher").click(function(e) {
         $elem.find(".componentbox").show();
+				$elem.find(".componentlist-table").empty();
         var $components = me._$library.find("component").each(function() {
             var img   = $(this).find("rotation").attr("image");
             var type  = $(this).attr("type");
