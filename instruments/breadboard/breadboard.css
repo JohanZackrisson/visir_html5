@@ -203,10 +203,10 @@
 
 .breadboard .instruments .left {
 	position: absolute;
-	width: 100px;
+	width: 110px;
 	height: 333px;
 	top: 119px;
-	left: 19px;
+	left: 9px;
 }
 
 .breadboard .instrument {
@@ -223,13 +223,11 @@
 }
 
 /* trick to avoid overflowing cells with images in them */
-.breadboard .instrument img
+/*.breadboard .instrument img
 {
-	/*vertical-align: top;*/
-	/*margin-bottom: -5px;*/
 	position: absolute;
 	top: 0; left: 0;
-}
+}*/
 
 
 .breadboard .instrument td.cell {
@@ -247,3 +245,87 @@
 .breadboard .instruments .left td.cell {
 	text-align: right;
 }
+
+.breadboard .instrument {
+	width: 110px;
+	text-align: left;
+	font-size: 0;
+}
+
+.breadboard .instrument .title {
+	display: inline-block;
+	width: 50px;
+	text-align: center;
+	position: relative;
+	vertical-align: top;
+	font-size: 10px;
+}
+
+
+.breadboard .instrument .texts {
+	display: inline-block;
+	position: relative;
+	top: 3px;
+	font-size: 10px;
+}
+
+.breadboard .instrument .connectiontext {
+	height: 13px;
+	padding-left: 3px;
+	padding-right: 3px;
+}
+
+.breadboard .instrument .connectionimages img {
+	display: block;
+}
+
+.breadboard .instrument .connectionimages {
+	display: inline-block;
+	width: 13px;
+	vertical-align: top;
+	text-align: right;
+}
+
+.breadboard .instrument .connectionimages .number {
+	text-align: center;
+	height: 13px;
+	font-size: 10px;
+}
+
+.breadboard .instrument .connnectionspacer {
+	display: inline-block;
+	width: 13px;
+	background: blue;
+}
+
+.breadboard .instrument.dcpower {
+	text-align: right;
+}
+
+.breadboard .instrument.dcpower .title {
+	display: inline-block;
+	width: 50px;
+	text-align: center;
+	position: relative;
+	vertical-align: top;
+	top: 40px;
+}
+
+.breadboard .instrument.fgen {
+	text-align: right;
+}
+
+.breadboard .instrument.osc .title {
+	top: 28px;
+}
+
+.breadboard .instrument.dmm .voltage {
+	margin-top: 10px;
+	text-align: left;
+}
+
+.breadboard .instrument.dmm .current {
+	margin-top: 24px;
+	text-align: left;
+}
+

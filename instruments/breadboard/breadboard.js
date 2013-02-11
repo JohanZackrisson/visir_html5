@@ -488,7 +488,7 @@ visir.Breadboard = function(id, $elem)
 	this.IMAGE_URL = "instruments/breadboard/images/";
 	
 	var tpl = '<div class="breadboard">\
-	<img class="background" src="instruments/breadboard/breadboard.png" alt="breadboard"/>\
+	<img class="background" src="instruments/breadboard/images/breadboard.png" alt="breadboard"/>\
 	<div class="clickarea"></div>\
 	<div class="bin">\
     	<div class="teacher">+</div>\
@@ -1110,45 +1110,48 @@ visir.Breadboard.prototype.WriteRequest = function()
 
 visir.Breadboard.prototype._AddMultimeters = function(x, y, num)
 {
-	var i = 0;
-	var $dmm = $('<div class="instrument dmm">\
-	<table border="0" cellspacing="0" cellpadding="0">\
-	<tr class="top"></tr>\
-	<tr class="Vhi"></tr>\
-	<tr class="Vlo"></tr>\
-	<tr class="spacer"></tr>\
-	<tr class="Ahi"></tr>\
-	<tr class="Alo"></tr>\
-	</table>\
-	</div>');
+	var i = 0;	
+	var $dmm = $(
+	'<div class="instrument dmm">\
+	</div>'
+	);
 	
 	$dmm.css("left", x + "px").css("top", y + "px");
-	
-	var $top = $dmm.find("table tr.top");
+
 	for(i=0;i<num; i++) {
-		var n = (num > 1) ? i+1 : "&nbsp;";
-		$top.append('<td class="cell">' + n + '</td>');
-		$top.append('<td class="cell">&nbsp;</td>');
+		var numstr = ""
+		if (num > 1) {
+			numstr = (i+1);
+			if (i>0) $dmm.append('<div class="connnectionspacer"></div>');
+		}
+		
+		$dmm.append(
+		'<div class="connectionimages">\
+			<div class="number">' + numstr + '</div>\
+			<img src="' + 	this.IMAGE_URL + 'connections_2.png" />\
+			<div style="height: 11px"></div>\
+			<img src="' + 	this.IMAGE_URL + 'connections_2.png" />\
+		</div>'
+		);
 	}
-	$top.append('<td class="">DMM</td>');
 	
-	var $Vhi = $dmm.find("table tr.Vhi");
-	var $Vlo = $dmm.find("table tr.Vlo");
-	for(i=0;i<num; i++) {
-		$Vhi.append('<td class="cell" rowspan="2" ><img src="' + 	this.IMAGE_URL + 'connections_2.png" /></td>');
-		if (i != num - 1) $Vhi.append('<td class="cell" rowspan="2">&nbsp;</td>');
-	}
-	$Vhi.append('<td>Hi</td><td rowspan="2">V/&Omega;</td>');
-	$Vlo.append('<td>Lo</td>');
+	$dmm.append(
+		'<div class="texts">\
+			<div class="connectiontext"></div>\
+			<div class="connectiontext">Hi</div>\
+			<div class="connectiontext">Lo</div>\
+			<div class="connectiontext"></div>\
+			<div class="connectiontext">Hi</div>\
+			<div class="connectiontext">Lo</div>\
+		</div>\
+		<div class="title">\
+			<div>Multimeter</div>\
+			<div class="voltage">V/&Omega;</div>\
+			<div class="current">mA</div>\
+		</div>\
+		'
+	);
 	
-	var $Ahi = $dmm.find("table tr.Ahi");
-	var $Alo = $dmm.find("table tr.Alo");
-	for(i=0;i<num; i++) {
-		$Ahi.append('<td class="cell" rowspan="2" ><img src="' + 	this.IMAGE_URL + 'connections_2.png" /></td>');
-		if (i != num - 1) $Ahi.append('<td class="cell" rowspan="2">&nbsp;</td>');
-	}
-	$Ahi.append('<td>Hi</td><td rowspan="2">mA</td>');
-	$Alo.append('<td>Lo</td>');	
 	this._$elem.find(".instruments").append($dmm);
 	
 	for(i=0;i<num; i++) {
@@ -1163,27 +1166,22 @@ visir.Breadboard.prototype._AddOSC = function(x, y, num)
 {
 	var $osc = $(
 	'<div class="instrument osc">\
-		<table border="0" cellspacing="0" cellpadding="0">\
-			<tr class="top"></tr>\
-			<tr class="ch1"></tr>\
-			<tr class="spacer"></tr>\
-			<tr class="ch2"></tr>\
-		</table>\
-	</div>');
-	
-	var $top = $osc.find("table tr.top"); // channel numbers
-	$top.append('<td>&nbsp;</td>');
-	
-	var $ch1 = $osc.find("table tr.ch1");
-	$ch1.append('<td class="cell"><img src="' + 	this.IMAGE_URL + 'connections_1.png" /></td>');
-	$ch1.append('<td class="cell">Ch1</td>');
-	$ch1.append('<td class="cell" rowspan="3">Oscilloscope</td>');
-	
-	var $ch2 = $osc.find("table tr.ch2");
-	$ch2.append('<td class="cell"><img src="' + 	this.IMAGE_URL + 'connections_1.png" /></td>');
-	$ch2.append('<td class="cell">Ch2</td>');
-	
-	
+		<div class="connectionimages">\
+			<div style="height: 13px"></div>\
+			<img src="' + 	this.IMAGE_URL + 'connections_1.png" />\
+			<div style="height: 9px"></div>\
+			<img src="' + 	this.IMAGE_URL + 'connections_1.png" />\
+		</div>\
+		<div class="texts">\
+			<div class="connectiontext"></div>\
+			<div class="connectiontext">Ch1</div>\
+			<div class="connectiontext"></div>\
+			<div class="connectiontext">Ch2</div>\
+		</div>\
+		<div class="title">Oscilloscope</div>\
+	</div>'
+	);
+		
 	$osc.css("left", x + "px").css("top", y + "px");
 	this._$elem.find(".instruments").append($osc);
 	
@@ -1196,9 +1194,12 @@ visir.Breadboard.prototype._AddGND = function(x, y)
 {
 	var $gnd = $(
 	'<div class="instrument gnd">\
-		<table border="0" cellspacing="0" cellpadding="0">\
-		<tr class=""><td class="cell"><img src="' + 	this.IMAGE_URL + 'connections_1.png" /></td><td>GND</td></tr>\
-		</table>\
+			<div class="connectionimages">\
+				<img src="' + 	this.IMAGE_URL + 'connections_1.png" />\
+			</div>\
+			<div class="texts">\
+				<div class="connectiontext">GND</div>\
+			</div>\
 	</div>');
 	$gnd.css("left", x + "px").css("top", y + "px");
 	this._$elem.find(".instruments").append($gnd);
@@ -1211,36 +1212,24 @@ visir.Breadboard.prototype._AddDCPower = function(x, y, num)
 {
 	var $dcpower = $(
 	'<div class="instrument dcpower">\
-		<table border="0" cellspacing="0" cellpadding="0">\
-			<tr class="top"></tr>\
-			<tr class="p25v"></tr>\
-			<tr class="com"></tr>\
-			<tr class="m25v"></tr>\
-			<tr class="spacer"></tr>\
-			<tr class="p6v"></tr>\
-			<tr class="gnd"></tr>\
-		</table>\
-	</div>');
-	
-	var $top = $dcpower.find("table tr.top"); // channel numbers
-	$top.append('<td rowspan="7">DC Power Supply</td>');
-	
-	var $p25v = $dcpower.find("table tr.p25v");
-	$p25v.append('<td class="cell">+25V</td>');
-	$p25v.append('<td class="cell" rowspan="3"><img src="' + 	this.IMAGE_URL + 'connections_3.png" /></td>');
-	
-	var $com = $dcpower.find("table tr.com");
-	$com.append('<td>COM</td>');
-	
-	var $m25v = $dcpower.find("table tr.m25v");
-	$m25v.append('<td>-25V</td>');
-	
-	var $p6v = $dcpower.find("table tr.p6v");
-	$p6v.append('<td>+6V</td>');
-	$p6v.append('<td class="cell" rowspan="2"><img src="' + 	this.IMAGE_URL + 'connections_2.png" /></td>');
-	
-	var $gnd = $dcpower.find("table tr.gnd");
-	$gnd.append('<td>GND</td>');
+		<div class="title">DC Power Supply</div>\
+			<div class="texts">\
+				<div class="connectiontext"></div>\
+				<div class="connectiontext">+25V</div>\
+				<div class="connectiontext">COM</div>\
+				<div class="connectiontext">-25V</div>\
+				<div class="connectiontext"></div>\
+				<div class="connectiontext">+6V</div>\
+				<div class="connectiontext">GND</div>\
+			</div>\
+			<div class="connectionimages">\
+				<div style="height: 13px"></div>\
+				<img src="' + 	this.IMAGE_URL + 'connections_3.png" />\
+				<div style="height: 10px"></div>\
+				<img src="' + 	this.IMAGE_URL + 'connections_2.png" />\
+			</div>\
+	</div>'
+	);
 	
 	$dcpower.css("right", x + "px").css("top", y + "px");
 	this._$elem.find(".instruments .left").append($dcpower);
@@ -1267,16 +1256,20 @@ visir.Breadboard.prototype._AddFGEN = function(x, y, num)
 		</table>\
 	</div>');
 	
-	var $top = $fgen.find("table tr.top"); // channel numbers
-	$top.append('<td>&nbsp;</td>');
-	
-	var $funcgen = $fgen.find("table tr.FGEN");
-	$funcgen.append('<td class="cell">Function&nbsp;Generator</td>');
-	$funcgen.append('<td class="cell" rowspan="2"><img src="' + 	this.IMAGE_URL + 'connections_2.png" /></td>');
-	
-	var $gnd = $fgen.find("table tr.GND");
-	$gnd.append('<td class="cell">GND</td>');
-	
+	var $fgen = $(
+	'<div class="instrument fgen">\
+		<div class="texts">\
+			<div class="connectiontext"></div>\
+			<div class="connectiontext">Function&nbsp;Generator</div>\
+			<div class="connectiontext">GND</div>\
+		</div>\
+		<div class="connectionimages">\
+			<div style="height: 13px"></div>\
+			<img src="' + 	this.IMAGE_URL + 'connections_2.png" />\
+		</div>\
+	</div>'
+	);
+		
 	$fgen.css("right", x + "px").css("top", y + "px");
 	this._$elem.find(".instruments .left").append($fgen);
 	
