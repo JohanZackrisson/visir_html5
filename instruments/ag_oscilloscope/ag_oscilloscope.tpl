@@ -60,6 +60,22 @@
 			<img class="up active" src="%img%/runstop_red_up.png" alt="run/stop button" /><img class="down" src="%img%/runstop_red_down.png" alt="run/stop button" />
 		</div>
 	</div>
+	<div class="button multibutton cursors">
+		<div class="state dark visible">
+			<img class="up active" src="%img%/osc_meas_off_up_cursors.png" alt="edge button" /><img class="down" src="%img%/osc_meas_off_down_cursors.png" alt="edge button" />
+		</div>
+		<div class="state light">
+			<img class="up active" src="%img%/osc_meas_on_up_cursors.png" alt="edge button" /><img class="down" src="%img%/osc_meas_on_down_cursors.png" alt="edge button" />
+		</div>
+	</div>
+	<div class="button multibutton measure">
+		<div class="state dark visible">
+			<img class="up active" src="%img%/osc_meas_off_up_quick_meas.png" alt="edge button" /><img class="down" src="%img%/osc_meas_off_down_quick_meas.png" alt="edge button" />
+		</div>
+		<div class="state light">
+			<img class="up active" src="%img%/osc_meas_on_up_quick_meas.png" alt="edge button" /><img class="down" src="%img%/osc_meas_on_down_quick_meas.png" alt="edge button" />
+		</div>
+	</div>
 	<div class="display">
 		<div class="background">
 			<div class="channel ch1"><span class="channelname">1</span><span class="lighttext voltage_ch1"><span class="value">1.00</span><div class="unitstring"></div>/</span></div>
@@ -94,6 +110,13 @@
 			<div class="graph">
 				<canvas class="grid" width="330" height="208"></canvas>
 				<canvas class="plot" width="330" height="208"></canvas>
+			</div>
+			<div class="infobar">
+				<div class="measurements">
+					<div class="box box1">Some text 1</div>
+					<div class="box box2">Some text 2</div>
+					<div class="box box3">Some text 3</div>
+				</div>
 			</div>
 			<div class="menubar">
 				<div class="menutitle"><span class="titlebox">Channel 1 Menu</span></div>
@@ -168,6 +191,38 @@
 						<hr />
 						<div class="selection sel_dc selected"><div class="checkmark_holder"><div class="checkmark" /></div><span>DC</span></div>
 						<div class="selection sel_ac"><div class="checkmark_holder"><div class="checkmark" /></div><span>AC</span></div>
+					</div>
+				</div>
+
+				<!-- menu_measure -->
+				<div class="menu menu_measure">
+					<div class="menubox">
+						<div class="title"><img class="menuicon" src="%img%/menu_arrow_up.png" alt="arrow"/>Source</div>
+						<div class="value source">1</div>
+					</div>
+					<div class="menubox">
+						<div class="title"><img class="menuicon" src="%img%/menu_arrow_spin.png" alt="arrow"/>Select:</div>
+						<div class="value selection">X</div>
+					</div>
+					<div class="menubox">
+						<div class="title">Measure</div>
+						<div class="value measure">X</div>
+					</div>
+					<div class="menubox">
+						<div class="title">Clear</div>
+						<div class="value clear">Measure</div>
+					</div>
+					
+					<div class="menu_selection sel_meas_source">
+						<div class="title">Source</div>
+						<hr />
+						<div class="selection sel_1 selected"><div class="checkmark_holder"><div class="checkmark" /></div><span>1</span></div>
+						<div class="selection sel_2"><div class="checkmark_holder"><div class="checkmark" /></div><span>2</span></div>
+					</div>
+					
+					<div class="menu_selection pos2 sel_meas_selection" style="width: 100px">
+						<div class="title">Select Measurement</div>
+						<hr />
 					</div>
 				</div>
 

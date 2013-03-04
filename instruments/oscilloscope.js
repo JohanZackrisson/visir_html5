@@ -14,7 +14,7 @@ visir.Oscilloscope = function(id)
 	function NewGraph(l)
 	{
 		var out = new Array(l);
-		for(var i=0; i<l; i++) out[i] = 0.0;
+		for(var i=0; i<l; i++) { out[i] = 0.0; }
 		return out;
 	}
 	
@@ -32,12 +32,29 @@ visir.Oscilloscope = function(id)
 		, delay: 0.0
 	}
 	
-	var m1 = { channel: 1, selection: "none", result: "" };
+	/*var m1 = { channel: 1, selection: "none", result: "" };
 	var m2 = { channel: 1, selection: "none", result: "" };
-	var m3 = { channel: 1, selection: "none", result: "" };
-	this._measurements = [ m1, m2, m3 ];
+	var m3 = { channel: 1, selection: "none", result: "" };*/
+	this._measurements = [];
 }
-	
+
+// XXX: the extra parameter is a horrible hack..
+visir.Oscilloscope.prototype.AddMeasurement = function(ch, selection, extra)
+{
+	var rv = -1;
+	for(var i=0;i<this._measurements.length; i++) {
+		if (this._measurements[i].channel == ch && this._measurements[i].selection == selection) {
+			this._measurements.splice(i, 1);
+			rv = i;
+			break;
+		}
+	}
+		
+	while(this._measurements.length > 2) this._measurements.shift();
+	this._measurements.push( { channel: ch, selection: selection, extra: extra, result: "" } );
+	return rv;
+}
+
 visir.Oscilloscope.prototype.WriteRequest = function()
 {
 	var $xml = $('<oscilloscope><horizontal/><channels/><trigger/><measurements/></oscilloscope>');
@@ -75,16 +92,23 @@ visir.Oscilloscope.prototype.WriteRequest = function()
 	AddXMLValue($trigger, "trig_delay", trig.delay);
 	
 	for(var i=0; i<3; i++) {
-		var meas = this._measurements[i];
+		var channel = 1;
+		var selection = "none";
+		if (i < this._measurements.length) {
+			var meas = this._measurements[i];
+			channel = meas.channel;
+			selection = meas.selection;
+		}
+		
 		var $measure = $('<measurement/>');
 		$measure.attr("number", i+1);
-		AddXMLValue($measure, "meas_channel", "channel " + meas.channel);
-		AddXMLValue($measure, "meas_selection", meas.selection);
+		AddXMLValue($measure, "meas_channel", "channel " + channel);
+		AddXMLValue($measure, "meas_selection", selection);
 		$xml.find("measurements").append($measure);
 	}
 	
 	return $("<root />").append($xml).html();
-},
+}
 
 visir.Oscilloscope.prototype.ReadResponse = function(response) {
 	var me = this;
@@ -108,16 +132,13 @@ visir.Oscilloscope.prototype.ReadResponse = function(response) {
 		}
 		me._channels[chnr - 1].graph = graph;
 	});
-
-/*	
-	var $multimeter = $xml.find("multimeter[id=" + this._id + "]");
-	if ($multimeter.length > 0) {
-		var result = $multimeter.find("dmm_result").attr("value");
-		if (!isNaN(result))	{
-			this._result = parseFloat(result);
-		} else {
-			this._result = NaN;
-		}
-	}
-*/
+	
+	$oscilloscope.find("measurement").each(function() {
+		var $measurement = $(this);
+		var measnr = parseInt($measurement.attr("number"), 10);
+		var channel = $measurement.find("meas_channel").attr("value");
+		var selection = $measurement.find("meas_selection").attr("value");
+		var result = parseFloat($measurement.find("meas_result").attr("value"));
+		if (me._measurements.length >= measnr) me._measurements[measnr - 1].result = result;
+	});
 }

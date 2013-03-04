@@ -34,6 +34,39 @@ visir.AgilentOscilloscope = function(id, elem, props)
 	this._channels[1].visible = true;
 	this._channels[1].display_offset = 0.0;
 	
+	
+	function NewMeasInfo(display, str, unit, proto) {
+		return { display: display, str: str, unit: unit, proto: proto };
+	}
+	
+	this._measurementInfo = [
+		NewMeasInfo("Amplitude", "Ampl", "V", "voltageamplitude")
+		, NewMeasInfo("Avgerage", "Avg", "V", "voltageaverage")
+		, NewMeasInfo("Base", "Base", "V", "voltagebase")
+		, NewMeasInfo("Duty Cycle", "Duty", "%", "negativedutycycle")
+		, NewMeasInfo("Fall Time", "Fall", "s", "falltime")
+		
+		, NewMeasInfo("Frequency", "Freq", "Hz", "frequency")
+		, NewMeasInfo("Maximum", "Max", "V", "voltagemax")
+		, NewMeasInfo("Minimum", "Min", "V", "voltagemin")
+		, NewMeasInfo("Overshoot", "Over", "%", "overshoot")
+		, NewMeasInfo("Peak-Peak", "Pk-Pk", "V", "voltagepeaktopeak")
+		
+		, NewMeasInfo("Period", "Period", "s", "period")
+		, NewMeasInfo("Phase", "Phase", "deg", "phasedelay")
+		, NewMeasInfo("Preshoot", "Pre", "%", "preshoot")
+		, NewMeasInfo("Rise Time", "Rise", "s", "risetime")
+		, NewMeasInfo("RMS", "RMS", "V", "voltagerms")
+		
+		, NewMeasInfo("Top", "Top", "V", "voltagetop")
+		, NewMeasInfo("+ Width", "+Width", "s", "positivewidth")
+		, NewMeasInfo("- Width", "-Width", "s", "negativewidth")
+	];
+	
+	this._measurementActiveCh = 1;
+	this._measurementSelectionIdx = 0;
+	this._measurementsVisible = false;
+	
 	this._activeMenu = ""; // the current menu displayed
 	this._activeMenuHandler = null;
 	
@@ -44,7 +77,12 @@ visir.AgilentOscilloscope = function(id, elem, props)
 	this._isMeasuringContinuous = false;
 	
 	var imgbase = "instruments/ag_oscilloscope/images";	
-	$.get("instruments/ag_oscilloscope/ag_oscilloscope.tpl", function(tpl) {
+	if (visir.BaseLocation) imgbase = visir.BaseLocation + imgbase;
+	
+	var tplLocation = "instruments/ag_oscilloscope/ag_oscilloscope.tpl";
+	if (visir.BaseLocation) tplLocation = visir.BaseLocation + tplLocation;
+	
+	$.get(tplLocation, function(tpl) {
 		tpl = tpl.replace(/%img%/g, imgbase);
 		elem.append(tpl);
 
@@ -102,6 +140,10 @@ visir.AgilentOscilloscope = function(id, elem, props)
 
 			me._ShowMenu("menu_edge");
 		});
+		
+		elem.find(".button.measure").click( function() {
+			me._ToggleMeasurements();
+		});
 
 		elem.find(".button.modecoupling").click( function() {
 			me._ShowMenu("menu_modecoupling");
@@ -120,6 +162,8 @@ visir.AgilentOscilloscope = function(id, elem, props)
 		elem.find(".display_button_4").click( function() { me._DisplayButtonClicked(4); });
 		elem.find(".display_button_5").click( function() { me._DisplayButtonClicked(5); });
 		elem.find(".display_button_6").click( function() { me._DisplayButtonClicked(6); });
+		
+		elem.find(".infobar .box").hide();
 
 		me._plotWidth = me._$elem.find(".plot").width();
 		me._plotHeight = me._$elem.find(".plot").height();
@@ -135,6 +179,7 @@ visir.AgilentOscilloscope = function(id, elem, props)
 			, 'menu_channel_2': CreateChannelMenu(me, 1, me._$elem.find(".menu_channel_2"))
 			, 'menu_edge': CreateEdgeMenu(me, me._$elem.find(".menu_edge"))
 			, 'menu_modecoupling': CreateTriggerModeCouplingMenu(me, me._$elem.find(".menu_modecoupling"))
+			, 'menu_measure': CreateMeasurementMenu(me, me._$elem.find(".menu_measure"))
 		};
 
 	});
@@ -418,6 +463,57 @@ visir.AgilentOscilloscope.prototype._SetTriggerMode = function(modeIdx)
 	this._$elem.find(".menu_modecoupling .value.mode").text(this._triggerModesDisplay[this._triggerModeIdx]); // need to update the menu (if its active)
 };
 
+visir.AgilentOscilloscope.prototype._IsMeasurementEnabled = function()
+{
+}
+
+visir.AgilentOscilloscope.prototype._ToggleMeasurements = function()
+{
+	var enabled = this._IsMeasurementEnabled();
+	// if ( measurement mode is selected) {
+	enabled = !enabled;
+	// }
+	this._ShowMenu("menu_measure");
+}
+
+visir.AgilentOscilloscope.prototype._AddMeasurementAndAnimate = function(ch, selection)
+{
+	// update protocol info
+	var full = this._measurements.length == 3;
+	var replaced = this.AddMeasurement(ch, this._measurementInfo[this._measurementSelectionIdx].proto, selection);
+	var $infobar = this._$elem.find(".infobar");
+	var $box1 = $infobar.find(".box1");
+	var $box2 = $infobar.find(".box2");
+	var $box3 = $infobar.find(".box3");
+	
+	var pos = [ 0, 110, 220];
+	var fast = 250;
+	var slowanim = { left: "-=110" };
+	var fastanim = { left: "-=250" };
+
+	trace("replaced: " + replaced);
+
+	if (replaced >= 0) {
+		// move first box back to second and animate back to first
+		if (replaced < 1) { $box1.stop().css("left", pos[1] + "px").animate(slowanim); } 
+		// move second to third and animate to second
+		if (replaced < 2) { $box2.stop().css("left", pos[2] + "px").animate(slowanim); }
+	} else if (full) {
+		// if the container is full and none were replaced, move the first and second
+		$box1.show().stop().css("left", pos[1] + "px").animate(slowanim);
+		$box2.show().stop().css("left", pos[2] + "px").animate(slowanim);
+	}
+	
+	$box1.text("(" + this._measurements[0].channel + ") " + this._measurementInfo[this._measurements[0].extra].str + ":");
+	if (this._measurements.length > 1) $box2.text("(" + this._measurements[1].channel + ") " + this._measurementInfo[this._measurements[1].extra].str + ":");
+	if (this._measurements.length > 2) $box3.text("(" + this._measurements[2].channel + ") " + this._measurementInfo[this._measurements[2].extra].str + ":");
+	
+	// move in the last item with greater speed
+	if (this._measurements.length == 1) { $box1.show().stop().css("left", pos[0] + fast + "px").animate(fastanim); }
+	if (this._measurements.length == 2) { $box2.show().stop().css("left", pos[1] + fast + "px").animate(fastanim); }
+	if (this._measurements.length == 3) { $box3.show().stop().css("left", pos[2] + fast + "px").animate(fastanim); }
+}
+
 visir.AgilentOscilloscope.prototype._ShowMenu = function(menuname)
 {
 	var $menu = this._$elem.find(".menu." + menuname);
@@ -559,6 +655,11 @@ visir.AgilentOscilloscope.prototype.ReadResponse = function(response) {
 		this._$elem.find(".button.single .state").removeClass("visible");
 		this._$elem.find(".button.single .state.dark").addClass("visible");
 	}
+	
+	var $measurements = this._$elem.find(".measurements");
+	if (this._measurements.length > 0) $measurements.find(".box1").text("(" + this._measurements[0].channel + ") " + this._measurementInfo[this._measurements[0].extra].str + ": " + this._measurements[0].result);
+	if (this._measurements.length > 1) $measurements.find(".box2").text("(" + this._measurements[1].channel + ") " + this._measurementInfo[this._measurements[1].extra].str + ": " + this._measurements[1].result);
+	if (this._measurements.length > 2) $measurements.find(".box3").text("(" + this._measurements[2].channel + ") " + this._measurementInfo[this._measurements[2].extra].str + ": " + this._measurements[2].result);
 };
 
 visir.AgilentOscilloscope.prototype._MakeMeasurement = function(button) {
@@ -706,6 +807,87 @@ function CreateTriggerModeCouplingMenu(osc, $menu)
 			$menu.find(".sel_trigger_coupling .sel_" + osc._trigger.coupling).addClass("selected");
 			$menu.find(".value.coupling").text(osc._trigger.coupling.toUpperCase());
 			$menu.find(".value.mode").text(osc._triggerModesDisplay[osc._triggerModeIdx]);
+		},
+		ShowMenu: function(name) {
+			this.HideMenu();
+			$menu.find(".menu_selection." + name).addClass("visible");
+			var menu = this;
+			if (!timer) {
+				timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
+				return false;
+			} else {
+				clearInterval(timer);
+				timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
+				return true;
+			}
+		},
+		HideMenu: function() {
+			$menu.find(".menu_selection").removeClass("visible");
+		}
+	};
+}
+
+function CreateMeasurementMenu(osc, $menu)
+{
+	var timer = null;
+	
+	var $sel = $menu.find(".sel_meas_selection");
+	for(var i=0;i < osc._measurementInfo.length; i++) {
+		var $row = $('<div class="selection"><div class="checkmark_holder"><div class="checkmark" /></div><span>' + osc._measurementInfo[i].display + '</span></div>');
+		$sel.append($row);
+	}
+	
+	//$sel.find(".selection").first().addClass("selected");
+	$sel.find(":nth-child(3)").addClass("selected");
+	
+	return {
+		GetName: function() { this.Redraw(); return "Measurement Menu"; },
+		ButtonPressed: function(nr) {
+			this.Redraw();
+			switch(nr) {
+				case 1:
+					$menu.find(".menu_selection.sel_meas_source").addClass("visible");
+					var menu = this;
+					if (!timer) {
+						timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
+						return;
+					} else {
+						clearInterval(timer);
+						timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
+					}
+					
+					osc._measurementActiveCh = (osc._measurementActiveCh == 1) ? 2 : 1;
+				break;
+				case 2:
+					$menu.find(".menu_selection.sel_meas_selection").addClass("visible");
+					var menu = this;
+					if (!timer) {
+						timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
+						return;
+					} else {
+						clearInterval(timer);
+						timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
+					}
+					osc._measurementSelectionIdx++;
+					if (osc._measurementSelectionIdx >= osc._measurementInfo.length) osc._measurementSelectionIdx = 0;
+				break;
+				
+				case 3:
+					osc._AddMeasurementAndAnimate(osc._measurementActiveCh, osc._measurementSelectionIdx);
+				break;
+				
+				case 4:
+				break;
+			}
+			this.Redraw();
+		},
+		Redraw: function() {
+			$menu.find(".selection").removeClass("selected");
+			$menu.find(".sel_meas_source .sel_" + osc._measurementActiveCh).addClass("selected");
+			$menu.find(".sel_meas_selection .selection:nth-child(" + (3 + osc._measurementSelectionIdx) + ")").addClass("selected");
+			$menu.find(".value.selection").text(osc._measurementInfo[osc._measurementSelectionIdx].str);
+			$menu.find(".value.measure").text(osc._measurementInfo[osc._measurementSelectionIdx].str);
+			$menu.find(".value.source").text(osc._measurementActiveCh);
 		},
 		ShowMenu: function(name) {
 			this.HideMenu();

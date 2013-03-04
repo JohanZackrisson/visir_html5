@@ -1,6 +1,7 @@
 .ag_osc
 {
 	position: relative;
+	text-align: left;
 }
 
 .ag_osc .button, .ag_osc .button img, .ag_osc .stepwheel, .ag_osc .stepwheel img {
@@ -31,6 +32,9 @@
 
 .ag_osc .button.runstop {top: 34px; left: 659px; }
 .ag_osc .button.single {top: 34px; left: 725px; }
+
+.ag_osc .button.cursors {top: 99px; left: 460px; }
+.ag_osc .button.measure {top: 99px; left: 503px; }
 
 /* to avoid having to do the layouting we let the browser do it for us */
 .ag_osc .display_buttons {
@@ -425,3 +429,33 @@
 {
 	display: block;
 }
+
+.ag_osc .infobar {
+	position: absolute;
+	font-size: 7pt;
+	height: 13px;
+	width: 332px;
+	left: 12px;
+	top: 229px;
+	overflow: hidden;
+}
+
+.ag_osc .infobar .box {
+	position: absolute;
+	font-family: sans-serif;
+	font-size: 9px;
+	background: #00ff00;
+	border-top: 1px solid #86FE85;
+	border-left: 1px solid #86FE85;
+	border-right: 1px solid #006633;
+	border-bottom: 1px solid #006633;
+	border-radius: 5px;
+	/*height: 11px;*/
+	width: 104px;
+	/*padding: 0px 5px 0px 5px;*/
+	padding-left: 3px;
+}
+
+.ag_osc .infobar .box1 { left: 0px; }
+.ag_osc .infobar .box2 { left: 110px; }
+.ag_osc .infobar .box3 { left: 220px; } 
