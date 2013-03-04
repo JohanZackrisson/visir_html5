@@ -35,6 +35,11 @@ visir.Point.prototype.SnapToGrid = function()
 	this.y += 3;
 }
 
+visir.Point.prototype.Add = function(p)
+{
+	return new visir.Point(this.x + p.x, this.y + p.y);
+}
+
 visir.Point.prototype.toString = function()
 {
 	return "(x: " + this.x + " y: " + this.y + ")";
@@ -135,79 +140,91 @@ visir.Wire.prototype._RawDraw = function(context, color, width)
 
 // Ocuppation grid for the bin (to know which positions are available)
 visir.Grid = function(componentList, $bin) {
-    var me = this;
+	var me = this;
 
-    // Being true = "available", and false = "busy"
-    this._grid = [
-        // row 0 (y=0): [ true, true, true ... ],
-        // row 1 (y=1): [ true, true, true ... ],
-    ];
+	// Being true = "available", and false = "busy"
+	this._grid = [
+	// row 0 (y=0): [ true, true, true ... ],
+	// row 1 (y=1): [ true, true, true ... ],
+	];
 
-    this._rows = 7;
-    this._cols = 54;
+	this._rows = 7;
+	this._cols = 54;
 
-    for(var y = 0; y < this._rows; y++) {
-        var rowOccupation = [];
-        for(var x = 0; x < this._cols; x++)
-            rowOccupation.push(true);
-        this._grid.push(rowOccupation);
-    }
+	for(var y = 0; y < this._rows; y++) {
+		var rowOccupation = [];
+		for(var x = 0; x < this._cols; x++)
+		rowOccupation.push(true);
+		this._grid.push(rowOccupation);
+	}
 
-    var bin_position = $bin.position();
-    var bin_left = bin_position.left;
-    var bin_top  = bin_position.top;
+	var bin_position = $bin.position();
+	var bin_left = bin_position.left;
+	var bin_top  = bin_position.top;
 
-    $(componentList).each(function(pos, component) {
-        var position = component._$elem.position();
-        var relative_top  = Math.floor((position.top  - bin_top  - 5 + parseInt(component.translation.y)) / 13);
-        var relative_left = Math.floor((position.left - bin_left - 5 + parseInt(component.translation.x)) / 13);
+	$(componentList).each(function(pos, component) {
+		var position = component._$elem.position();
+		var relative_top  = Math.floor((position.top  - bin_top  - 5 + parseInt(component.translation.y)) / 13);
+		var relative_left = Math.floor((position.left - bin_left - 5 + parseInt(component.translation.x)) / 13);
+		
+		/*
+		trace("Marking: " + component._type + " " + component._value);
+		trace("rel: " + relative_left + " " + relative_top);
+		trace("size: " + component.widthInPoints() + " " + component.heightInPoints());
+		*/
 
-        // trace("Component found in: " + relative_top + ", " + relative_left);
+		var margin = 5;
+		var wip = Math.ceil((component.width()+margin) / 13);
+		var hip = Math.ceil((component.height()+margin) / 13);
 
-        if(relative_top >= 0 && relative_top < me._rows && relative_left >= 0 && relative_left < me._cols) {
-            for(var x = relative_left; x < relative_left + component.widthInPoints(); x++) 
-                for(var y = relative_top; y < relative_top + component.heightInPoints(); y++) {
-                    me._set(x,y, false);
-//                    trace("Marking busy..." + x + "; " + y);
-                }
-        }
-    });
+		// trace("Component found in: " + relative_top + ", " + relative_left);
+
+		//if(relative_top >= 0 && relative_top < me._rows && relative_left >= 0 && relative_left < me._cols) {
+			for(var x = relative_left; x < relative_left + wip; x++) 
+			for(var y = relative_top; y < relative_top + hip; y++) {
+				if (x >= 0 && x<me._cols && y >= 0 && y<me._rows) {
+					me._set(x,y, false);
+				}
+				//trace("Marking busy..." + x + "; " + y + " " + component._type + " " + component._value);
+			}
+		//}
+	});
 }
 
 visir.Grid.prototype._get = function(x, y)
 {
-    // trace("Attempting " + x + ", " + y);
-    return this._grid[y][x];
+	//trace("Attempting " + x + ", " + y + " " + this._grid[y][x]);
+	return this._grid[y][x];
 }
 
 visir.Grid.prototype._set = function(x, y, value)
 {
-    // trace("Attempting " + x + ", " + y);
-    this._grid[y][x] = value;
+	//trace("Attempting " + x + ", " + y + " " + value);
+	this._grid[y][x] = value;
 }
 
 
 visir.Grid.prototype._FindSlot = function(height, width) 
 {
-    for (var x = 0; x <= this._cols - width; x++) { // x = 0 .. ~54
-        for (var y = 0; y <= this._rows - height; y++) { // y = 0 .. ~7
-            if (this._get(x, y)) {
-                var potentialHole = true;
-                for (var x2 = x; x2 < this._cols && x2 < x + width && potentialHole; x2++) {
-                    for (var y2 = y; y2 < this._rows && y2 < y + height && potentialHole; y2++) {
-                        // trace(" " + x2 + " " + y2);
-                        // trace(this._grid);
-                        if (!this._get(x2, y2))
-                            potentialHole = false;
-                    }
-                }
-                if (potentialHole)
-                    return { 'x' : x, 'y' : y };
-            }
-        }
-    }
+	for (var x = 0; x <= this._cols - width; x++) { // x = 0 .. ~54
+		for (var y = 0; y <= this._rows - height; y++) { // y = 0 .. ~7
+			if (this._get(x, y)) {
+				var potentialHole = true;
+				for (var x2 = x; x2 < this._cols && x2 < x + width && potentialHole; x2++) {
+					for (var y2 = y; y2 < this._rows && y2 < y + height && potentialHole; y2++) {
+						//trace("xx: " + x2 + " " + y2);
+						// trace(this._grid);
+						if (!this._get(x2, y2))
+						potentialHole = false;
+					}
+				}
+				if (potentialHole)
+				return { 'x' : x, 'y' : y };
+			}
+		}
+	}
 
-    return { 'x' : 0, 'y' : 0 };
+	return { 'x' : 0, 'y' : 0 };
 }
 
 
@@ -220,30 +237,45 @@ visir.Component = function($elem, breadboard)
 	this._$elem        = $elem;
 	this._breadboard   = breadboard;
 	this._$circle      = null;
-	this._current_step = 0;
+	this._current_step = 0; // current rotation
 	this.translation   = { 'x' : 0, 'y' : 0 };
 	this.translations  = [];
 	this._pins = []; // one entry per rotation, each entry contains an array of points with offsets to where each pin is located
 }
 
+visir.Component.prototype.Move = function(x, y)
+{
+	this._$elem.css("left", x).css("top", y);
+}
+
+visir.Component.prototype.GetPos = function()
+{
+	return new visir.Point(parseInt(this._$elem.css("left"), 10), parseInt(this._$elem.css("top"), 10));
+}
+
+visir.Component.prototype.GetRotation = function()
+{
+	return this._current_step;
+}
+
 visir.Component.prototype.width = function() 
 {
-    return this._$elem.find('.active').width();
+	return this._$elem.find('.active').width();
 }
 
 visir.Component.prototype.height = function() 
 {
-    return this._$elem.find('.active').height();
+	return this._$elem.find('.active').height();
 }
 
 visir.Component.prototype.heightInPoints = function()
 {
-    return Math.ceil(this.height() / 13);
+	return Math.ceil(this.height() / 13);
 }
 
 visir.Component.prototype.widthInPoints = function()
 {
-    return Math.ceil(this.width() / 13);
+	return Math.ceil(this.width() / 13);
 }
 
 visir.Component.prototype.remove = function() 
@@ -340,10 +372,6 @@ visir.Component.prototype._AddCircle = function()
     var newTop       = originalTop  - relativeTop;
     var newLeft      = originalLeft - relativeLeft;
 
-    // Later they are removed
-    var $parentNode = this._$elem.parent();
-    // this._$elem.remove();
-
     // Overall block
     this._$circle = $('<span class="componentcircle"></span>');
     this._$circle.width(CIRCLE_SIZE);
@@ -372,7 +400,7 @@ visir.Component.prototype._AddCircle = function()
 
     // Trash button
     // http://openclipart.org/detail/68/trash-can-by-andy
-    var $trashImg = $('<img src="instruments/breadboard/images/trash.png"/>');
+    var $trashImg = $('<img src="' + me._breadboard.IMAGE_URL + 'trash.png"/>');
     $trashImg.width(ICON_SIZE);
     $trashImg.height(ICON_SIZE);
     $trashImg.css({
@@ -381,14 +409,17 @@ visir.Component.prototype._AddCircle = function()
         'top'      : CIRCLE_SIZE - ICON_SIZE
     })
     $trashImg.click(function() {
-        me.remove();
+        //me.remove();
+				//
+				me._PlaceInBin();
+				me._breadboard.SelectComponent(null);
     });
     this._$circle.append($trashImg);
 
     // Rotation button
     // Public domain
     // http://openclipart.org/detail/33685/tango-view-refresh-by-warszawianka
-    var $rotateImg = $('<img src="instruments/breadboard/images/rotate.png"/>');
+    var $rotateImg = $('<img src="' + me._breadboard.IMAGE_URL + 'rotate.png"/>');
     $rotateImg.width(ICON_SIZE);
     $rotateImg.height(ICON_SIZE);
     $rotateImg.css({
@@ -419,7 +450,7 @@ visir.Component.prototype._AddCircle = function()
     // XXX Gentleface; CC Attribution-NonCommercial 3.0
     // http://www.softicons.com/free-icons/toolbar-icons/black-wireframe-toolbar-icons-by-gentleface/cursor-hand-icon
     // http://www.softicons.com/free-icons/toolbar-icons/black-wireframe-toolbar-icons-by-gentleface/cursor-drag-hand-icon
-    var $dragImg = $('<img src="instruments/breadboard/images/drop.png" />');
+    var $dragImg = $('<img src="' + me._breadboard.IMAGE_URL + 'drop.png" />');
     $dragImg.width(ICON_SIZE);
     $dragImg.height(ICON_SIZE);
     $dragImg.css({
@@ -429,15 +460,15 @@ visir.Component.prototype._AddCircle = function()
     });
     this._$circle.append($dragImg);
 
-    $parentNode.append(this._$circle);
+		this._breadboard._$elem.find("#comp_circle").append(this._$circle);
 
     var handler = this.generateHandler(this._$circle, function() {
         // On clicked
         me._RemoveCircle();
     }, this._$elem, function() {
-        $dragImg.attr("src", "instruments/breadboard/images/drag.png");
+        $dragImg.attr("src", me._breadboard.IMAGE_URL + "drag.png");
     }, function () {
-        $dragImg.attr("src", "instruments/breadboard/images/drop.png");
+        $dragImg.attr("src", me._breadboard.IMAGE_URL + "drop.png");
     })
 
     $circleImg.on("mousedown touchstart", handler);
@@ -479,16 +510,22 @@ visir.Breadboard = function(id, $elem)
 	debugbb = this;
 	this._$elem = $elem;
 	this._$library = null;
+	this._onLibraryLoaded = null;
 	this._components = [];
 	this._wires = [];
 	this._instruments = [];
 	this._selectedWire = null; // index in _wires
 	this._selectedCompnent = null;
 	
+	this._isTouchDevice = navigator.userAgent.match(/iPhone|iPad|Android/)
+	
+	this._fingerOffset = new visir.Point(0, -26);
+	
 	this.IMAGE_URL = "instruments/breadboard/images/";
+	if (visir.BaseLocation) this.IMAGE_URL = visir.BaseLocation + this.IMAGE_URL;
 	
 	var tpl = '<div class="breadboard">\
-	<img class="background" src="instruments/breadboard/images/breadboard.png" alt="breadboard"/>\
+	<img class="background" src="' + this.IMAGE_URL + 'breadboard.png" alt="breadboard"/>\
 	<div class="clickarea"></div>\
 	<div class="bin">\
     	<div class="teacher">+</div>\
@@ -510,6 +547,7 @@ visir.Breadboard = function(id, $elem)
 	<div id="wire_start" class="wirepoint start" />\
 	<div id="wire_mid" class="wirepoint mid" />\
 	<div id="wire_end" class="wirepoint end" />\
+	<div id="comp_circle" class="comp_circle" />\
 	<div class="componentbox">\
         <div class="componentlist">\
             <table class="componentlist-table">\
@@ -554,7 +592,7 @@ visir.Breadboard = function(id, $elem)
             var value = $(this).attr("value");
 						var img_html = '<tr class="component-list-row">\
 							<td>\
-								<img src="instruments/breadboard/images/' + img + '"/>\
+								<img src="' + me.IMAGE_URL + img + '"/>\
 							</td>\
 							<td>' + type + '</td>\
 							<td>' + value + '</td>\
@@ -587,11 +625,11 @@ visir.Breadboard = function(id, $elem)
 			if (idx !== null) {
 				e.preventDefault();
 				me.SelectWire(idx);
+				me.SelectComponent(null);
 				return;
 			}
 			
 			// nothing was picked
-			// XXX: should deselect component if selected
 			me.SelectWire(null);
 			me.SelectComponent(null);
 
@@ -649,10 +687,15 @@ visir.Breadboard = function(id, $elem)
 		return function($elem, x, y) {
 			if (me._selectedWire === null) return;
 				var p = new visir.Point(x, y);
+				
+				// add a finger offset if on a mobile touch screen device
+				if (me._isTouchDevice) p = p.Add(me._fingerOffset);
 				if (snap) p.SnapToGrid();
 				assign(p);
 				me._DrawWires();
-				return {x: p.x - $elem.width() / 2, y: p.y - $elem.height() / 2};
+				
+				var retp = new visir.Point(p.x - $elem.width() / 2, p.y - $elem.height() / 2);
+				return retp;
 		}
 	}
 			
@@ -667,10 +710,12 @@ visir.Breadboard = function(id, $elem)
 	$elem.find("#wire_end").draggable( {
 		move: GenWirePointMove(true, function(p) { me._wires[me._selectedWire]._end = p; } )
 	});
-		
-	me._ReadLibrary("instruments/breadboard/library.xml");
 	
-	me._AddMultimeters(1 + 13*45,8 + 13*22,2);
+	var libraryxml = "instruments/breadboard/library.xml";
+	if (visir.BaseLocation) libraryxml = visir.BaseLocation + libraryxml;
+	me._ReadLibrary(libraryxml);
+	
+	me._AddMultimeters(1 + 13*45,8 + 13*21,2);
 	me._AddOSC(1 + 13*45, 8 + 13 * 16, 1);
 	me._AddGND(1 + 13*45, 8 + 13 * 30);
 	me._AddDCPower(0, 6+13*5, 2);
@@ -756,6 +801,8 @@ visir.Breadboard.prototype.SelectWire = function(idx)
 	function UpdatePoint($e, p) {
 			var x = p.x - $e.width() / 2;
 			var y = p.y - $e.height() / 2;
+			x = x | 0;
+			y = y | 0;
 			$e.css("left", x).css("top", y);
 	}
 	
@@ -768,6 +815,7 @@ visir.Breadboard.prototype.SelectWire = function(idx)
 visir.Breadboard.prototype.SelectComponent = function(comp)
 {
 	if (this._selectedCompnent) this._selectedCompnent._RemoveCircle();
+	if (comp) comp._AddCircle();
 }
 
 visir.Breadboard.prototype._UpdateDisplay = function(ch)
@@ -784,13 +832,15 @@ visir.Breadboard.prototype._ReadLibrary = function(url)
 		async: true,
 		success: function(xml) {
 			me._$library = $(xml);
+			if (me._onLibraryLoaded) me._onLibraryLoaded();
 		}
 	});
 }
 
 visir.Breadboard.prototype.CreateComponent = function(type, value)
-{
-	var BASE_URL = "instruments/breadboard/images/";
+{	
+	//var BASE_URL = "instruments/breadboard/images/";
+	//if (visir.BaseLocation) BASE_URL = visir.BaseLocation + BASE_URL;
 	
 	var me = this;
 	var $libcomp = this._$library.find('component[type="'+ type+'"][value="'+ value+ '"]');
@@ -804,7 +854,7 @@ visir.Breadboard.prototype.CreateComponent = function(type, value)
 	var idx = 0;
 	
 	$libcomp.find("rotation").each(function() {
-		var imgtpl = '<img src="' + BASE_URL + $(this).attr("image") + '" alt="'+ type + value + '"/>';
+		var imgtpl = '<img src="' + me.IMAGE_URL + $(this).attr("image") + '" alt="'+ type + value + '"/>';
 		var $img = $(imgtpl);
 		var rot = $(this).attr("rot");
 		var ox = $(this).attr("ox");
@@ -831,7 +881,7 @@ visir.Breadboard.prototype.CreateComponent = function(type, value)
 	
 		var current_translation = { 'x' : ox, 'y' : oy, 'rot' : rot };
 		comp_obj.translations.push(current_translation);
-		trace("Adding " + ox + ", " + oy);
+		//trace("Adding " + ox + ", " + oy);
 		if (idx == 0) {
 			$img.addClass("active");
 			comp_obj.translation = current_translation;
@@ -858,101 +908,109 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
 {
 	var me = this;
 	var $doc = $(document);
-	
+
 	var offset = this._$elem.offset();
-	
+
 	var touches = 0;
-    var initialTouchTime = 0;
+	var initialTouchTime = 0;
 
-    var generateHandler = function(component, callbackClicked, internalComponent, callbackPressed, callbackReleased) {
-        return function(e) {
-            e.preventDefault();
+	var generateHandler = function(component, callbackClicked, internalComponent, callbackPressed, callbackReleased) {
+		return function(e) {
+			e.preventDefault();
 
-            initialTouchTime = new Date().getTime();
+			initialTouchTime = new Date().getTime();
 
-            touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
-            e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
-            //var start = { x: e.pageX - offset.x, y: e.pageY - offset.y};
-            
-            $doc.on("keypress.rem", function(e) {
-                // trace("key: " + e.which);
-                if (e.which == 114) // 'r'
-                    comp_obj.Rotate();
-            });
+			touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
+			e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
+			//var start = { x: e.pageX - offset.x, y: e.pageY - offset.y};
 
-            $doc.on("keyup.rem", function(e){
-                if(e.keyCode == 46)
-                    comp_obj.remove();
-            }) 
+			$doc.on("keypress.rem", function(e) {
+				// trace("key: " + e.which);
+				if (e.which == 114) // 'r'
+				comp_obj.Rotate();
+			});
 
-            $doc.on("mousemove.rem touchmove.rem", function(e) {
-                if(callbackPressed != undefined)
-                    callbackPressed();
+			$doc.on("keyup.rem", function(e){
+				if(e.keyCode == 46)
+				comp_obj.remove();
+			}) 
 
-                touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
-                var touch = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
-                
+			$doc.on("mousemove.rem touchmove.rem", function(e) {
+				if(callbackPressed != undefined)
+				callbackPressed();
 
-                var p = { x: touch.pageX - offset.left, y: touch.pageY - offset.top };
-                snapPoint(p);
-                //trace("move");
-                component.css({
-                    "left": p.x + "px",
-                    "top": p.y + "px"
-                });
-                if(internalComponent != undefined) {
-                    internalComponent.css({
-                        "left": p.x + "px",
-                        "top": p.y + "px"
-                    });
-                }
-                
-                // if two fingers are down, turn the component around towards the second finger
-                if (e.originalEvent.touches && e.originalEvent.touches.length > 1) {
-                    var turn = e.originalEvent.touches[1];
-                    var angle = Math.atan2( touch.pageY - turn.pageY, touch.pageX - turn.pageX ) * 180 / Math.PI;
-                    angle = (angle + 360) % 360;
-                    var step = 0;
-                    if (angle < 45 || angle > 315) step = 0;
-                    else if (angle > 45 && angle < 135) step = 1;
-                    else if (angle >135 && angle < 225) step = 2;
-                    else step = 3;
-                    
-                    comp_obj.Rotate(step);
-                }
-                
-            });
+				touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
+				var touch = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
 
-            $doc.on("mouseup.rem touchend.rem", function(e) {
-                trace("up: " + touches);
-                if (touches > 1) {
-                    touches--;
-                    return;
-                }
+				/*var p = new visir.Point(touch.pageX - offset.left, touch.pageY - offset.top);
+				p.SnapToGrid();
+				comp_obj.Move(p.x, p.y);*/
 
-                var timeSincePressed = new Date().getTime() - initialTouchTime;
-                trace("Time since pressed: " + timeSincePressed);
-                if(timeSincePressed < 300) // Less than this time is considered a click
-                    callbackClicked();
+				var p = { x: touch.pageX - offset.left, y: touch.pageY - offset.top };
+				snapPoint(p);
+				//trace("move");
+				component.css({
+					"left": p.x + "px",
+					"top": p.y + "px"
+				});
+				if(internalComponent != undefined) {
+					internalComponent.css({
+						"left": p.x + "px",
+						"top": p.y + "px"
+					});
+				}
 
-                if(callbackReleased != undefined)
-                    callbackReleased();
+				// if two fingers are down, turn the component around towards the second finger
+				if (e.originalEvent.touches && e.originalEvent.touches.length > 1) {
+					var turn = e.originalEvent.touches[1];
+					var angle = Math.atan2( touch.pageY - turn.pageY, touch.pageX - turn.pageX ) * 180 / Math.PI;
+					angle = (angle + 360) % 360;
+					var step = 0;
+					if (angle < 45 || angle > 315) step = 0;
+					else if (angle > 45 && angle < 135) step = 1;
+					else if (angle >135 && angle < 225) step = 2;
+					else step = 3;
 
-                //if (e.originalEvent.touches && e.originalEvent.touches.length > 1) return;
-                component.off(".rem");
-                $doc.off(".rem");
-            });
-        };
-    };
+					comp_obj.Rotate(step);
+				}
+
+			});
+
+			$doc.on("mouseup.rem touchend.rem", function(e) {
+				trace("up: " + touches);
+				if (touches > 1) {
+					touches--;
+					return;
+				}
+
+				var timeSincePressed = new Date().getTime() - initialTouchTime;
+				trace("Time since pressed: " + timeSincePressed);
+				if(timeSincePressed < 300) // Less than this time is considered a click
+				callbackClicked();
+
+				if(callbackReleased != undefined)
+				callbackReleased();
+
+				//if (e.originalEvent.touches && e.originalEvent.touches.length > 1) return;
+				component.off(".rem");
+				$doc.off(".rem");
+			});
+		};
+	};
 	$comp.on("mousedown touchstart", generateHandler($comp, function() {
-        // On clicked, add circle
-        $(me._components).each(function() {
-            this._RemoveCircle();
-        });
-        comp_obj._AddCircle();
-    }));
-    comp_obj.generateHandler = generateHandler;
-}
+		// On clicked, add circle
+		/*
+		$(me._components).each(function() {
+		this._RemoveCircle();
+		});
+		comp_obj._AddCircle();
+		*/
+		me.SelectComponent(comp_obj);
+		me.SelectWire(null);
+		}));
+		// XXX: this is hackish, we should do something better..
+		comp_obj.generateHandler = generateHandler;
+	}
 
 visir.Breadboard.prototype._RemoveWire = function(wire)
 {
@@ -994,14 +1052,14 @@ visir.Breadboard.prototype.CreateInstr = function(instr_type, instr_name)
 		_connections: [],		
 		AddConnection: function(board_point, fixed_output) {
 			//var p = new visir.Point(point.x / 13 | 0, point.y / 13 | 0);
-			trace("adding to instr: " + board_point + " " + instr_type);
+			//trace("adding to instr: " + board_point + " " + instr_type);
 			this._connections.push( { _point: board_point, fixed: fixed_output, marked: false });
 			return this;
 		},
 		GetNameAndMarkIfUsed: function(point) {
-			trace("instr: " + this._type + " " + this._name + " " + point);
+			//trace("instr: " + this._type + " " + this._name + " " + point);
 			for(var i=0;i<this._connections.length; i++) {
-				trace("checking against: " + this._connections[i]._point);
+				//trace("checking against: " + this._connections[i]._point);
 				if (point.x == this._connections[i]._point.x && point.y == this._connections[i]._point.y) {
 					this._connections[i].marked = true;
 					return this._ConnectionName(i);
@@ -1053,7 +1111,7 @@ visir.Breadboard.prototype._GetNodeName = function(p)
 {
 	var px = p.x / 13 | 0;
 	var py = p.y / 13 | 0;
-	trace("px/y: " + px + " " + py);
+	//trace("px/y: " + px + " " + py);
 	
 	// upper half, vertical
 	if (px >= 11 && px <= 42 && py >= 16 && py <= 20) {	return "A" + (px - 10);	}
@@ -1102,6 +1160,92 @@ visir.Breadboard.prototype.WriteRequest = function()
 {
 	var $xml = $('<circuit><circuitlist/></circuit>');
 	$xml.find("circuitlist").append(this._GenerateCircuit());
+	return $("<root />").append($xml).html();
+}
+
+visir.Breadboard.prototype.LoadCircuit = function(circuit)
+{
+	var me = this;
+	if (!this._$library) {
+		this._onLibraryLoaded = function() { me.LoadCircuit(circuit); }
+		return; // we have to wait until the library is loaded
+	}
+	
+	var offx = -44;
+	var offy = 3;
+
+	
+	$xml = $(circuit);
+	$xml.find("component").each(function() {
+		var t = $(this).text();
+		var args = t.split(" ");
+		switch(args[0]) {
+			case "W":
+				var c = parseInt(args[1], 10);
+				var x1 = parseInt(args[2], 10);
+				var y1 = parseInt(args[3], 10);
+				var x2 = parseInt(args[4], 10);
+				var y2 = parseInt(args[5], 10);
+				var x3 = parseInt(args[6], 10);
+				var y3 = parseInt(args[7], 10);
+				
+				var hex = Number(c).toString(16);
+				hex = "#" + "000000".substr(0, 6 - hex.length) + hex; 
+				
+				//trace("wire: " + hex)
+								
+				var nWire = new visir.Wire(hex); // XXX
+				me._wires.push(nWire);
+				nWire._start.x = x1 + offx;
+				nWire._start.y = y1 + offy;
+				nWire._mid.x = x2 + offx;
+				nWire._mid.y = y2 + offy;
+				nWire._end.x = x3 + offx;
+				nWire._end.y = y3 + offy;
+				
+				me._DrawWires();
+				
+			break;
+			default:
+				var x = parseInt(args[2], 10);
+				var y = parseInt(args[3], 10);
+				var rot = parseInt(args[4], 10);
+				var comp = me.CreateComponent(args[0], args[1]);
+				comp.Move(x + offx, y + offy);
+				comp.Rotate(rot);
+				
+			break;
+		}
+		//trace("xxx: " + $(this).text());
+	});
+}
+
+visir.Breadboard.prototype.SaveCircuit = function(circuit)
+{
+	var offp = new visir.Point(44, -3);
+	
+	var $xml = $("<circuit><circuitlist/></circuit>");
+	$cirlist = $xml.find("circuitlist");
+	
+	for(var i=0;i<this._wires.length; i++) {
+		var w = this._wires[i];
+		var $wire = $("<component/>");
+		var c = parseInt(w._color, 16);
+		var s = w._start.Add(offp);
+		var m = w._mid.Add(offp);
+		var e = w._end.Add(offp);
+		$wire.text("W " + c + " " + s.x + " " + s.y + " " + m.x + " " + m.y + " " + e.x + " " + e.y);
+		$cirlist.append($wire);
+	}
+	
+	for(var i=0;i<this._components.length; i++) {
+		var c = this._components[i];
+		var $comp = $("<component/>");
+		var p = c.GetPos().Add(offp);
+		$comp.text(c._type + " " + c._value + " " + p.x + " " + p.y + " " + c.GetRotation());
+		$cirlist.append($comp);
+	}
+	
 	return $("<root />").append($xml).html();
 }
 
@@ -1158,7 +1302,7 @@ visir.Breadboard.prototype._AddMultimeters = function(x, y, num)
 		var p = new visir.Point(x / 13 | 0, y / 13 | 0);
 		var off_x = i * 2;
 		this.CreateInstr("DMM", i+1).AddConnection(new visir.Point(p.x + off_x, p.y + 2)).AddConnection(new visir.Point(p.x + off_x, p.y + 3));
-		this.CreateInstr("IPROBE", i+1).AddConnection(new visir.Point(p.x + off_x, p.y + 4)).AddConnection(new visir.Point(p.x + off_x, p.y + 5));
+		this.CreateInstr("IPROBE", i+1).AddConnection(new visir.Point(p.x + off_x, p.y + 5)).AddConnection(new visir.Point(p.x + off_x, p.y + 6));
 	}
 }
 
