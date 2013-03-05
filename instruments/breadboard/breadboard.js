@@ -74,7 +74,7 @@ visir.Wire.prototype.SetBentPoints = function(start, end)
 	cross.x /= scale;
 	cross.y /= scale;
 	
-	var mid = { x: 0, y: 0 };
+	var mid = new visir.Point();
 	mid.x = start.x + (end.x - start.x) / 2;
 	mid.y = start.y + (end.y - start.y) / 2;
 	mid.x += cross.x;
@@ -164,8 +164,8 @@ visir.Grid = function(componentList, $bin) {
 
 	$(componentList).each(function(pos, component) {
 		var position = component._$elem.position();
-		var relative_top  = Math.floor((position.top  - bin_top  - 5 + parseInt(component.translation.y)) / 13);
 		var relative_left = Math.floor((position.left - bin_left - 5 + parseInt(component.translation.x)) / 13);
+		var relative_top  = Math.floor((position.top  - bin_top  - 5 + parseInt(component.translation.y)) / 13);
 		
 		/*
 		trace("Marking: " + component._type + " " + component._value);
@@ -287,7 +287,7 @@ visir.Component.prototype.remove = function()
 
 visir.Component.prototype._RemoveCircle = function() 
 {
-	this._breadboard._selectedCompnent = null;
+	this._breadboard.SelectComponent(null);
 	if(this._$circle != null) {
 		this._$circle.remove();
 		this._$circle = null;
@@ -296,24 +296,28 @@ visir.Component.prototype._RemoveCircle = function()
 
 visir.Component.prototype._PlaceInBin = function()
 {
-    var grid = this._breadboard._BuildOccupationGrid();
+	var grid = this._breadboard._BuildOccupationGrid();
 
-    var height = this.heightInPoints();
-    var width  = this.widthInPoints();
+	var height = this.heightInPoints();
+	var width  = this.widthInPoints();
 
-    var availablePos = grid._FindSlot(height, width);
-    var bin_position = this._breadboard._GetBin().position();
+	var availablePos = grid._FindSlot(height, width);
+	var bin_position = this._breadboard._GetBin().position();
 
-    // TODO: Take into account: this.translation.rot
-    var new_left = availablePos.x * 13 + bin_position.left + 5 - parseInt(this.translation.x);
-    var new_top  = availablePos.y * 13 + bin_position.top  + 5 - parseInt(this.translation.y);
+	// TODO: Take into account: this.translation.rot
+	this.Rotate(0);
+	var new_left = availablePos.x * 13 + bin_position.left + 5 - parseInt(this.translation.x);
+	var new_top  = availablePos.y * 13 + bin_position.top  + 5 - parseInt(this.translation.y);
+	var p = new visir.Point(new_left, new_top);
+	p.SnapToGrid();
+	
 
-    // trace("Available position found: [x=" + availablePos.x + ", y=" + availablePos.y + "] (which is [" + new_left + ", " + new_top + "])");
+	// trace("Available position found: [x=" + availablePos.x + ", y=" + availablePos.y + "] (which is [" + new_left + ", " + new_top + "])");
 
-    this._$elem.css({
-        "left" : new_left,
-        "top"  : new_top,
-    });
+	this._$elem.css({
+		"left" : p.x,
+		"top"  : p.y,
+	});
 }
 
 visir.Component.prototype.Rotate = function(step)
@@ -344,7 +348,6 @@ visir.Component.prototype.Rotate = function(step)
 visir.Component.prototype._AddCircle = function()
 {
     var me = this;
-		this._breadboard._selectedCompnent = this;
 
     // Placed here for math operations
     // var CIRCLE_SIZE    =  140;
@@ -676,9 +679,14 @@ visir.Breadboard = function(id, $elem)
 	});
 	
 	$elem.find(".delete").click( function() {
-		if (me._selectedWire === null) return;
-		me._RemoveWire(me._wires[me._selectedWire]);
-		me.SelectWire(null);
+		if (me._selectedWire !== null) {
+			me._RemoveWire(me._wires[me._selectedWire]);
+			me.SelectWire(null);
+		}
+		if (me._selectedCompnent) {
+			me._selectedCompnent._PlaceInBin();
+			me.SelectComponent(null);
+		}
 	});
 	
 	
@@ -700,15 +708,15 @@ visir.Breadboard = function(id, $elem)
 	}
 			
 	$elem.find("#wire_start").draggable( {
-		move: GenWirePointMove(true, function(p) { me._wires[me._selectedWire]._start = p; } )
+		move: GenWirePointMove(true, function(p) { me._wires[me._selectedWire]._start = new visir.Point(p.x, p.y); } )
 	});
 	
 	$elem.find("#wire_mid").draggable( {
-		move: GenWirePointMove(false, function(p) { me._wires[me._selectedWire]._mid = p; } )
+		move: GenWirePointMove(false, function(p) { me._wires[me._selectedWire]._mid = new visir.Point(p.x, p.y); } )
 	});
 	
 	$elem.find("#wire_end").draggable( {
-		move: GenWirePointMove(true, function(p) { me._wires[me._selectedWire]._end = p; } )
+		move: GenWirePointMove(true, function(p) { me._wires[me._selectedWire]._end = new visir.Point(p.x, p.y); } )
 	});
 	
 	var libraryxml = "instruments/breadboard/library.xml";
@@ -789,14 +797,16 @@ visir.Breadboard.prototype.SelectWire = function(idx)
 	this._selectedWire = idx;
 	this._DrawWires();
 	
+	this._UpdateTrashIcon();
+	
 	if (idx === null) {
 		this._$elem.find(".wirepoint").removeClass("enabled");
-		this._$elem.find(".delete").removeClass("enabled");
+		//this._$elem.find(".delete").removeClass("enabled");
 		return;
 	}
 	
 	this._$elem.find(".wirepoint").addClass("enabled");
-	this._$elem.find(".delete").addClass("enabled");
+	//this._$elem.find(".delete").addClass("enabled");
 	
 	function UpdatePoint($e, p) {
 			var x = p.x - $e.width() / 2;
@@ -814,8 +824,22 @@ visir.Breadboard.prototype.SelectWire = function(idx)
 
 visir.Breadboard.prototype.SelectComponent = function(comp)
 {
-	if (this._selectedCompnent) this._selectedCompnent._RemoveCircle();
-	if (comp) comp._AddCircle();
+	var prev = this._selectedCompnent;
+	this._selectedCompnent = comp;
+	this._UpdateTrashIcon();
+	if (prev) prev._RemoveCircle();
+	if (comp) {
+		comp._AddCircle();
+	}
+}
+
+visir.Breadboard.prototype._UpdateTrashIcon = function()
+{
+	if (this._selectedCompnent || this._selectedWire !== null) {
+		this._$elem.find(".delete").addClass("enabled");
+	} else {
+		this._$elem.find(".delete").removeClass("enabled");
+	}
 }
 
 visir.Breadboard.prototype._UpdateDisplay = function(ch)
@@ -1220,6 +1244,20 @@ visir.Breadboard.prototype.LoadCircuit = function(circuit)
 	});
 }
 
+visir.Breadboard.prototype._ColorToNum = function(rgb)
+{
+	var regex = /rgb *\( *([0-9]{1,3}) *, *([0-9]{1,3}) *, *([0-9]{1,3}) *\)/;
+	var values = regex.exec(rgb);
+	if(values.length != 4)
+	{
+		return parseInt(rgb, 16); // fallback to #000000 format
+	}
+	var r = Math.round(parseFloat(values[1]));
+	var g = Math.round(parseFloat(values[2]));
+	var b = Math.round(parseFloat(values[3]));
+	return (r << 16) + (g << 8) + b;
+}
+
 visir.Breadboard.prototype.SaveCircuit = function(circuit)
 {
 	var offp = new visir.Point(44, -3);
@@ -1230,7 +1268,8 @@ visir.Breadboard.prototype.SaveCircuit = function(circuit)
 	for(var i=0;i<this._wires.length; i++) {
 		var w = this._wires[i];
 		var $wire = $("<component/>");
-		var c = parseInt(w._color, 16);
+		var c = this._ColorToNum(w._color);
+		trace("wire color: " + c);
 		var s = w._start.Add(offp);
 		var m = w._mid.Add(offp);
 		var e = w._end.Add(offp);
