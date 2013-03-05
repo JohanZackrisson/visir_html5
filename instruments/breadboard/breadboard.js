@@ -280,14 +280,13 @@ visir.Component.prototype.widthInPoints = function()
 
 visir.Component.prototype.remove = function() 
 {
-	this._RemoveCircle();
 	this._$elem.remove();
 	this._breadboard._RemoveComponent(this);
+	this._breadboard.SelectComponent(null);
 }
 
 visir.Component.prototype._RemoveCircle = function() 
 {
-	this._breadboard.SelectComponent(null);
 	if(this._$circle != null) {
 		this._$circle.remove();
 		this._$circle = null;
@@ -467,7 +466,7 @@ visir.Component.prototype._AddCircle = function()
 
     var handler = this.generateHandler(this._$circle, function() {
         // On clicked
-        me._RemoveCircle();
+				me._breadboard.SelectComponent(null);
     }, this._$elem, function() {
         $dragImg.attr("src", me._breadboard.IMAGE_URL + "drag.png");
     }, function () {
@@ -541,6 +540,7 @@ visir.Breadboard = function(id, $elem)
 		<div class="color blue"></div>\
 		<div class="color brown"></div>\
 	</div>\
+	<div class="indicator"></div>\
 	<div class="delete"></div>\
 	<div class="components"></div>\
 	<div class="instruments">\
@@ -830,6 +830,9 @@ visir.Breadboard.prototype.SelectComponent = function(comp)
 	if (prev) prev._RemoveCircle();
 	if (comp) {
 		comp._AddCircle();
+		this._$elem.find(".indicator").text(comp._type + " " + comp._value);
+	} else {
+		this._$elem.find(".indicator").text("");
 	}
 }
 
@@ -1010,10 +1013,10 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
 				var timeSincePressed = new Date().getTime() - initialTouchTime;
 				trace("Time since pressed: " + timeSincePressed);
 				if(timeSincePressed < 300) // Less than this time is considered a click
-				callbackClicked();
+					callbackClicked();
 
 				if(callbackReleased != undefined)
-				callbackReleased();
+					callbackReleased();
 
 				//if (e.originalEvent.touches && e.originalEvent.touches.length > 1) return;
 				component.off(".rem");
@@ -1023,12 +1026,6 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
 	};
 	$comp.on("mousedown touchstart", generateHandler($comp, function() {
 		// On clicked, add circle
-		/*
-		$(me._components).each(function() {
-		this._RemoveCircle();
-		});
-		comp_obj._AddCircle();
-		*/
 		me.SelectComponent(comp_obj);
 		me.SelectWire(null);
 		}));
