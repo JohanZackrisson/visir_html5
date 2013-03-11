@@ -3,9 +3,13 @@
 <head>
 	<title>Multimeter test</title>
 	<meta name="viewport" content="initial-scale=1.0" />
+
+
+<!--
 	<link rel="stylesheet" href="instruments/flukemultimeter/flukemultimeter.css" />
 	<link rel="stylesheet" href="instruments/tripledc/tripledc.css" />
 	<link rel="stylesheet" href="instruments/breadboard/breadboard.css" />
+-->
 	<style>
 		#dmm , #dmm2 {
 			display: inline-block;
@@ -52,7 +56,10 @@
 	<script type="text/javascript" src="jquery-turnable.js"></script>
 	<script type="text/javascript" src="jquery-draggable.js"></script>
 	<script type="text/javascript" src="jquery-updownbutton.js"></script>
-	<script type="text/javascript" src="instruments/transport.js"></script>
+
+    <script type="text/javascript" id="visirjs" src="http://dev.openlabs.bth.se/~zeta/dav/git/visir_html5/visir.js"></script>
+<!--
+    <script type="text/javascript" src="instruments/transport.js"></script>
 	
 	<script type="text/javascript" src="instruments/multimeter.js"></script>
 	<script type="text/javascript" src="instruments/flukemultimeter/flukemultimeter.js"></script>
@@ -61,7 +68,7 @@
 	<script type="text/javascript" src="instruments/tripledc/tripledc.js"></script>
 	
 	<script type="text/javascript" src="instruments/breadboard/breadboard.js"></script>
-
+-->
 	<script>
 	
 	function init()
@@ -105,7 +112,11 @@
 			$("#logwindow").css("display", "none");
 		});		
 	}
-	$( function() { init(); });
+	$( function() { 
+        visir.Load(init, function() {
+            alert("Failed");
+        }, "");
+    });
 </script>
 </head>
 <body>
