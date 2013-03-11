@@ -400,24 +400,6 @@ visir.Component.prototype._AddCircle = function()
     });
     this._$circle.append($circleImg);
 
-    // Trash button
-    // http://openclipart.org/detail/68/trash-can-by-andy
-    var $trashImg = $('<img src="' + me._breadboard.IMAGE_URL + 'trash.png"/>');
-    $trashImg.width(ICON_SIZE);
-    $trashImg.height(ICON_SIZE);
-    $trashImg.css({
-        'position' : 'absolute',
-        'left'     : 0,
-        'top'      : CIRCLE_SIZE - ICON_SIZE
-    })
-    $trashImg.click(function() {
-        //me.remove();
-				//
-				me._PlaceInBin();
-				me._breadboard.SelectComponent(null);
-    });
-    this._$circle.append($trashImg);
-
     // Rotation button
     // Public domain
     // http://openclipart.org/detail/33685/tango-view-refresh-by-warszawianka
@@ -431,50 +413,20 @@ visir.Component.prototype._AddCircle = function()
     });
     $rotateImg.click(function() {
         me.Rotate();
-
-				// XXX: a bit to fancy to rotate the icon, disabled for now
-        /*$rotateImg.animate({'rotation' : '+=360'}, {
-            step : function(now, fx){
-                var currentRotation  = 'rotate(' + (now % 360) + 'deg)';
-                $rotateImg.css({
-                    'transform'         : currentRotation,
-                    '-moz-transform'    : currentRotation,
-                    '-webkit-transform' : currentRotation,
-                });
-            },
-            duration : 'slow'
-        });
-				*/
     });
     this._$circle.append($rotateImg);
 
     // Drag and drop button
-    // XXX Gentleface; CC Attribution-NonCommercial 3.0
-    // http://www.softicons.com/free-icons/toolbar-icons/black-wireframe-toolbar-icons-by-gentleface/cursor-hand-icon
-    // http://www.softicons.com/free-icons/toolbar-icons/black-wireframe-toolbar-icons-by-gentleface/cursor-drag-hand-icon
-    var $dragImg = $('<img src="' + me._breadboard.IMAGE_URL + 'drop.png" />');
-    $dragImg.width(ICON_SIZE);
-    $dragImg.height(ICON_SIZE);
-    $dragImg.css({
-        'position' : 'absolute',
-        'left'     : CIRCLE_SIZE - ICON_SIZE,
-        'top'      : 0
-    });
-    this._$circle.append($dragImg);
-
-		this._breadboard._$elem.find("#comp_circle").append(this._$circle);
+	this._breadboard._$elem.find("#comp_circle").append(this._$circle);
 
     var handler = this.generateHandler(this._$circle, function() {
         // On clicked
 				me._breadboard.SelectComponent(null);
     }, this._$elem, function() {
-        $dragImg.attr("src", me._breadboard.IMAGE_URL + "drag.png");
     }, function () {
-        $dragImg.attr("src", me._breadboard.IMAGE_URL + "drop.png");
     })
 
     $circleImg.on("mousedown touchstart", handler);
-    $dragImg.on("mousedown touchstart", handler);
 }
 
 visir.Component.prototype.GenCircuitIfUsed = function()
