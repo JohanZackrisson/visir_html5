@@ -19,8 +19,10 @@ visir.HPFunctionGenerator = function(id, elem)
 	 }
 
 	var imgbase = "instruments/hp_funcgen/images";
+	if (visir.BaseLocation) imgbase = visir.BaseLocation + imgbase;
 		
-	var tpl = '<div class="hp_funcgen">\
+	var tpl = 
+	'<div class="hp_funcgen">\
 	<img src="%img%/fgen.png" width="800" height="356" />\
 	<div class="bigtext num_display">1.00<span class="green">0</span>0000</div>\
 	<div class="bigtext num_unit">KHz</div>\
@@ -53,6 +55,7 @@ visir.HPFunctionGenerator = function(id, elem)
 			<img src="%img%/wheel.png" alt="handle" />\
 		</div>\
 	</div>\
+	<div class="manual_link"><a href="http://www.home.agilent.com/upload/cmc_upload/All/6C0633120A_USERSGUIDE_ENGLISH.pdf" target="_blank">Download Manual</a></div>\
 	</div>';
 	
 	tpl = tpl.replace(/%img%/g, imgbase);

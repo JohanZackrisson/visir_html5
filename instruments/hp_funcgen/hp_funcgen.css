@@ -1,6 +1,9 @@
 .hp_funcgen
 {
 	position: relative;
+	text-align: left;
+	width:800px;
+	height:356px;
 }
 
 /* wheel */
@@ -97,4 +100,24 @@
 .hp_funcgen .on .green
 {
 	color: #00FF00;	
+}
+
+.hp_funcgen A:visited , .hp_funcgen A:link
+{
+	color: black;
+	text-decoration: none;
+}
+
+.hp_funcgen .manual_link
+{
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+	margin: 2px;
+	border-radius: 5px;
+	border: 1px solid black;
+	display: inline-block;
+	font-size: 12px;
+	background: #bbbbbb;
+	padding: 1px 3px 1px 3px;
 }
