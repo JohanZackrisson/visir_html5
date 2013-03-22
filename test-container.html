@@ -1,0 +1,258 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>VISIR HTML5 Test</title>
+	<!--meta name="viewport" content="initial-scale=1.0, minimum-scale=1, maximum-scale=2" /-->
+	<!--meta name="viewport" content="width=1020px, initial-scale=1, maximum-scale=3" /-->
+	<style>
+		#dmm , #dmm2 {
+			display: inline-block;
+		}
+	
+		#turn {
+			width: 188px; height: 188px; 
+		}
+		#turn .top
+		{
+			transform-origin: 94px 94px;
+			-moz-transform-origin: 94px 94px;
+			-webkit-transform-origin: 94px 94px;
+			width: 188px; height: 188px; 
+		}
+		#turn2
+		{
+			height: 94px;
+			width: 94px;
+		}
+		
+		#turn2 .top
+		{
+			height: 94px;
+			width: 94px;
+		}
+		
+		#bottom
+		{
+			position: fixed;
+
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			background: white;
+			
+		}
+		
+		#container
+		{
+			width: 800px;
+			/*height: 500px;*/
+			height: 460px;
+			border: 1px solid black;			
+			position: relative;
+			text-align: center;
+			overflow: hidden;
+		}
+		
+		#container > div
+		{
+			margin: 0px auto;
+			position: relative;
+			display: inline-block;
+		}
+		
+		.buttonrow {
+			padding: 1px;
+			position: relative;
+			width: 800px;
+			text-align: center;
+			background: #999999;
+			min-height: 48px;
+		}
+		
+		.buttonrow button
+		{
+			font-size: 11px;
+			font-family: sans-serif;
+			margin: 4px;
+			height: 40px;
+			border-radius: 4px;
+			border-width: 1px;
+			border-color: rgb(192, 192, 192);
+			background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e0e0e0), color-stop(100%,#afafaf));
+			background: -moz-linear-gradient(top, #e0e0e0 0%, #afafaf 100%);
+			width: 80px;
+			vertical-align: top;
+			-webkit-user-select: none;
+		}
+		
+		.instrumentbuttons {
+			display: inline-block;
+			position: relative;
+		}
+		
+		#measurebutton {
+			width: 90px;
+			float: right;
+			margin-right: 20px;
+		}
+		
+		.loadsave {
+			float: left;
+			width: 60px;
+			min-height: 20px;
+			margin-left: 10px;
+		}
+		
+		#loadbutton , #savebutton
+		{
+			display: inline-block;
+			width: 50px;
+			height: 20px;
+			float:left;
+		}
+		#savebutton {
+			margin-top: -2px;
+		}
+		
+	</style>
+	<script type="text/javascript" src="jquery-1.8.2.min.js"></script>
+	<script type="text/javascript" src="visir.js"></script>
+	<script type="text/javascript" src="instrumentregistry.js"></script>
+	<script>
+		
+	function init()
+	{
+		
+		function MakeMeasurement()
+		{
+			reg.MakeRequest(transport);
+		}
+		
+		function ShowInstr(name) {
+			$("#container > div").hide();
+			$(name).show();
+		}
+				
+		trace("starting up..");
+
+		var transport = new visir.JSTransport(visir.SetWorking);
+		transport.onerror = function(err) { alert("Error: " + err); }
+		
+		transport.Connect("http://194.47.134.182:8080/measureserver", "fnord");
+		
+		var reg = new visir.InstrumentRegistry();
+		/*reg.CreateInstrument("Breadboard", "#circuit1");
+		reg.CreateInstrument("FlukeMultimeter", "#multimeter1");
+		reg.CreateInstrument("FlukeMultimeter", "#multimeter2");
+		reg.CreateInstrument("AgilentOscilloscope", "#oscilloscope1", { MeasureCalling: MakeMeasurement, CheckToContinueCalling: function() { return true; } });
+		reg.CreateInstrument("TripleDC", "#dcpower1");
+		reg.CreateInstrument("HPFunctionGenerator", "#functiongenerator1");
+		*/
+		
+		var savedexperiment = '<save><instruments list="breadboard/breadboard.swf|multimeter/multimeter.swf|functiongenerator/functiongenerator.swf|oscilloscope/oscilloscope.swf|tripledc/tripledc.swf" /><multimeter /><circuit><circuitlist><component>W 0 312 312 235 336 156 364</component><component>W 0 403 325 357.5 309.8 312 325</component><component>W 0 481 312 442 299 403 312</component><component>W 16711680 403 234 442 221 481 234</component><component>W 16711680 312 221 357.5 205.8 403 221</component><component>W 16711680 156 260 229.65 221 312 234</component><component>R 1k 312 273 1</component><component>R 1k 65 52 0</component><component>R 1k 65 39 0</component><component>R 1k 65 78 0</component><component>R 1k 65 65 0</component><component>R 1.6k 481 273 1</component><component>R 10k 260 78 0</component><component>R 10k 403 273 1</component><component>R 10k 260 52 0</component><component>R 10k 260 39 0</component><component>R 10k 260 65 0</component><component>R 2.7k 195 26 0</component><component>R 2.7k 195 52 0</component><component>R 2.7k 195 39 0</component><component>C 56n 312 39 0</component><component>C 56n 312 91 0</component></circuitlist></circuit></save>';
+		savedexperiment = '<save version="2"><instruments htmlinstruments="Breadboard|FlukeMultimeter|HPFunctionGenerator|AgilentOscilloscope|TripleDC"></instruments><circuit><circuitlist><component>W 0 312 312 235 336 156 364</component><component>W 0 403 325 357 309 312 325</component><component>W 0 481 312 442 299 403 312</component><component>W 16711680 403 234 442 221 481 234</component><component>W 16711680 312 221 357 205 403 221</component><component>W 16711680 156 260 229 221 312 234</component><component>R 1k 312 273 1</component><component>R 1k 65 52 0</component><component>R 1k 65 39 0</component><component>R 1k 65 78 0</component><component>R 1k 65 65 0</component><component>R 1.6k 481 273 1</component><component>R 10k 260 78 0</component><component>R 10k 403 273 1</component><component>R 10k 260 52 0</component><component>R 10k 260 39 0</component><component>R 10k 260 65 0</component><component>R 2.7k 195 26 0</component><component>R 2.7k 195 52 0</component><component>R 2.7k 195 39 0</component><component>C 56n 312 39 0</component><component>C 56n 559 221 0</component></circuitlist></circuit></save>';
+		reg.LoadExperiment(savedexperiment, $("#container"));
+		reg.CreateButtons($(".instrumentbuttons"));
+		
+		$(".measure").click( function() {
+			MakeMeasurement();
+		});
+		
+		$("#showlog").click( function() {
+			$("#logwindow").css("display", "block");
+		});
+		$("#hidelog").click( function() {
+			$("#logwindow").css("display", "none");
+		});
+		
+		$("#savebutton").click( function() {
+			trace(reg.WriteSave());
+			$("#download_data").val(reg.WriteSave());
+			$("#download_form").submit();
+		});
+		
+		$("#loadbutton").click( function() {
+			$("#upload").click();
+		});
+		
+		var isTouchDevice = navigator.userAgent.match(/iPhone|iPad/);
+		if (isTouchDevice) {
+			$(".loadsave button").hide();
+		}
+		
+		$("#upload").change( function() { $("#upload_form").submit(); })
+		$("#upload_iframe").unbind().load( function() {
+			
+			trace("loaded: " + $(this).contents().find("body").html());
+			var savedata = $(this).contents().find("body").html();
+			reg.LoadExperiment(savedata, $("#container"));
+			reg.CreateButtons($(".instrumentbuttons"));
+			ShowInstr("#circuit1");
+			
+			$("#upload").val(""); // trick to make sure we get the change request even if the same file was selected
+		});
+		
+		ShowInstr("#circuit1");
+		
+		function LoadFromURL(url)
+		{
+			reg.LoadExperimentFromURL(url, $("#container"), $(".instrumentbuttons"));
+			//reg.CreateButtons($(".instrumentbuttons"));
+			//ShowInstr("#circuit1");
+		}
+		
+		$("#load_experiment_1").click( function () {
+			LoadFromURL("http://dev.openlabs.bth.se/~zeta/dav/openlabsweb/trunk/sites/electronics/public/flash/experiment.php?exp=a4e037b4c8063f85b10b77e0e2a07071ee42b880");
+			return false;
+		});
+		
+		$("#load_experiment_2").click( function () {
+			LoadFromURL("http://dev.openlabs.bth.se/~zeta/dav/openlabsweb/trunk/sites/electronics/public/flash/experiment.php?exp=c0e2383e5dbd569b09115a5e669b73ecdbed3d16");
+			return false;
+		});
+	}
+	$( function() { 
+		//init();
+		visir.Load(init);
+	});
+</script>
+</head>
+<body>
+	<div style="display: none">
+		<iframe id="upload_iframe"></iframe>
+		<form action="http://dev.openlabs.bth.se/~zeta/dav/git/loadsave/load.php" id="upload_form" method="post" enctype="multipart/form-data" target="upload_iframe">
+			<input id="upload" name="filename" type="file" />
+		</form>
+	
+		<form action="http://dev.openlabs.bth.se/~zeta/dav/git/loadsave/save.php" id="download_form" method="post" enctype="multipart/form-data" target="upload_iframe"><!-- use the upload_iframe for now-->
+			<input type="hidden" id="download_data" name="data" />
+		</form>
+	</div>
+	<div id="container">
+	</div>
+	<div class="buttonrow">
+		<div class="loadsave">
+			<button id="loadbutton" class="">Load</button>
+			<button id="savebutton" class="">Save</button>
+		</div>
+		<div class="instrumentbuttons">
+		</div>
+		<button id="measurebutton" class="measure">Perform Measurement</button>
+	</div>
+	<br/>
+	<br/>
+	<div>
+		<a href="#" id="load_experiment_1">Test 1</a><br/>
+		<a href="#" id="load_experiment_2">Test 2</a>
+	</div>
+
+	<div>
+		Log window:
+		<button id="showlog">Show</button>
+		<button id="hidelog">Hide</button>
+	</div>
+	<div id="logwindow" style="border: 1px solid #000000; padding: 2px; height: 500px; width: 800px; overflow: scroll; display:none"></div>
+	<br/>
+	<br/>
+</body>
+</html>
