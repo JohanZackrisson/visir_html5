@@ -2,6 +2,8 @@
 {
 	position: relative;
 	text-align: left;
+	width: 800px;
+	height: 449px;
 }
 
 .ag_osc .button, .ag_osc .button img, .ag_osc .stepwheel, .ag_osc .stepwheel img {
@@ -23,6 +25,7 @@
 .ag_osc .offset_ch1 { top: 284px; left: 451px; }
 .ag_osc .offset_ch2 { top: 284px; left: 529px; }
 .ag_osc .offset_trg { top: 92px; left: 747px; }
+.ag_osc .selection_knob { top: 115px; left: 417px; }
 
 .ag_osc .button.channel_1 {	top: 237px; left: 454px; }
 .ag_osc .button.channel_2 {	top: 237px; left: 533px; }
@@ -458,4 +461,24 @@
 
 .ag_osc .infobar .box1 { left: 0px; }
 .ag_osc .infobar .box2 { left: 110px; }
-.ag_osc .infobar .box3 { left: 220px; } 
+.ag_osc .infobar .box3 { left: 220px; }
+
+.ag_osc A:visited , .ag_osc A:link
+{
+	color: black;
+	text-decoration: none;
+}
+
+.ag_osc .manual_link
+{
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+	margin: 2px;
+	border-radius: 5px;
+	border: 1px solid black;
+	display: inline-block;
+	font-size: 12px;
+	background: #bbbbbb;
+	padding: 1px 3px 1px 3px;
+}

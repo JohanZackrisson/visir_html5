@@ -82,7 +82,12 @@ visir.AgilentOscilloscope = function(id, elem, props)
 	var tplLocation = "instruments/ag_oscilloscope/ag_oscilloscope.tpl";
 	if (visir.BaseLocation) tplLocation = visir.BaseLocation + tplLocation;
 	
+	// the placeholder is only used while loading, so that size computations are done right
+	var $placeholder = $('<div class="ag_osc" />');
+	elem.append($placeholder);
+	
 	$.get(tplLocation, function(tpl) {
+		$placeholder.remove();
 		tpl = tpl.replace(/%img%/g, imgbase);
 		elem.append(tpl);
 
@@ -121,6 +126,7 @@ visir.AgilentOscilloscope = function(id, elem, props)
 
 		elem.find(".offset_trg").turnable({turn: newHandleFunc(function() { me._StepTriggerLevel(true); }, function() { me._StepTriggerLevel(false); }) });
 		elem.find(".horz").turnable({turn: newHandleFunc(function() { me._SetTimedivIdx(me._timeIdx+1); }, function() { me._SetTimedivIdx(me._timeIdx-1); }) });
+		elem.find(".selection_knob").turnable({turn: newHandleFunc(function() { me._StepSelection(true); }, function() { me._StepSelection(false); }) });
 		elem.find(".vert_ch1").turnable({turn: newHandleFunc(function() { me._SetVoltIdx(0, me._voltIdx[0]+1); }, function() { me._SetVoltIdx(0, me._voltIdx[0]-1);}) });
 		elem.find(".vert_ch2").turnable({turn: newHandleFunc(function() { me._SetVoltIdx(1, me._voltIdx[1]+1); }, function() { me._SetVoltIdx(1, me._voltIdx[1]-1);}) });
 
@@ -165,9 +171,9 @@ visir.AgilentOscilloscope = function(id, elem, props)
 		
 		elem.find(".infobar .box").hide();
 
-		me._plotWidth = me._$elem.find(".plot").width();
-		me._plotHeight = me._$elem.find(".plot").height();
-
+		me._plotWidth = me._$elem.find(".graph").width();
+		me._plotHeight = me._$elem.find(".graph").height();
+		
 		me._DrawGrid(elem.find(".grid"));
 		me._DrawPlot(elem.find(".plot"));	
 		me._UpdateChannelDisplay(0);
@@ -197,8 +203,12 @@ visir.AgilentOscilloscope.prototype._DrawGrid = function($elem)
 	context.beginPath();
 	
 	var len = 3.5;
-	var w = $elem.width();
-	var h = $elem.height();
+	/* Get the size from the .graph element instead.
+		This works around the problem where canvases get no size if a parent node has display:none.
+	*/
+	var w = $elem.parent().width();
+	var h = $elem.parent().height()
+		
 	var xspacing = w / 10;
 	var yspacing = h / 8;
 	var i, x, y;
@@ -244,8 +254,11 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 	context.strokeStyle = "#00ff00";
 	context.lineWidth		= 1.2;
 	
-	var w = this._plotWidth; //$elem.width();
-	var h = this._plotHeight; //$elem.height();
+	/* Get the size from the .graph element instead.
+		This works around the problem where canvases get no size if a parent node has display:none.
+	*/
+	var w = $elem.parent().width();
+	var h = $elem.parent().height();
 	context.clearRect(0,0, w, h);
 	context.beginPath();
 
@@ -514,6 +527,22 @@ visir.AgilentOscilloscope.prototype._AddMeasurementAndAnimate = function(ch, sel
 	if (this._measurements.length == 3) { $box3.show().stop().css("left", pos[2] + fast + "px").animate(fastanim); }
 }
 
+visir.AgilentOscilloscope.prototype._ClearMeasurement = function()
+{
+	this._$elem.find(".infobar .box").hide();
+	this._measurements = [];
+}
+
+visir.AgilentOscilloscope.prototype._StepSelection = function(up)
+{
+	if (this._activeMenu == "menu_measure") {
+		this._measurementSelectionIdx = (up) ? this._measurementSelectionIdx + 1 : this._measurementSelectionIdx - 1;
+		if (this._measurementSelectionIdx < 0) this._measurementSelectionIdx = this._measurementInfo.length - 1;
+		if (this._measurementSelectionIdx >= this._measurementInfo.length) this._measurementSelectionIdx = 0;
+		this._activeMenuHandler.ShowMenu("sel_meas_selection");
+	}
+}
+
 visir.AgilentOscilloscope.prototype._ShowMenu = function(menuname)
 {
 	var $menu = this._$elem.find(".menu." + menuname);
@@ -642,6 +671,7 @@ visir.AgilentOscilloscope.prototype._UpdateDisplay = function()
 };
 
 visir.AgilentOscilloscope.prototype.ReadResponse = function(response) {
+	var me = this;
 	visir.AgilentOscilloscope.parent.ReadResponse.apply(this, arguments);
 	this._DrawPlot(this._$elem.find(".plot"));
 	
@@ -656,10 +686,19 @@ visir.AgilentOscilloscope.prototype.ReadResponse = function(response) {
 		this._$elem.find(".button.single .state.dark").addClass("visible");
 	}
 	
-	var $measurements = this._$elem.find(".measurements");
-	if (this._measurements.length > 0) $measurements.find(".box1").text("(" + this._measurements[0].channel + ") " + this._measurementInfo[this._measurements[0].extra].str + ": " + this._measurements[0].result);
-	if (this._measurements.length > 1) $measurements.find(".box2").text("(" + this._measurements[1].channel + ") " + this._measurementInfo[this._measurements[1].extra].str + ": " + this._measurements[1].result);
-	if (this._measurements.length > 2) $measurements.find(".box3").text("(" + this._measurements[2].channel + ") " + this._measurementInfo[this._measurements[2].extra].str + ": " + this._measurements[2].result);
+	function UpdateResult($elem, measurement) {
+		var str = "(" + measurement.channel + ") " + me._measurementInfo[measurement.extra].str + ": ";
+		var unit = visir.GetUnit(measurement.result);
+		str += (measurement.result / Math.pow(10, unit.pow)).toPrecision(4);
+		str += unit.unit;
+		str += me._measurementInfo[measurement.extra].unit;
+		$elem.text(str);
+	}
+	
+	var $measurements = this._$elem.find(".measurements");	
+	if (this._measurements.length > 0) UpdateResult($measurements.find(".box1"), this._measurements[0]);
+	if (this._measurements.length > 1) UpdateResult($measurements.find(".box2"), this._measurements[1]);
+	if (this._measurements.length > 2) UpdateResult($measurements.find(".box3"), this._measurements[2]);
 };
 
 visir.AgilentOscilloscope.prototype._MakeMeasurement = function(button) {
@@ -877,6 +916,7 @@ function CreateMeasurementMenu(osc, $menu)
 				break;
 				
 				case 4:
+					osc._ClearMeasurement();
 				break;
 			}
 			this.Redraw();
@@ -890,6 +930,7 @@ function CreateMeasurementMenu(osc, $menu)
 			$menu.find(".value.source").text(osc._measurementActiveCh);
 		},
 		ShowMenu: function(name) {
+			this.Redraw();
 			this.HideMenu();
 			$menu.find(".menu_selection." + name).addClass("visible");
 			var menu = this;

@@ -4,6 +4,7 @@
 	<div class="stepwheel small offset_ch1"><img class="active top" src="%img%/osc_wheel_small_1.png" alt="stepwheel" /><img class="top" src="%img%/osc_wheel_small_2.png" alt="stepwheel" /></div>
 	<div class="stepwheel small offset_ch2"><img class="active top" src="%img%/osc_wheel_small_1.png" alt="stepwheel" /><img class="top" src="%img%/osc_wheel_small_2.png" alt="stepwheel" /></div>
 	<div class="stepwheel small offset_trg"><img class="active top" src="%img%/osc_wheel_small_1.png" alt="stepwheel" /><img class="top" src="%img%/osc_wheel_small_2.png" alt="stepwheel" /></div>
+	<div class="stepwheel small selection_knob"><img class="active top" src="%img%/osc_wheel_small_1.png" alt="stepwheel" /><img class="top" src="%img%/osc_wheel_small_2.png" alt="stepwheel" /></div>
 	<div class="stepwheel large horz"><img class="active top" src="%img%/osc_wheel_big_1.png" alt="stepwheel" /><img class="top" src="%img%/osc_wheel_big_2.png" alt="stepwheel" /></div>
 	<div class="stepwheel large vert_ch1"><img class="active top" src="%img%/osc_wheel_big_1.png" alt="stepwheel" /><img class="top" src="%img%/osc_wheel_big_2.png" alt="stepwheel" /></div>
 	<div class="stepwheel large vert_ch2"><img class="active top" src="%img%/osc_wheel_big_1.png" alt="stepwheel" /><img class="top" src="%img%/osc_wheel_big_2.png" alt="stepwheel" /></div>
@@ -229,4 +230,5 @@
 			</div>
 		</div>
 	</div>
+	<div class="manual_link"><a href="http://cp.literature.agilent.com/litweb/pdf/54622-97036.pdf" target="_blank">Download Manual</a></div>\
 </div>
