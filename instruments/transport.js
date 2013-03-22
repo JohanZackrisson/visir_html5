@@ -13,6 +13,15 @@ visir.JSTransport = function(workingCallback)
 	this.onerror = function(err) {};
 	
 	this._request = this._CreateRequest();
+	
+	this._shuttingDown = false;
+	
+	var me = this;
+	$(window).bind('beforeunload', function() {
+	//$(window).unload(function() {
+		trace("shutting down");
+		me._shuttingDown = true;
+	});
 }
 
 /*
@@ -152,9 +161,11 @@ visir.JSTransport.prototype._SendXML = function(data, callback)
 		req.onerror = function(e) { trace("XMLHttpRequest error: " + e); me.Error(e); }
 		req.onreadystatechange = function(response)
 		{
+			if (me._shuttingDown) return;
 			if (req.readyState != 4) return;
+			if (req.status == 0) return; // workaround for strange shutdown status
 			if (req.status != "200" && req.status != "304") {
-				me.Error("unexpected request return status");
+				me.Error("unexpected request return status: " + req.status + " " + req.readyState);
 				return;
 			}
 			//trace("XMLHttpRequest response: " + req.responseText);
