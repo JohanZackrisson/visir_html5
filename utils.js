@@ -15,7 +15,7 @@ function inherit(proto) {
 function trace(msg)
 {
 	$("#logwindow").append(msg + "<br/>");
-	if (console && console.log) console.log(msg);
+	if (window.console && console.log) console.log(msg);
 }
 
 function setRotation(elem, deg)
@@ -85,4 +85,31 @@ function base64_decode(data) {
   } while (i < data.length);
 
   return tmp_arr;
+}
+
+visir.GetUnit = function(val)
+{
+	var units = [
+		["G", 6 ]
+		, ["M", 6 ]
+		, ["k", 3 ]
+		, ["", 0]
+		, ["m", -3]
+		, ["u", -6]
+		, ["n", -9]
+		];
+	val = Math.abs(val);
+	var unit = "";
+	var div = 0;
+	if (val == 0) return { unit: unit, pow: div };
+	
+	for (var key in units) {
+		var unit = units[key];
+		if (val >= Math.pow(10, unit[1])) {
+			return {unit: unit[0], pow: unit[1] };
+		}
+	}
+	
+	var last = units[units.length - 1];
+	return {unit: last[0], pow: last[1] };
 }
