@@ -1,6 +1,9 @@
 .tripledc
 {
 	position: relative;
+	text-align: left;
+	width: 720px;
+	height: 449px;
 }
 
 .tripledc .hide
@@ -131,3 +134,24 @@
 	width: 37px;
 	height: 35px;
 }
+
+.tripledc A:visited , .tripledc A:link
+{
+	color: black;
+	text-decoration: none;
+}
+
+.tripledc .manual_link
+{
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+	margin: 2px;
+	border-radius: 5px;
+	border: 1px solid black;
+	display: inline-block;
+	font-size: 12px;
+	background: #bbbbbb;
+	padding: 1px 3px 1px 3px;
+}
+

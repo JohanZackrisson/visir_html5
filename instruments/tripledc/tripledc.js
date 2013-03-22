@@ -13,12 +13,13 @@ visir.TripleDC = function(id, elem)
 	// all the values are represented times 1000 to avoid floating point trouble
 	// XXX: need to change this later, both voltage and current has an active digit
 	this._values = {
-		"6V+": { voltage: 0, current: 5000, digit: 2 },
-		"25V+": { voltage: 0, current: 5000, digit: 2 },
-		"25V-": { voltage: 0, current: 5000, digit: 2 }
+		"6V+": { voltage: 0, current: 5000, digit: 2, min: 0, max: 6000},
+		"25V+": { voltage: 0, current: 5000, digit: 2, min: 0, max: 25000 },
+		"25V-": { voltage: 0, current: 5000, digit: 2, min: -25000, max: 0 }
 	 }
 	
 	var imgbase = "instruments/tripledc/images";
+	if (visir.BaseLocation) imgbase = visir.BaseLocation + imgbase;
 	
 	var tpl = '<div class="tripledc">\
 	<img src="%img%/3dc.png" width="720" height="449" />\
@@ -39,6 +40,7 @@ visir.TripleDC = function(id, elem)
 			<img src="%img%/3dc_wheel.png" alt="handle" />\
 		</div>\
 	</div>\
+	<div class="manual_link"><a href="http://cp.literature.agilent.com/litweb/pdf/E3631-90002.pdf" target="_blank">Download Manual</a></div>\
 	</div>';
 	
 	tpl = tpl.replace(/%img%/g, imgbase);
@@ -134,7 +136,7 @@ visir.TripleDC.prototype._SetActiveChannel = function(ch) {
 
 visir.TripleDC.prototype._SetActiveValue = function(val, digit) {
 	var aCh = this._GetActiveChannel();
-	if (val < 0 || val > 25000) return;
+	if ((val < aCh.min) || (val > aCh.max)) return;
 	if (digit > 4 || digit < 0) return;
 	//trace("setactivevalue: " + val + " " + digit + " " + Math.pow(10, digit));
 	if (val > 1000 && val < Math.pow(10, digit)) return;
