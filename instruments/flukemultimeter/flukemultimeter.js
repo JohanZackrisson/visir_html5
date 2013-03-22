@@ -12,12 +12,15 @@ visir.FlukeMultimeter = function(id, elem)
 	
 	visir.FlukeMultimeter.parent.constructor.apply(this, arguments)
 	
+	var imgbase = "instruments/flukemultimeter/";
+	if (visir.BaseLocation) imgbase = visir.BaseLocation + imgbase;
+	
 	var tpl = '<div class="flukedmm">\
-	<img src="instruments/flukemultimeter/fluke23.png" width="300" height="460" />\
+	<img src="' + imgbase + 'fluke23.png" width="300" height="460" />\
 	<div class="dmm_value" id="value">12.3</div>\
 	<div class="rot">\
 		<div class="top vred">\
-			<img src="instruments/flukemultimeter/fluke23_vred.png" alt="handle" />\
+			<img src="' + imgbase + 'fluke23_vred.png" alt="handle" />\
 		</div>\
 	</div>\
 	</div>';
@@ -66,12 +69,50 @@ visir.FlukeMultimeter.prototype.UpdateDisplay = function() {
 		$value.text("");
 	} else {
 		var out = this.GetResult();
-		if (typeof out == "number") out = out.toPrecision(4);
-		$value.text(out);
+		
+		trace("DMM RESULT: " + out);
+		
+		if (typeof out == "number") {
+			var unit = this._GetUnit(out);
+			out = out / Math.pow(10, unit.pow);
+
+			out = out.toPrecision(4);
+			$value.text(out + unit.unit);
+		}
+		else {
+			$value.text(out);
+		}
 	}
 }
 
 visir.FlukeMultimeter.prototype.ReadResponse = function(response) {
 	visir.FlukeMultimeter.parent.ReadResponse.apply(this, arguments)
 	this.UpdateDisplay();
+}
+
+visir.FlukeMultimeter.prototype._GetUnit = function(val)
+{
+	var units = [
+		["G", 6 ]
+		, ["M", 6 ]
+		, ["k", 3 ]
+		, ["", 0]
+		, ["m", -3]
+		, ["u", -6]
+		, ["n", -9]
+		];
+	val = Math.abs(val);
+	var unit = "";
+	var div = 0;
+	if (val == 0) return { unit: unit, pow: div };
+	
+	for (var key in units) {
+		var unit = units[key];
+		if (val >= Math.pow(10, unit[1])) {
+			return {unit: unit[0], pow: unit[1] };
+		}
+	}
+	
+	var last = units[units.length - 1];
+	return {unit: last[0], pow: last[1] };
 }
