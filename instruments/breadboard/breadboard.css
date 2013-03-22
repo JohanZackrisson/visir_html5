@@ -5,6 +5,7 @@
 	position:relative;
 	font-family: Times, serif;	
 	-webkit-user-select: none;
+	text-align: left;
 }
 
 /* canvas for drawing wires, should be drawn in the forground above components */
@@ -54,8 +55,9 @@
 	height:18px;
 	border:2px solid rgb(200,193,138);
 	position:absolute;
-	left:673px;
-	top:76px;
+	margin: 3px;
+	right: 0px;
+	bottom: 0px;
 	text-align: center;
 	border-radius: 6px;
 	box-shadow: 2px 2px 4px #888;
@@ -68,6 +70,24 @@
 .breadboard .bin .teacher:hover
 {
 	background: rgb(252,251,232);
+}
+
+.breadboard .bin .reset
+{
+	font-size: 12px;
+	border:2px solid rgb(200,193,138);
+	position:absolute;
+	right:0px;
+	top:0px;
+	margin: 3px;
+	padding: 0 3px 0 3px;
+	text-align: center;
+	border-radius: 6px;
+	box-shadow: 2px 2px 4px #888;
+	background: rgb(232,231,212);
+	cursor: hand; 
+	cursor: pointer;
+	pointer-events:auto;
 }
 
 .breadboard .componentbox
@@ -199,6 +219,13 @@
 	border: 2px solid black;
 }
 
+.breadboard .indicator {
+	position: absolute;
+	bottom: 10px;
+	left: 593px;
+	font-size: 12px;
+}
+
 .breadboard .instruments {
 	-webkit-user-select: none;
 	pointer-events:none;
@@ -214,7 +241,6 @@
 
 .breadboard .instrument {
 	font-size: 10px;
-	font-weight:bold;
 	text-align: center;
 	position: absolute;
 	padding: 0; margin: 0;

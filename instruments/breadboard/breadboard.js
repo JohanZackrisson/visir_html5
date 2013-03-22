@@ -232,7 +232,7 @@ visir.Grid.prototype._FindSlot = function(height, width)
 // Component
 
 // Component container
-visir.Component = function($elem, breadboard)
+visir.Component = function($elem, breadboard, type, value)
 {
 	this._$elem        = $elem;
 	this._breadboard   = breadboard;
@@ -241,6 +241,8 @@ visir.Component = function($elem, breadboard)
 	this.translation   = { 'x' : 0, 'y' : 0 };
 	this.translations  = [];
 	this._pins = []; // one entry per rotation, each entry contains an array of points with offsets to where each pin is located
+	this._type = type;
+	this._value = value;
 }
 
 visir.Component.prototype.Move = function(x, y)
@@ -530,7 +532,8 @@ visir.Breadboard = function(id, $elem)
 	<img class="background" src="' + this.IMAGE_URL + 'breadboard.png" alt="breadboard"/>\
 	<div class="clickarea"></div>\
 	<div class="bin">\
-    	<div class="teacher">+</div>\
+		<div class="reset">Reset</div>\
+   	<div class="teacher">+</div>\
 	</div>\
 	<div class="colorpicker">\
 		<div class="color red"></div>\
@@ -567,8 +570,6 @@ visir.Breadboard = function(id, $elem)
 	$elem.append(tpl);
 	
 	var $wires = $elem.find("#wires");
-	var wires_offset = $wires.offset();
-	var offset = { x: wires_offset.left, y: wires_offset.top };
 	var $doc = $(document);
 	var context = $wires[0].getContext('2d');
 	this._wireCtx = context;
@@ -577,9 +578,10 @@ visir.Breadboard = function(id, $elem)
 	
 	// create offsceen canvas for wire picking
 	var offscreen_canvas = document.createElement('canvas');
-	offscreen_canvas.width = $wires.width();
-	offscreen_canvas.height = $wires.height();
+	offscreen_canvas.width = 715; //$wires.parent().width();
+	offscreen_canvas.height = 450; //$wires.parent().height();
 	this._offWireCtx = offscreen_canvas.getContext('2d');
+	//$elem.find("#debug").append(offscreen_canvas);
 	//document.getElementById("debug").appendChild(offscreen_canvas);
 
  // TODO: make it configurable (argument?)
@@ -609,12 +611,29 @@ visir.Breadboard = function(id, $elem)
         });
     });
 
+		$elem.find(".reset").click( function(e) {
+			// Send all the components back to the bin
+			for(var i=0;i<me._components.length;i++) {
+				me._components[i].Move(500,500); // move away from the bin
+			}			
+			for(var i=0;i<me._components.length;i++) {
+				me._components[i]._PlaceInBin();
+			}
+			
+			me.SelectComponent(null);
+			me._wires = [];
+			me._DrawWires();
+		});
+
     $elem.find(".componentbutton button").click(function(e) {
         $elem.find(".componentbox").hide();
     });
 
 	
 	$click.on("mousedown touchstart", function(e) {
+		var wires_offset = $wires.offset();
+		var offset = { x: wires_offset.left, y: wires_offset.top };
+		
 		if (!me._color) {
 			// do picking against the wires
 			
@@ -646,6 +665,7 @@ visir.Breadboard = function(id, $elem)
 		me._wires.push(nWire);
 		
 		e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
+
 		var start = new visir.Point(e.pageX - offset.x, e.pageY - offset.y);
 		start.SnapToGrid();
 		
@@ -730,9 +750,16 @@ visir.Breadboard = function(id, $elem)
 	me._AddFGEN(0, 6+13*16, 2);
 }
 
+visir.Breadboard.prototype.Clear = function()
+{
+	while(this._components.length > 0) this._components[0].remove();
+	this._wires = [];
+	this._DrawWires();
+}
+
 visir.Breadboard.prototype._PickWire = function(x, y)
 {
-	var pickWidth = 10;
+	var pickWidth = 15;
 	this._offWireCtx.clearRect(0,0, this._$wires.width(), this._$wires.height());
 	for(var i=0;i<this._wires.length; i++)
 	{
@@ -761,15 +788,7 @@ visir.Breadboard.prototype._PickWire = function(x, y)
 visir.Breadboard.prototype._DrawWires = function()
 {
 	this._wireCtx.clearRect(0,0, this._$wires.width(), this._$wires.height());
-	
-	// draw outline if selected
-	/*this._wireCtx.save();
-	if (this._selectedWire !== null) {
-		this._wires[this._selectedWire]._RawDraw(this._wireCtx, "#000", 5);
-	}
-	this._wireCtx.restore();
-	*/
-	
+		
 	for(var i=0;i<this._wires.length; i++)
 	{
 		this._wires[i].DrawShadow(this._wireCtx, "#000", 5);
@@ -781,6 +800,7 @@ visir.Breadboard.prototype._DrawWires = function()
 		this._wires[i].Draw(this._wireCtx);
 	}
 	
+	// draw outline if selected
 	// always draw the selected wired on top
 	this._wireCtx.save();
 	if (this._selectedWire !== null) {
@@ -872,11 +892,7 @@ visir.Breadboard.prototype.CreateComponent = function(type, value)
 	var me = this;
 	var $libcomp = this._$library.find('component[type="'+ type+'"][value="'+ value+ '"]');
 	var $comp = $('<div class="component"></div>');
-	var comp_obj = new visir.Component($comp, me);
-
-	//XXX: should be in ctor
-	comp_obj._type = type;
-	comp_obj._value = value;
+	var comp_obj = new visir.Component($comp, me, type, value);
 	
 	var idx = 0;
 	
@@ -1184,8 +1200,24 @@ visir.Breadboard.prototype.WriteRequest = function()
 	return $("<root />").append($xml).html();
 }
 
+visir.Breadboard.prototype.ReadResponse = function()
+{
+	
+}
+
+visir.Breadboard.prototype.ReadSave = function($xml)
+{
+	this.LoadCircuit($xml);
+}
+
+visir.Breadboard.prototype.WriteSave = function()
+{
+	return this.SaveCircuit();
+}
+
 visir.Breadboard.prototype.LoadCircuit = function(circuit)
 {
+	this.Clear();
 	var me = this;
 	if (!this._$library) {
 		this._onLibraryLoaded = function() { me.LoadCircuit(circuit); }
@@ -1245,9 +1277,9 @@ visir.Breadboard.prototype._ColorToNum = function(rgb)
 {
 	var regex = /rgb *\( *([0-9]{1,3}) *, *([0-9]{1,3}) *, *([0-9]{1,3}) *\)/;
 	var values = regex.exec(rgb);
-	if(values.length != 4)
+	if(!values || values.length != 4)
 	{
-		return parseInt(rgb, 16); // fallback to #000000 format
+		return parseInt(rgb.slice(1), 16); // fallback to #000000 format
 	}
 	var r = Math.round(parseFloat(values[1]));
 	var g = Math.round(parseFloat(values[2]));
