@@ -474,8 +474,8 @@ visir.Breadboard = function(id, $elem)
 	this._selectedCompnent = null;
 	
 	this._isTouchDevice = navigator.userAgent.match(/iPhone|iPad|Android/)
-	
-	this._fingerOffset = new visir.Point(0, -26);
+	if (this._isTouchDevice) this._fingerOffset = new visir.Point(0, -26);
+	else this._fingerOffset = new visir.Point(0, 0);
 	
 	this.IMAGE_URL = "instruments/breadboard/images/";
 	if (visir.BaseLocation) this.IMAGE_URL = visir.BaseLocation + this.IMAGE_URL;
@@ -572,6 +572,7 @@ visir.Breadboard = function(id, $elem)
 				me._components[i]._PlaceInBin();
 			}
 			
+			me.SelectWire(null);
 			me.SelectComponent(null);
 			me._wires = [];
 			me._DrawWires();
@@ -619,11 +620,13 @@ visir.Breadboard = function(id, $elem)
 		e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
 
 		var start = new visir.Point(e.pageX - offset.x, e.pageY - offset.y);
+		start = start.Add(me._fingerOffset);
 		start.SnapToGrid();
 		
 		$click.on("mousemove.rem touchmove.rem", function(e) {
 			e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
 			var end = new visir.Point(e.pageX - offset.x, e.pageY - offset.y);
+			end = end.Add(me._fingerOffset);
 			end.SnapToGrid();
 			
 			nWire.SetBentPoints(start, end);
@@ -669,7 +672,7 @@ visir.Breadboard = function(id, $elem)
 				var p = new visir.Point(x, y);
 				
 				// add a finger offset if on a mobile touch screen device
-				if (me._isTouchDevice) p = p.Add(me._fingerOffset);
+				p = p.Add(me._fingerOffset);
 				if (snap) p.SnapToGrid();
 				assign(p);
 				me._DrawWires();
@@ -759,8 +762,7 @@ visir.Breadboard.prototype._DrawWires = function()
 		this._wires[this._selectedWire]._RawDraw(this._wireCtx, "#000", 5);
 		this._wires[this._selectedWire].Draw(this._wireCtx);
 	}
-	this._wireCtx.restore();	
-	
+	this._wireCtx.restore();
 }
 
 visir.Breadboard.prototype.SelectWire = function(idx)
