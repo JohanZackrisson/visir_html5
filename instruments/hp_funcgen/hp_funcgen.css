@@ -106,6 +106,9 @@
 {
 	color: black;
 	text-decoration: none;
+	font-weight: normal;
+	font-size: 12px;
+	font-family: serif;
 }
 
 .hp_funcgen .manual_link
@@ -117,7 +120,7 @@
 	border-radius: 5px;
 	border: 1px solid black;
 	display: inline-block;
-	font-size: 12px;
 	background: #bbbbbb;
+	font-size: 12px;
 	padding: 1px 3px 1px 3px;
 }
