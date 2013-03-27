@@ -79,18 +79,20 @@
 	</div>
 	<div class="display">
 		<div class="background">
-			<div class="channel ch1"><span class="channelname">1</span><span class="lighttext voltage_ch1"><span class="value">1.00</span><div class="unitstring"></div>/</span></div>
-			<div class="channel ch2"><span class="channelname">2</span><span class="lighttext voltage_ch2"><span class="value">1.00</span><div class="unitstring"></div>/</span></div>
-			<div class="timedelay"><img class="arrow" src="%img%/delay_arrow.png" alt="delay arrow" /><span class="lighttext">0.00s</span></div>
-			<div class="timescale"><span class="lighttext timediv"><span class="value">500us</span><div class="unitstring"></div>/</span></div>
-			<div class="trigtype"><span class="lighttext triggermode">Level</span></div>
-			<div class="triggerslope">
-				<img class="flank positive selected" src="%img%/osc_trig_edge_up_small.png" alt="trigger flank" /><img class="flank negative" src="%img%/osc_trig_edge_down_small.png" alt="trigger flank" />
+			<div class="topbar">
+				<div class="channel ch1"><span class="channelname">1</span><span class="lighttext voltage_ch1"><span class="value">1.00</span><div class="unitstring"></div>/</span></div>
+				<div class="channel ch2"><span class="channelname">2</span><span class="lighttext voltage_ch2"><span class="value">1.00</span><div class="unitstring"></div>/</span></div>
+				<div class="timedelay"><img class="arrow" src="%img%/delay_arrow.png" alt="delay arrow" /><span class="lighttext">0.00s</span></div>
+				<div class="timescale"><span class="lighttext timediv"><span class="value">500us</span><div class="unitstring"></div>/</span></div>
+				<div class="trigtype"><span class="lighttext triggermode">Level</span></div>
+				<div class="triggerslope">
+					<img class="flank positive selected" src="%img%/osc_trig_edge_up_small.png" alt="trigger flank" /><img class="flank negative" src="%img%/osc_trig_edge_down_small.png" alt="trigger flank" />
+				</div>
+				<div class="triggersource">
+					<span class="channelname">1</span>
+				</div>
+				<div class="triglevel"><span class="lighttext"><span class="value">0.00</span><div class="unitstring"></div></span></div>
 			</div>
-			<div class="triggersource">
-				<span class="channelname">1</span>
-			</div>
-			<div class="triglevel"><span class="lighttext"><span class="value">0.00</span><div class="unitstring"></div></span></div>
 			<div class="vertical">
 				<div class="group offset_group_ch1 visible">
 					<div class="ch_offset normal visible"><span class="offsetchannel">1</span><img class="offsetarrow" src="%img%/offset_arrow.png" alt="offset arrow" /></div>
