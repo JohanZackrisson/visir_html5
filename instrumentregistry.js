@@ -10,6 +10,7 @@ visir.InstrumentRegistry = function()
 		multimeter: 0,
 		oscilloscope: 0
 	};
+	this._listeners = [];
 	
 	function InstrInfo(type, name, swf) { return { type: type, displayname: name, swf: swf } };
 	this._instrumentInfo = {
@@ -134,14 +135,11 @@ visir.InstrumentRegistry.prototype._CreateInstrFromSWF = function(swf, $loc)
 	return null;
 }
 
-visir.InstrumentRegistry.prototype.LoadExperimentFromURL = function(url, $loc, $buttons)
+visir.InstrumentRegistry.prototype.LoadExperimentFromURL = function(url, $loc)
 {
 	var me = this;
 	$.get(url, function(data) {
 		me.LoadExperiment(data, $loc);
-		me.CreateButtons($buttons);
-		$loc.find("> .instrument").hide();
-		$loc.find("> .instrument").first().show();
 	});
 }
 
@@ -170,33 +168,18 @@ visir.InstrumentRegistry.prototype.LoadExperiment = function(xmldata, $loc)
 	}
 	
 	this.ReadSave($xml);
+	this.Notify("onExperimentLoaded");
 }
 
-visir.InstrumentRegistry.prototype._CreateInstrButton = function(name)
+visir.InstrumentRegistry.prototype.AddListener = function(listenTo)
 {
-	return $('<button class="instrumentbutton">' + name + '</button>');
+	this._listeners.push(listenTo);
 }
 
-visir.InstrumentRegistry.prototype.CreateButtons = function($container)
+// XXX: do we need to fix arguments? lets see..
+visir.InstrumentRegistry.prototype.Notify = function(func)
 {
-	$container.find(".instrumentbutton").remove();
-	var me = this;
-	
-	function genButtonHandler($dom) {
-		return function() {
-			for(var i=0;i<me._instruments.length; i++) {
-				me._instruments[i].domnode.hide();
-			}
-			$dom.show();
-		}
-	}
-	
-	for(var i=0;i<this._instruments.length; i++) {
-		var instr = this._instruments[i];
-		var suffix = "";
-		if (this._instruments[i].id > 1) suffix += " " + this._instruments[i].id;
-		var $newButton = this._CreateInstrButton( instr.instrInfo.displayname + suffix);
-		$newButton.click( genButtonHandler(instr.domnode));
-		$container.append($newButton);
+	for(var i=0;i<this._listeners.length; i++) {
+		if (typeof this._listeners[i][func] == "function") this._listeners[i][func]();
 	}
 }

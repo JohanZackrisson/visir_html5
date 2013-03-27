@@ -13,6 +13,7 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		, "instruments/hp_funcgen/hp_funcgen.css"
 		, "instruments/ag_oscilloscope/ag_oscilloscope.css"
 		, "instruments/ni_oscilloscope/ni_oscilloscope.css"
+		, "instrumentframe/instrumentframe.css"
 	];
 	
 	var stage1_scripts = [
@@ -20,6 +21,7 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		, "jquery-turnable.js"
 		, "jquery-draggable.js"
 		, "jquery-updownbutton.js"
+		, "instrumentregistry.js"
 		, "instruments/multimeter.js"
 		, "instruments/oscilloscope.js"
 		, "instruments/functiongenerator.js"
@@ -34,6 +36,7 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		, "instruments/hp_funcgen/hp_funcgen.js"
 		, "instruments/ag_oscilloscope/ag_oscilloscope.js"
 		, "instruments/ni_oscilloscope/ni_oscilloscope.js"
+		, "instrumentframe/instrumentframe.js"
 	];
 	
 	function InjectCSS(src)
