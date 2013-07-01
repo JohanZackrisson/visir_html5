@@ -6,11 +6,11 @@ visir.InstrumentFrame = function(instreg, $container)
 {
 	this._registry = instreg;
 	this._$container = $container;
-	
+
 	var protocol = window.location.protocol;
 	var load_url = protocol + "//dev.openlabs.bth.se/~zeta/dav/git/loadsave/load.php";
 	var save_url = protocol + "//dev.openlabs.bth.se/~zeta/dav/git/loadsave/save.php";
-	
+
 	//XXX: should generate a iframe name with a unique id..
 	var $tpl = $(
 	'<div class="frame">\
@@ -32,7 +32,7 @@ visir.InstrumentFrame = function(instreg, $container)
 	</div>\
 	'
 	);
-	
+
 	var isTouchDevice = navigator.userAgent.match(/iPhone|iPad/);
 	if (!isTouchDevice) {
 		$loadsave = $(
@@ -41,31 +41,31 @@ visir.InstrumentFrame = function(instreg, $container)
 			');
 			$tpl.find(".loadsave").append($loadsave);
 	}
-	
+
 	$container.append($tpl);
 
 	var frame = this;
 	instreg.AddListener( { onExperimentLoaded: function() { frame.CreateButtons(); }  })
-	
+
 	$container.find("#savebutton").click( function() {
 		trace(instreg.WriteSave());
 		$container.find("#download_data").val(instreg.WriteSave());
 		$container.find("#download_form").submit();
 	});
-		
+
 	$container.find("#loadbutton").click( function() {
 		$container.find("#upload").click();
 	});
-	
+
 	$container.find("#upload").change( function() { $("#upload_form").submit(); })
 	$container.find("#upload_iframe").unbind().load( function() {
-		trace("loaded: '" + $(this).contents().find("body").html() + "'");
+		trace("loaded: '" + $(this).html() + "'");
 		var savedata = $(this).contents().find("body").html();
 		if (savedata.length == 0) return;
 		instreg.LoadExperiment(savedata, $container.find(".container"));
 		$container.find("#upload").val(""); // trick to make sure we get the change request even if the same file was selected
 	});
-	
+
 	/// Note: the .measure button click is handled outside this class
 }
 
@@ -82,10 +82,10 @@ visir.InstrumentFrame.prototype._CreateInstrButton = function(name)
 visir.InstrumentFrame.prototype.CreateButtons = function()
 {
 	var instruments = this._registry._instruments; // watch out!
-	
+
 	this._$container.find(".instrumentbutton").remove();
 	var me = this;
-	
+
 	function genButtonHandler($dom) {
 		return function() {
 			for(var i=0;i<instruments.length; i++) {
@@ -94,7 +94,7 @@ visir.InstrumentFrame.prototype.CreateButtons = function()
 			$dom.show();
 		}
 	}
-	
+
 	for(var i=0;i<instruments.length; i++) {
 		var instr = instruments[i];
 		var suffix = "";
@@ -103,7 +103,7 @@ visir.InstrumentFrame.prototype.CreateButtons = function()
 		$newButton.click( genButtonHandler(instr.domnode));
 		this._$container.find(".instrumentbuttons").append($newButton);
 	}
-	
+
 	this._$container.find(".container > .instrument").hide();
 	this._$container.find(".container > .instrument").first().show();
 }
