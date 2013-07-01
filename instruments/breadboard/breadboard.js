@@ -524,6 +524,7 @@ visir.Breadboard = function(id, $elem)
 	$elem.append(tpl);
 
 	var $wires = $elem.find("#wires");
+	G_vmlCanvasManager.initElement($wires);
 	var $doc = $(document);
 	var context = $wires[0].getContext('2d');
 	this._wireCtx = context;
@@ -532,6 +533,7 @@ visir.Breadboard = function(id, $elem)
 
 	// create offsceen canvas for wire picking
 	var offscreen_canvas = document.createElement('canvas');
+	G_vmlCanvasManager.initElement(offscreen_canvas);
 	offscreen_canvas.width = 715; //$wires.parent().width();
 	offscreen_canvas.height = 450; //$wires.parent().height();
 	this._offWireCtx = offscreen_canvas.getContext('2d');
