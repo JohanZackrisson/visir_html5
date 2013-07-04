@@ -5,23 +5,23 @@ var visir = visir || {};
 visir.Oscilloscope = function(id)
 {
 	this._id = id;
-	
+
 	this._autoScale = 0;
 	this._sampleRate = 500; // ?
 	this._horzRefPos = 50;
 	this._recordLength = 500; // number of samples to aquire
-	
+
 	function NewGraph(l)
 	{
 		var out = new Array(l);
 		for(var i=0; i<l; i++) { out[i] = 0.0; }
 		return out;
 	}
-	
+
 	var channel1 = { enabled: 1, coupling: "dc", range: 1, offset: 0, attenuation: 1.0, graph: NewGraph(500) };
 	var channel2 = { enabled: 1, coupling: "dc", range: 1, offset: 0, attenuation: 1.0, graph: NewGraph(500) };
 	this._channels = [ channel1, channel2 ];
-	
+
 	this._trigger = {
 		source: 1 //"channel 1"
 		, slope: "positive"
@@ -31,7 +31,7 @@ visir.Oscilloscope = function(id)
 		, timeout: 1.0
 		, delay: 0.0
 	}
-	
+
 	/*var m1 = { channel: 1, selection: "none", result: "" };
 	var m2 = { channel: 1, selection: "none", result: "" };
 	var m3 = { channel: 1, selection: "none", result: "" };*/
@@ -49,7 +49,7 @@ visir.Oscilloscope.prototype.AddMeasurement = function(ch, selection, extra)
 			break;
 		}
 	}
-		
+
 	while(this._measurements.length > 2) this._measurements.shift();
 	this._measurements.push( { channel: ch, selection: selection, extra: extra, result: "" } );
 	return rv;
@@ -59,15 +59,15 @@ visir.Oscilloscope.prototype.WriteRequest = function()
 {
 	var $xml = $('<oscilloscope><horizontal/><channels/><trigger/><measurements/></oscilloscope>');
 	$xml.attr("id", this._id);
-	
+
 	AddXMLValue($xml, "osc_autoscale", this._autoScale);
-	
+
 	// horizontal
 	var $horz = $xml.find("horizontal");
 	AddXMLValue($horz, "horz_samplerate", this._sampleRate);
 	AddXMLValue($horz, "horz_refpos", this._horzRefPos);
 	AddXMLValue($horz, "horz_recordlength", this._recordLength);
-	
+
 	// assume 2 channels
 	for(var i=0; i<2; i++) {
 		var ch = this._channels[i];
@@ -80,7 +80,7 @@ visir.Oscilloscope.prototype.WriteRequest = function()
 		AddXMLValue($channel, "chan_attenuation", ch.attenuation);
 		$xml.find("channels").append($channel);
 	}
-	
+
 	var $trigger = $xml.find("trigger");
 	var trig = this._trigger;
 	AddXMLValue($trigger, "trig_source", "channel " + trig.source);
@@ -90,7 +90,7 @@ visir.Oscilloscope.prototype.WriteRequest = function()
 	AddXMLValue($trigger, "trig_mode", trig.mode);
 	AddXMLValue($trigger, "trig_timeout", trig.timeout);
 	AddXMLValue($trigger, "trig_delay", trig.delay);
-	
+
 	for(var i=0; i<3; i++) {
 		var channel = 1;
 		var selection = "none";
@@ -99,14 +99,14 @@ visir.Oscilloscope.prototype.WriteRequest = function()
 			channel = meas.channel;
 			selection = meas.selection;
 		}
-		
+
 		var $measure = $('<measurement/>');
 		$measure.attr("number", i+1);
 		AddXMLValue($measure, "meas_channel", "channel " + channel);
 		AddXMLValue($measure, "meas_selection", selection);
 		$xml.find("measurements").append($measure);
 	}
-	
+
 	return $("<root />").append($xml).html();
 }
 
@@ -115,7 +115,7 @@ visir.Oscilloscope.prototype.ReadResponse = function(response) {
 	var $xml = $(response);
 	var $oscilloscope = $xml.find("oscilloscope"); // add id match later, when server supports it
 	if ($oscilloscope.length == 0) return;
-	
+
 	$oscilloscope.find("channel").each(function() {
 		var $channel = $(this);
 		var chnr = $channel.attr("number");
@@ -132,7 +132,7 @@ visir.Oscilloscope.prototype.ReadResponse = function(response) {
 		}
 		me._channels[chnr - 1].graph = graph;
 	});
-	
+
 	$oscilloscope.find("measurement").each(function() {
 		var $measurement = $(this);
 		var measnr = parseInt($measurement.attr("number"), 10);

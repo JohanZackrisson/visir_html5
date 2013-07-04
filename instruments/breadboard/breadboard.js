@@ -73,13 +73,13 @@ visir.Wire.prototype.SetBentPoints = function(start, end)
 	var scale = 5;
 	cross.x /= scale;
 	cross.y /= scale;
-	
+
 	var mid = new visir.Point();
 	mid.x = start.x + (end.x - start.x) / 2;
 	mid.y = start.y + (end.y - start.y) / 2;
 	mid.x += cross.x;
 	mid.y += cross.y;
-		
+
 	this.SetPoints(start, mid, end);
 }
 
@@ -99,13 +99,13 @@ visir.Wire.prototype.DrawShadow = function(context, color, width)
 {
 	var diff = { x: this._end.x - this._start.x, y: this._end.y - this._start.y };
 	var len = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
-		
+
 	var scale = 20.0;
 	var midx = this._mid.x + len / scale;
 	var midy = this._mid.y + len / scale;
-	
+
 	context.save();
-	
+
 	context.shadowBlur=7;
 	context.shadowColor="black";
 	context.lineCap = 'round';
@@ -123,7 +123,7 @@ visir.Wire.prototype.DrawShadow = function(context, color, width)
 
 
 visir.Wire.prototype._RawDraw = function(context, color, width)
-{	
+{
 	context.lineCap = 'round';
 	context.strokeStyle = color;
 	context.lineWidth   = width;
@@ -166,7 +166,7 @@ visir.Grid = function(componentList, $bin) {
 		var position = component._$elem.position();
 		var relative_left = Math.floor((position.left - bin_left - 5 + parseInt(component.translation.x)) / 13);
 		var relative_top  = Math.floor((position.top  - bin_top  - 5 + parseInt(component.translation.y)) / 13);
-		
+
 		/*
 		trace("Marking: " + component._type + " " + component._value);
 		trace("rel: " + relative_left + " " + relative_top);
@@ -180,7 +180,7 @@ visir.Grid = function(componentList, $bin) {
 		// trace("Component found in: " + relative_top + ", " + relative_left);
 
 		//if(relative_top >= 0 && relative_top < me._rows && relative_left >= 0 && relative_left < me._cols) {
-			for(var x = relative_left; x < relative_left + wip; x++) 
+			for(var x = relative_left; x < relative_left + wip; x++)
 			for(var y = relative_top; y < relative_top + hip; y++) {
 				if (x >= 0 && x<me._cols && y >= 0 && y<me._rows) {
 					me._set(x,y, false);
@@ -204,7 +204,7 @@ visir.Grid.prototype._set = function(x, y, value)
 }
 
 
-visir.Grid.prototype._FindSlot = function(height, width) 
+visir.Grid.prototype._FindSlot = function(height, width)
 {
 	for (var x = 0; x <= this._cols - width; x++) { // x = 0 .. ~54
 		for (var y = 0; y <= this._rows - height; y++) { // y = 0 .. ~7
@@ -260,12 +260,12 @@ visir.Component.prototype.GetRotation = function()
 	return this._current_step;
 }
 
-visir.Component.prototype.width = function() 
+visir.Component.prototype.width = function()
 {
 	return this._$elem.find('.active').width();
 }
 
-visir.Component.prototype.height = function() 
+visir.Component.prototype.height = function()
 {
 	return this._$elem.find('.active').height();
 }
@@ -280,14 +280,14 @@ visir.Component.prototype.widthInPoints = function()
 	return Math.ceil(this.width() / 13);
 }
 
-visir.Component.prototype.remove = function() 
+visir.Component.prototype.remove = function()
 {
 	this._$elem.remove();
 	this._breadboard._RemoveComponent(this);
 	this._breadboard.SelectComponent(null);
 }
 
-visir.Component.prototype._RemoveCircle = function() 
+visir.Component.prototype._RemoveCircle = function()
 {
 	if(this._$circle != null) {
 		this._$circle.remove();
@@ -311,7 +311,7 @@ visir.Component.prototype._PlaceInBin = function()
 	var new_top  = availablePos.y * 13 + bin_position.top  + 5 - parseInt(this.translation.y);
 	var p = new visir.Point(new_left, new_top);
 	p.SnapToGrid();
-	
+
 
 	// trace("Available position found: [x=" + availablePos.x + ", y=" + availablePos.y + "] (which is [" + new_left + ", " + new_top + "])");
 
@@ -355,11 +355,11 @@ visir.Component.prototype._AddCircle = function()
     var CIRCLE_SIZE    =  this.width() + 100;
     var ICON_SIZE      =  40;
 
-    // If the circle may be slightly bigger than the four 
+    // If the circle may be slightly bigger than the four
     // corner icons, since circles don't have corners. This
-    // constant establishes the level of overlap between the 
+    // constant establishes the level of overlap between the
     // square that surrounds a circle and the square that
-    // surrounds the icons. Example: establishing it to 0 
+    // surrounds the icons. Example: establishing it to 0
     // the circle will not overlap at all; establishing it to
     // 1 will overlap completely.
     var CIRCLE_OVERLAP =  0.4;
@@ -434,11 +434,11 @@ visir.Component.prototype._AddCircle = function()
 visir.Component.prototype.GenCircuitIfUsed = function()
 {
 	var out = this._type + "_X";
-	
+
 	var rot = this._current_step;
 	var pins = this._pins[rot];
 	if (pins.length == 0) return null; // assert?
-	
+
 	for(var i = 0; i< pins.length; i++) {
 		var p = this._breadboard._GetNodeName(this._GetPinPoint(pins[i]));
 		if (!p) return null;
@@ -450,7 +450,7 @@ visir.Component.prototype.GenCircuitIfUsed = function()
 visir.Component.prototype._GetPinPoint = function(p)
 {
 	var mx = parseInt(this._$elem.css('left'));
-	var my = parseInt(this._$elem.css('top'));	
+	var my = parseInt(this._$elem.css('top'));
 	//trace("mx/y: " + mx + " " + my + "-" + p);
 	return new visir.Point(mx + p.x, my + p.y);
 }
@@ -472,14 +472,14 @@ visir.Breadboard = function(id, $elem)
 	this._instruments = [];
 	this._selectedWire = null; // index in _wires
 	this._selectedCompnent = null;
-	
+
 	this._isTouchDevice = navigator.userAgent.match(/iPhone|iPad|Android/)
 	if (this._isTouchDevice) this._fingerOffset = new visir.Point(0, -26);
 	else this._fingerOffset = new visir.Point(0, 0);
-	
+
 	this.IMAGE_URL = "instruments/breadboard/images/";
 	if (visir.BaseLocation) this.IMAGE_URL = visir.BaseLocation + this.IMAGE_URL;
-	
+
 	var tpl = '<div class="breadboard">\
 	<img class="background" src="' + this.IMAGE_URL + 'breadboard.png" alt="breadboard"/>\
 	<div class="clickarea"></div>\
@@ -488,12 +488,14 @@ visir.Breadboard = function(id, $elem)
    	<div class="teacher">+</div>\
 	</div>\
 	<div class="colorpicker">\
+		<p class="title">Wire color</p>\
 		<div class="color red"></div>\
 		<div class="color black"></div>\
 		<div class="color green"></div>\
 		<div class="color yellow"></div>\
 		<div class="color blue"></div>\
 		<div class="color brown"></div>\
+		<div class="currentcolor"></div>\
 	</div>\
 	<div class="indicator"></div>\
 	<div class="delete"></div>\
@@ -516,20 +518,22 @@ visir.Breadboard = function(id, $elem)
         </div>\
     </div>\
 	</div>';
-	
+
 	//tpl += '<div id="debug"></div>'
-		
+
 	$elem.append(tpl);
-	
+
 	var $wires = $elem.find("#wires");
+	G_vmlCanvasManager.initElement($wires);
 	var $doc = $(document);
 	var context = $wires[0].getContext('2d');
 	this._wireCtx = context;
 	this._$wires = $wires;
 	var $click = $elem.find(".clickarea");
-	
+
 	// create offsceen canvas for wire picking
 	var offscreen_canvas = document.createElement('canvas');
+	G_vmlCanvasManager.initElement(offscreen_canvas);
 	offscreen_canvas.width = 715; //$wires.parent().width();
 	offscreen_canvas.height = 450; //$wires.parent().height();
 	this._offWireCtx = offscreen_canvas.getContext('2d');
@@ -567,11 +571,11 @@ visir.Breadboard = function(id, $elem)
 			// Send all the components back to the bin
 			for(var i=0;i<me._components.length;i++) {
 				me._components[i].Move(500,500); // move away from the bin
-			}			
+			}
 			for(var i=0;i<me._components.length;i++) {
 				me._components[i]._PlaceInBin();
 			}
-			
+
 			me.SelectWire(null);
 			me.SelectComponent(null);
 			me._wires = [];
@@ -582,18 +586,18 @@ visir.Breadboard = function(id, $elem)
         $elem.find(".componentbox").hide();
     });
 
-	
+
 	$click.on("mousedown touchstart", function(e) {
 		var wires_offset = $wires.offset();
 		var offset = { x: wires_offset.left, y: wires_offset.top };
-		
+
 		if (!me._color) {
 			// do picking against the wires
-			
+
 			// don't care if we got more than one touch
 			// we can probably do something smarter here, to avoid problems when scrolling etc.
 			if (e.originalEvent.touches && e.originalEvent.touches.length > 1) return;
-			
+
 			var touch = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
 			var start = new visir.Point(touch.pageX - offset.x, touch.pageY - offset.y);
 			var idx = me._PickWire(start.x, start.y);
@@ -603,7 +607,7 @@ visir.Breadboard = function(id, $elem)
 				me.SelectComponent(null);
 				return;
 			}
-			
+
 			// nothing was picked
 			me.SelectWire(null);
 			me.SelectComponent(null);
@@ -612,47 +616,47 @@ visir.Breadboard = function(id, $elem)
 		}
 		//trace("mouse down");
 		e.preventDefault();
-		
+
 		// Draw new wire
 		var nWire = new visir.Wire(me._color); // XXX: replace with CreateWire
 		me._wires.push(nWire);
-		
+
 		e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
 
 		var start = new visir.Point(e.pageX - offset.x, e.pageY - offset.y);
 		start = start.Add(me._fingerOffset);
 		start.SnapToGrid();
-		
+
 		$click.on("mousemove.rem touchmove.rem", function(e) {
 			e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
 			var end = new visir.Point(e.pageX - offset.x, e.pageY - offset.y);
 			end = end.Add(me._fingerOffset);
 			end.SnapToGrid();
-			
+
 			nWire.SetBentPoints(start, end);
 			me._DrawWires();
 
 			//trace("move")
 		});
-		
+
 		$doc.on("mouseup.rem touchend.rem", function(e) {
 			trace("mouseup");
 			$click.off(".rem");
 			$doc.off(".rem");
-			
+
 			// deselect the color picker
 			me._color = null;
 			me._$elem.find(".color").removeClass("selected");
 		});
 	});
-	
+
 	$elem.find(".color").click( function() {
 		me._color = $(this).css("background-color");
-		me._$elem.find(".color").removeClass("selected");
-		$(this).addClass("selected");
+		me._$elem.find('.color.selected').removeClass('selected');
+		$(this).addClass('selected');
 		me.SelectWire(null);
 	});
-	
+
 	$elem.find(".delete").click( function() {
 		if (me._selectedWire !== null) {
 			me._RemoveWire(me._wires[me._selectedWire]);
@@ -663,41 +667,41 @@ visir.Breadboard = function(id, $elem)
 			me.SelectComponent(null);
 		}
 	});
-	
-	
+
+
 	function GenWirePointMove(snap, assign)
 	{
 		return function($elem, x, y) {
 			if (me._selectedWire === null) return;
 				var p = new visir.Point(x, y);
-				
+
 				// add a finger offset if on a mobile touch screen device
 				p = p.Add(me._fingerOffset);
 				if (snap) p.SnapToGrid();
 				assign(p);
 				me._DrawWires();
-				
+
 				var retp = new visir.Point(p.x - $elem.width() / 2, p.y - $elem.height() / 2);
 				return retp;
 		}
 	}
-			
+
 	$elem.find("#wire_start").draggable( {
 		move: GenWirePointMove(true, function(p) { me._wires[me._selectedWire]._start = new visir.Point(p.x, p.y); } )
 	});
-	
+
 	$elem.find("#wire_mid").draggable( {
 		move: GenWirePointMove(false, function(p) { me._wires[me._selectedWire]._mid = new visir.Point(p.x, p.y); } )
 	});
-	
+
 	$elem.find("#wire_end").draggable( {
 		move: GenWirePointMove(true, function(p) { me._wires[me._selectedWire]._end = new visir.Point(p.x, p.y); } )
 	});
-	
+
 	var libraryxml = "instruments/breadboard/library.xml";
 	if (visir.BaseLocation) libraryxml = visir.BaseLocation + libraryxml;
 	me._ReadLibrary(libraryxml);
-	
+
 	me._AddMultimeters(1 + 13*45,8 + 13*21,2);
 	me._AddOSC(1 + 13*45, 8 + 13 * 16, 1);
 	me._AddGND(1 + 13*45, 8 + 13 * 30);
@@ -723,38 +727,38 @@ visir.Breadboard.prototype._PickWire = function(x, y)
 	var c = this._offWireCtx.getImageData(x, y, 1, 1).data;
 	trace("c: " + c[0] + " " + c[1] + " " + c[2] + " " + c[3]);
 	var r = c[0] - 1;
-	
+
 	/*for(var i=0;i<this._wires.length; i++)
 	{
 		this._wires[i].Draw(this._offWireCtx);
 	}
-	
+
 	this._offWireCtx.strokeStyle = "#ff0000";
 	this._offWireCtx.lineWidth = 1;
-	this._offWireCtx.beginPath();	
+	this._offWireCtx.beginPath();
 	this._offWireCtx.arc(x, y, 2, 0, Math.PI*2, true);
 	this._offWireCtx.closePath();
 	this._offWireCtx.stroke();
 	*/
-	
+
 	return (r >= 0) ? r : null;
 }
 
 visir.Breadboard.prototype._DrawWires = function()
 {
 	this._wireCtx.clearRect(0,0, this._$wires.width(), this._$wires.height());
-		
+
 	for(var i=0;i<this._wires.length; i++)
 	{
 		this._wires[i].DrawShadow(this._wireCtx, "#000", 5);
 	}
-	
+
 	for(var i=0;i<this._wires.length; i++)
 	{
 		if (this._selectedWire === i) continue;
 		this._wires[i].Draw(this._wireCtx);
 	}
-	
+
 	// draw outline if selected
 	// always draw the selected wired on top
 	this._wireCtx.save();
@@ -770,18 +774,18 @@ visir.Breadboard.prototype.SelectWire = function(idx)
 	trace("selected wire: " + idx);
 	this._selectedWire = idx;
 	this._DrawWires();
-	
+
 	this._UpdateTrashIcon();
-	
+
 	if (idx === null) {
 		this._$elem.find(".wirepoint").removeClass("enabled");
 		//this._$elem.find(".delete").removeClass("enabled");
 		return;
 	}
-	
+
 	this._$elem.find(".wirepoint").addClass("enabled");
 	//this._$elem.find(".delete").addClass("enabled");
-	
+
 	function UpdatePoint($e, p) {
 			var x = p.x - $e.width() / 2;
 			var y = p.y - $e.height() / 2;
@@ -789,7 +793,7 @@ visir.Breadboard.prototype.SelectWire = function(idx)
 			y = y | 0;
 			$e.css("left", x).css("top", y);
 	}
-	
+
 	var w = this._wires[idx];
 	UpdatePoint(this._$elem.find("#wire_start"), w._start);
 	UpdatePoint(this._$elem.find("#wire_mid"), w._mid);
@@ -839,17 +843,17 @@ visir.Breadboard.prototype._ReadLibrary = function(url)
 }
 
 visir.Breadboard.prototype.CreateComponent = function(type, value)
-{	
+{
 	//var BASE_URL = "instruments/breadboard/images/";
 	//if (visir.BaseLocation) BASE_URL = visir.BaseLocation + BASE_URL;
-	
+
 	var me = this;
 	var $libcomp = this._$library.find('component[type="'+ type+'"][value="'+ value+ '"]');
 	var $comp = $('<div class="component"></div>');
 	var comp_obj = new visir.Component($comp, me, type, value);
-	
+
 	var idx = 0;
-	
+
 	$libcomp.find("rotation").each(function() {
 		var imgtpl = '<img src="' + me.IMAGE_URL + $(this).attr("image") + '" alt="'+ type + value + '"/>';
 		var $img = $(imgtpl);
@@ -863,11 +867,11 @@ visir.Breadboard.prototype.CreateComponent = function(type, value)
 			ox = oy;
 			oy = tmp;
 		}
-		
+
 		var transform = "";
 		transform	+= ' translate(' + ox + 'px, ' + oy + 'px)';
 		transform += ' rotate(' + rot + 'deg)';
-				
+
 		$img.css( {
 			'transform': transform,
 			'-moz-transform': transform,
@@ -875,7 +879,7 @@ visir.Breadboard.prototype.CreateComponent = function(type, value)
 //			, 'top': oy + 'px'
 //			, 'left': ox + 'px'
 		})
-	
+
 		var current_translation = { 'x' : ox, 'y' : oy, 'rot' : rot };
 		comp_obj.translations.push(current_translation);
 		//trace("Adding " + ox + ", " + oy);
@@ -884,17 +888,17 @@ visir.Breadboard.prototype.CreateComponent = function(type, value)
 			comp_obj.translation = current_translation;
 		}
 		$comp.append($img);
-		
+
 		$(this).find("pin").each( function() {
 			var x = parseInt($(this).attr("x"));
 			var y = parseInt($(this).attr("y"));
 			if (!comp_obj._pins[idx]) comp_obj._pins[idx] = [];
 			comp_obj._pins[idx].push(new visir.Point(x,y));
-		});		
-		
+		});
+
 		idx++;
 	});
-	
+
 	me._components.push(comp_obj);
 	me._AddComponentEvents(comp_obj, $comp);
 	me._$elem.find(".components").append($comp);
@@ -930,7 +934,7 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
 			$doc.on("keyup.rem", function(e){
 				if(e.keyCode == 46)
 				comp_obj.remove();
-			}) 
+			})
 
 			$doc.on("mousemove.rem touchmove.rem", function(e) {
 				if(callbackPressed != undefined)
@@ -1023,7 +1027,7 @@ visir.Breadboard.prototype._RemoveComponent = function(comp_obj)
 	}
 }
 
-visir.Breadboard.prototype._BuildOccupationGrid = function() 
+visir.Breadboard.prototype._BuildOccupationGrid = function()
 {
     return new visir.Grid(this._components, this._GetBin());
 }
@@ -1036,11 +1040,11 @@ visir.Breadboard.prototype._GetBin = function()
 visir.Breadboard.prototype.CreateInstr = function(instr_type, instr_name)
 {
 	var me = this;
-	
+
 	var newinstr = {
 		_type: instr_type,
 		_name: instr_name,
-		_connections: [],		
+		_connections: [],
 		AddConnection: function(board_point, fixed_output) {
 			//var p = new visir.Point(point.x / 13 | 0, point.y / 13 | 0);
 			//trace("adding to instr: " + board_point + " " + instr_type);
@@ -1059,7 +1063,7 @@ visir.Breadboard.prototype.CreateInstr = function(instr_type, instr_name)
 		},
 		GenInstrIfUsed: function() {
 			if (this._type == "0") return; // special case for 0/GND instruments
-			
+
 			// if any of the points are marked, generate the instrument string
 			var isUsed = false;
 			var conStr = "";
@@ -1103,7 +1107,7 @@ visir.Breadboard.prototype._GetNodeName = function(p)
 	var px = p.x / 13 | 0;
 	var py = p.y / 13 | 0;
 	//trace("px/y: " + px + " " + py);
-	
+
 	// upper half, vertical
 	if (px >= 11 && px <= 42 && py >= 16 && py <= 20) {	return "A" + (px - 10);	}
 	// lower half, vertical
@@ -1113,10 +1117,10 @@ visir.Breadboard.prototype._GetNodeName = function(p)
 	if (px >= 13 && px <= 41 && py == 12 && (px % 6 != 0)) { return "Y"; }
 	if (px >= 13 && px <= 41 && py == 31 && (px % 6 != 0)) { return "S"; }
 	if (px >= 13 && px <= 41 && py == 32 && (px % 6 != 0)) { return "T"; }
-	
+
 	var instrp = this._GetAndMarkInstrNodeName(new visir.Point(px, py));
 	if (instrp) return instrp;
-	
+
 	return null;
 }
 
@@ -1125,7 +1129,7 @@ visir.Breadboard.prototype._GenerateCircuit = function()
 	for(var i=0; i < this._instruments.length; i++) {
 		var r = this._instruments[i].ClearMarks();
 	}
-	
+
 	var out = "";
 	for (var i = 0; i < this._wires.length; i++) {
 		var wire = this._wires[i];
@@ -1133,17 +1137,17 @@ visir.Breadboard.prototype._GenerateCircuit = function()
 		var e = this._GetNodeName(wire._end);
 		if (s && e) out += "W_X " + s + " " + e + "\n";
 	}
-	
+
 	for(var i=0;i < this._components.length; i++) {
 		var r = this._components[i].GenCircuitIfUsed();
 		if (r) out += r;
 	}
-	
+
 	for(var i=0; i < this._instruments.length; i++) {
 		var r = this._instruments[i].GenInstrIfUsed();
 		if (r) out += r;
 	}
-	
+
 	return out;
 }
 
@@ -1156,7 +1160,7 @@ visir.Breadboard.prototype.WriteRequest = function()
 
 visir.Breadboard.prototype.ReadResponse = function()
 {
-	
+
 }
 
 visir.Breadboard.prototype.ReadSave = function($xml)
@@ -1177,11 +1181,11 @@ visir.Breadboard.prototype.LoadCircuit = function(circuit)
 		this._onLibraryLoaded = function() { me.LoadCircuit(circuit); }
 		return; // we have to wait until the library is loaded
 	}
-	
+
 	var offx = -44;
 	var offy = 3;
 
-	
+
 	$xml = $(circuit);
 	$xml.find("component").each(function() {
 		var t = $(this).text();
@@ -1195,12 +1199,12 @@ visir.Breadboard.prototype.LoadCircuit = function(circuit)
 				var y2 = parseInt(args[5], 10);
 				var x3 = parseInt(args[6], 10);
 				var y3 = parseInt(args[7], 10);
-				
+
 				var hex = Number(c).toString(16);
-				hex = "#" + "000000".substr(0, 6 - hex.length) + hex; 
-				
+				hex = "#" + "000000".substr(0, 6 - hex.length) + hex;
+
 				//trace("wire: " + hex)
-								
+
 				var nWire = new visir.Wire(hex); // XXX
 				me._wires.push(nWire);
 				nWire._start.x = x1 + offx;
@@ -1209,9 +1213,9 @@ visir.Breadboard.prototype.LoadCircuit = function(circuit)
 				nWire._mid.y = y2 + offy;
 				nWire._end.x = x3 + offx;
 				nWire._end.y = y3 + offy;
-				
+
 				me._DrawWires();
-				
+
 			break;
 			default:
 				var x = parseInt(args[2], 10);
@@ -1220,7 +1224,7 @@ visir.Breadboard.prototype.LoadCircuit = function(circuit)
 				var comp = me.CreateComponent(args[0], args[1]);
 				comp.Move(x + offx, y + offy);
 				comp.Rotate(rot);
-				
+
 			break;
 		}
 		//trace("xxx: " + $(this).text());
@@ -1244,10 +1248,10 @@ visir.Breadboard.prototype._ColorToNum = function(rgb)
 visir.Breadboard.prototype.SaveCircuit = function(circuit)
 {
 	var offp = new visir.Point(44, -3);
-	
+
 	var $xml = $("<circuit><circuitlist/></circuit>");
 	$cirlist = $xml.find("circuitlist");
-	
+
 	for(var i=0;i<this._wires.length; i++) {
 		var w = this._wires[i];
 		var $wire = $("<component/>");
@@ -1259,7 +1263,7 @@ visir.Breadboard.prototype.SaveCircuit = function(circuit)
 		$wire.text("W " + c + " " + s.x + " " + s.y + " " + m.x + " " + m.y + " " + e.x + " " + e.y);
 		$cirlist.append($wire);
 	}
-	
+
 	for(var i=0;i<this._components.length; i++) {
 		var c = this._components[i];
 		var $comp = $("<component/>");
@@ -1267,7 +1271,7 @@ visir.Breadboard.prototype.SaveCircuit = function(circuit)
 		$comp.text(c._type + " " + c._value + " " + p.x + " " + p.y + " " + c.GetRotation());
 		$cirlist.append($comp);
 	}
-	
+
 	return $("<root />").append($xml).html();
 }
 
@@ -1276,12 +1280,12 @@ visir.Breadboard.prototype.SaveCircuit = function(circuit)
 
 visir.Breadboard.prototype._AddMultimeters = function(x, y, num)
 {
-	var i = 0;	
+	var i = 0;
 	var $dmm = $(
 	'<div class="instrument dmm">\
 	</div>'
 	);
-	
+
 	$dmm.css("left", x + "px").css("top", y + "px");
 
 	for(i=0;i<num; i++) {
@@ -1290,7 +1294,7 @@ visir.Breadboard.prototype._AddMultimeters = function(x, y, num)
 			numstr = (i+1);
 			if (i>0) $dmm.append('<div class="connnectionspacer"></div>');
 		}
-		
+
 		$dmm.append(
 		'<div class="connectionimages">\
 			<div class="number">' + numstr + '</div>\
@@ -1300,7 +1304,7 @@ visir.Breadboard.prototype._AddMultimeters = function(x, y, num)
 		</div>'
 		);
 	}
-	
+
 	$dmm.append(
 		'<div class="texts">\
 			<div class="connectiontext"></div>\
@@ -1317,9 +1321,9 @@ visir.Breadboard.prototype._AddMultimeters = function(x, y, num)
 		</div>\
 		'
 	);
-	
+
 	this._$elem.find(".instruments").append($dmm);
-	
+
 	for(i=0;i<num; i++) {
 		var p = new visir.Point(x / 13 | 0, y / 13 | 0);
 		var off_x = i * 2;
@@ -1347,10 +1351,10 @@ visir.Breadboard.prototype._AddOSC = function(x, y, num)
 		<div class="title">Oscilloscope</div>\
 	</div>'
 	);
-		
+
 	$osc.css("left", x + "px").css("top", y + "px");
 	this._$elem.find(".instruments").append($osc);
-	
+
 	var p = new visir.Point(x / 13 | 0, y / 13 | 0);
 	this.CreateInstr("PROBE1", 1).AddConnection(new visir.Point(p.x, p.y + 2));
 	this.CreateInstr("PROBE2", 1).AddConnection(new visir.Point(p.x, p.y + 4));
@@ -1369,7 +1373,7 @@ visir.Breadboard.prototype._AddGND = function(x, y)
 	</div>');
 	$gnd.css("left", x + "px").css("top", y + "px");
 	this._$elem.find(".instruments").append($gnd);
-	
+
 	var p = new visir.Point(x / 13 | 0, (y / 13 | 0) + 1)
 	this.CreateInstr("0").AddConnection(p, "0");
 }
@@ -1396,10 +1400,10 @@ visir.Breadboard.prototype._AddDCPower = function(x, y, num)
 			</div>\
 	</div>'
 	);
-	
+
 	$dcpower.css("right", x + "px").css("top", y + "px");
 	this._$elem.find(".instruments .left").append($dcpower);
-	
+
 	var p = new visir.Point(x / 13 | 0, y / 13 | 0);
 	var off_x = 8;
 	var off_y = 9;
@@ -1421,7 +1425,7 @@ visir.Breadboard.prototype._AddFGEN = function(x, y, num)
 			<tr class="GND"></tr>\
 		</table>\
 	</div>');
-	
+
 	var $fgen = $(
 	'<div class="instrument fgen">\
 		<div class="texts">\
@@ -1435,10 +1439,10 @@ visir.Breadboard.prototype._AddFGEN = function(x, y, num)
 		</div>\
 	</div>'
 	);
-		
+
 	$fgen.css("right", x + "px").css("top", y + "px");
 	this._$elem.find(".instruments .left").append($fgen);
-	
+
 	var p = new visir.Point(x / 13 | 0, y / 13 | 0);
 	var off_x = 8;
 	var off_y = 9;
