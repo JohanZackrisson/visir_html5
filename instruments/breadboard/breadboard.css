@@ -3,7 +3,7 @@
 	width: 714px;
 	height: 450px;
 	position:relative;
-	font-family: Times, serif;	
+	font-family: Times, serif;
 	-webkit-user-select: none;
 	text-align: left;
 }
@@ -62,7 +62,7 @@
 	border-radius: 6px;
 	box-shadow: 2px 2px 4px #888;
 	background: rgb(232,231,212);
-	cursor: hand; 
+	cursor: hand;
 	cursor: pointer;
 	pointer-events:auto;
 }
@@ -85,7 +85,7 @@
 	border-radius: 6px;
 	box-shadow: 2px 2px 4px #888;
 	background: rgb(232,231,212);
-	cursor: hand; 
+	cursor: hand;
 	cursor: pointer;
 	pointer-events:auto;
 }
@@ -124,12 +124,12 @@
 {
 	position:absolute;
     top: 368px;
-    left: 150px; 
+    left: 150px;
 }
 
 .breadboard .components
 {
-	
+
 }
 
 .breadboard .component
@@ -161,17 +161,33 @@
 .breadboard .colorpicker
 {
 	position:absolute;
-	top: 130px;
-	right: 3px;
-	width: 120px;
+	top: 125px;
+	right: 10px;
+	width: 110px;
+	border: 1px solid #000;
 }
 
-.breadboard .color
+.breadboard .colorpicker p.title
+{
+	font-size: 0.8em;
+	margin: 0px;
+	padding: 0.1em 0.5em;
+}
+
+.breadboard .color:not(.currentcolor)
 {
 	position: relative;
 	float: left;
-	width: 39px;
-	height: 39px;	
+	width: 30px;
+	height: 30px;
+	margin: 2px;
+	border: 1px solid #CCC;
+}
+
+.breadboard .color:hover
+{
+	border: 1px solid #AAA;
+	cursor: pointer;
 }
 
 .color.red { background: red; }
@@ -181,11 +197,10 @@
 .color.blue { background: blue; }
 .color.brown { background: brown; }
 
-.color.selected
+.breadboard .color.selected
 {
-	border: 3px solid gray;
-	margin: -3px;
-	z-index: 10;
+	border: 3px solid #000;
+	margin: 0px;
 }
 
 .breadboard .wirepoint {
@@ -207,11 +222,11 @@
 	width: 40px; height: 40px;
 	position: absolute;
 	bottom: 0; right: 0;
-	opacity: 0.4;	
+	opacity: 0.4;
 }
 
 .breadboard .delete.enabled {
-	opacity: 1.0;	
+	opacity: 1.0;
 }
 
 .breadboard .componentcircle .circle {

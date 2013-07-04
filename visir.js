@@ -1,7 +1,5 @@
 var visir = visir || {};
 
-if ($.browser.msie) alert("Upgrade to a modern web browser. This page will probably not work as designed.");
-
 visir.Load = function( onSuccess, onFailure, baseurl )
 {
 	baseurl = baseurl || "";
@@ -15,7 +13,7 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		, "instruments/ni_oscilloscope/ni_oscilloscope.css"
 		, "instrumentframe/instrumentframe.css"
 	];
-	
+
 	var stage1_scripts = [
 		"utils.js"
 		, "jquery-turnable.js"
@@ -28,7 +26,7 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		, "instruments/dcpower.js"
 		, "instruments/transport.js"
 	];
-	
+
 	var stage2_scripts = [
 		"instruments/breadboard/breadboard.js"
 		, "instruments/flukemultimeter/flukemultimeter.js"
@@ -38,7 +36,7 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		, "instruments/ni_oscilloscope/ni_oscilloscope.js"
 		, "instrumentframe/instrumentframe.js"
 	];
-	
+
 	function InjectCSS(src)
 	{
 		var def = $.Deferred();
@@ -59,7 +57,7 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		head.appendChild(script);
 		return def.promise();
 	}
-	
+
 	function InjectScript(src)
 	{
 		var def = $.Deferred();
@@ -80,7 +78,7 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		head.appendChild(script);
 		return def.promise();
 	}
-	
+
 	// we need to load the essentials dependecies before loading the rest of the files
 	function GetStage1()
 	{
@@ -90,7 +88,7 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		}
 		return defs;
 	}
-	
+
 	function GetStage2() {
 		var defs = [];
 		for(var i=0;i<stage2_scripts.length; i++) {
@@ -101,7 +99,7 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		}
 		return defs;
 	}
-	
+
 	var deferred_1 = GetStage1();
 	$.when.apply(null, deferred_1).done( function() {
 		var deferred_2 = GetStage2();
