@@ -2,10 +2,11 @@
 	width: 800px;
 	/*height: 500px;*/
 	height: 460px;
-	border: 1px solid black;			
+	border: 1px solid black;
 	position: relative;
 	text-align: center;
 	overflow: hidden;
+	margin: 0px auto;
 }
 
 .frame .container > div {
@@ -21,6 +22,7 @@
 	text-align: center;
 	background: #999999;
 	min-height: 48px;
+	margin: 0px auto;
 }
 
 .frame .buttonrow button {
@@ -65,4 +67,9 @@
 
 .frame #savebutton {
 	margin-top: -2px;
+}
+
+.breadboard
+{
+	border: none;
 }

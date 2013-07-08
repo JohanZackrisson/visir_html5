@@ -91,8 +91,11 @@ visir.AgilentOscilloscope = function(id, elem, props)
 		tpl = tpl.replace(/%img%/g, imgbase);
 		elem.append(tpl);
 
-		G_vmlCanvasManager.initElement(elem.find(".grid"));
-		G_vmlCanvasManager.initElement(elem.find(".plot"));
+		if (typeof G_vmlCanvasManager !== "undefined")
+		{
+			G_vmlCanvasManager.initElement(elem.find(".grid"));
+			G_vmlCanvasManager.initElement(elem.find(".plot"));
+		}
 
 		var unitstring_tpl = '<div class="large strings visible">V</div><div class="small strings"><div class="top">m</div><div class="bottom">v</div></div>';
 		elem.find(".unitstring").append(unitstring_tpl);
