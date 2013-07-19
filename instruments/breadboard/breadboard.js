@@ -551,26 +551,26 @@ visir.Breadboard = function(id, $elem)
 	if(!teacher_mode) $elem.find(".teacher").hide();
 
     $elem.find(".teacher").click(function(e) {
-        $elem.find(".componentbox").show();
-				$elem.find(".componentlist-table").empty();
-        var $components = me._$library.find("component").each(function() {
-            var img   = $(this).find("rotation").attr("image");
-            var type  = $(this).attr("type");
-            var value = $(this).attr("value");
-						var img_html = '<tr class="component-list-row">\
-							<td>\
-								<img src="' + me.IMAGE_URL + img + '"/>\
-							</td>\
-							<td>' + type + '</td>\
-							<td>' + value + '</td>\
-							</tr>';
-            $elem.find(".componentlist-table").append(img_html);
+			$elem.find(".componentbox").show();
+			$elem.find(".componentlist-table").empty();
+			var $components = me._$library.find("component").each(function() {
+				var img   = $(this).find("rotation").attr("image");
+				var type  = $(this).attr("type");
+				var value = $(this).attr("value");
+				var img_html = '<tr class="component-list-row">\
+				<td>\
+				<img src="' + me.IMAGE_URL + img + '"/>\
+				</td>\
+				<td>' + type + '</td>\
+				<td>' + value + '</td>\
+				</tr>';
+				$elem.find(".componentlist-table").append(img_html);
 
-            $($elem.find('.component-list-row').get(-1)).click(function(e){
-                var comp_obj = me.CreateComponent(type, value);
-                comp_obj._PlaceInBin();
-            });
-        });
+				$($elem.find('.component-list-row').get(-1)).click(function(e){
+					var comp_obj = me.CreateComponent(type, value);
+					comp_obj._PlaceInBin();
+				});
+			});
     });
 
 		$elem.find(".reset").click( function(e) {
@@ -676,6 +676,7 @@ visir.Breadboard = function(id, $elem)
 			me.SelectComponent(null);
 		}
 	});
+	
 	
 	$elem.find(".help").click( function() {
 		me.ShowHelp(true);
@@ -840,6 +841,15 @@ visir.Breadboard.prototype.SelectWire = function(idx)
 	UpdatePoint(this._$elem.find("#wire_end"), w._end);
 }
 
+visir.Breadboard.prototype.ShowComponentIndicator = function(comp)
+{
+	var value = "";
+	if (comp) {
+		value = comp._type + " " + comp._value;
+	}
+	this._$elem.find(".indicator").text(value);
+}
+
 visir.Breadboard.prototype.SelectComponent = function(comp)
 {
 	var prev = this._selectedCompnent;
@@ -883,7 +893,8 @@ visir.Breadboard.prototype._ReadLibrary = function(url)
 			me._$library = $(xml);
 			if (me._onLibraryLoaded) me._onLibraryLoaded();
 		}
-	});
+	}).fail(function() { alert("error"); })
+	;
 }
 
 visir.Breadboard.prototype.CreateComponent = function(type, value)
@@ -1049,14 +1060,26 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
 			});
 		};
 	};
+	
 	$comp.on("mousedown touchstart", generateHandler($comp, function() {
 		// On clicked, add circle
 		me.SelectComponent(comp_obj);
 		me.SelectWire(null);
-		}));
-		// XXX: this is hackish, we should do something better..
-		comp_obj.generateHandler = generateHandler;
-	}
+	}));
+	
+	$comp.hover(
+		function() {
+			// in
+			if (!me._selectedCompnent) me.ShowComponentIndicator(comp_obj);
+		},
+		function() {
+			if (!me._selectedCompnent) me.ShowComponentIndicator(null);
+		}
+	);
+	
+	// XXX: this is hackish, we should do something better..
+	comp_obj.generateHandler = generateHandler;
+}
 
 visir.Breadboard.prototype._RemoveWire = function(wire)
 {
