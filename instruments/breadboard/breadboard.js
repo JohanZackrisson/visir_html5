@@ -726,34 +726,6 @@ visir.Breadboard = function(id, $elem)
 	me._ReadLibrary(libraryxml);
 	me._AddInstrumentConnections();
 
-	if ($.browser.msie)
-	{
-		if (parseInt($.browser.version, 10) >= 9)
-		{
-			//$elem.find("#wires").wrap('<svg xmlns="http://www.w3.org/2000/svg" width="714" height="450" pointer-events="none"><foreignObject width="100%" height="100%"></foreignObject></svg>');
-			//$elem.find("#wires").insertBefore($elem.find(".clickarea"));
-			//$elem.find("#wires").css("z-index", -2);
-			//$elem.find("#wires").hide();
-			$elem.find(".instrument").attr("unselectable", "on");
-			$elem.find(".instrument div").attr("unselectable", "on");
-			$elem.find(".background").attr("unselectable", "on");
-			$elem.find("#wires").css("z-index", "10");
-			$elem.find(".clickarea").css("z-index", "11");
-			$elem.find(".colorpicker").css("z-index", "12");
-			$elem.find(".wirepoint").css("z-index", "13");
-			$elem.find(".components").css("z-index", "14");
-			$elem.find(".reset").css("z-index", "14");
-			$elem.find(".teacher").css("z-index", "14");
-			//$elem.find(".comp_circle").insertBefore($elem.find(".components"));
-			$elem.find(".comp_circle").css("z-index", "20");
-
-			$elem.find(".componentbox").css("z-index", "20");
-			$elem.find(".clickarea").css("background", "white").css("opacity", "0.01");
-			trace("Applying IE workaround");
-		}
-	}
-
-
 	$("body").on("configChanged", function(e) {
 		me._AddInstrumentConnections();
 	});
