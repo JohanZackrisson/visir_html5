@@ -7,6 +7,8 @@ visir.InstrumentFrame = function(instreg, $container)
 	this._registry = instreg;
 	this._$container = $container;
 	
+	var frame = this;
+	
 	this._showingInstrumentDialog = false;
 	
 	var protocol = window.location.protocol;
@@ -52,38 +54,59 @@ visir.InstrumentFrame = function(instreg, $container)
 	var $tpl = $(tpl);
 	
 	var isTouchDevice = navigator.userAgent.match(/iPhone|iPad/);
-	
+		
 	$container.append($tpl);
 	
 	var teacher_mode = (visir.Config) ? visir.Config.Get("teacher") : true;
 	if (teacher_mode) {
 		this._$container.find("div.shelf").addClass("show");
 	}
-
-	var frame = this;
+	
+	if (isTouchDevice) {
+		var $dialog = $('\
+		<div class="filedialog">\
+			<div class="loaddialog dialog"><div class="closebutton"></div><div class="files"></div></div>\
+			<div class="savedialog dialog"><div class="closebutton"></div>\
+				<div>Enter file name:</div>\
+				<input id="filename" type="text" />\
+				<br/><button id="save">Save</button>\
+				<div class="infotext">Files on portable devices are stored in the browsers local storage and will be removed if the browsers data store is cleared.</div>\
+			</div>\
+		</div>\
+		');
+		
+		$dialog.find(".savedialog button#save").click( function() {
+			var filename = $dialog.find(".savedialog input#filename").val();
+			if (!filename) {
+				alert("Please enter a valid filename");
+				return;
+			}
+			frame._SaveToLocalStorage(filename);
+			$dialog.find(".dialog").hide();
+		});
+		
+		$dialog.find(".closebutton").click( function() {
+			$dialog.find(".dialog").hide();
+		});
+						
+		this._$container.find(".container").append($dialog);
+	}
 	instreg.AddListener( { onExperimentLoaded: function() { frame.CreateButtons(); }  })
 	
 	$container.find("#savebutton").click( function() {
 		if (!isTouchDevice) {
 			frame._SaveToFileSystem();
 		} else {
-			frame._SaveToLocalStorage("testname");
+			frame._ShowLocalStorageSaveDialog();
 		}
-		
-		/*trace(instreg.WriteSave());
-		$container.find("#download_data").val(instreg.WriteSave());
-		$container.find("#download_form").submit();
-		*/
 	});
 		
 	$container.find("#loadbutton").click( function() {
 		if (!isTouchDevice) {
 			frame._LoadFromFileSystem();
 		} else {
-			frame._LoadFromLocalStorage("testname");
+			frame._ShowLocalStorageLoadDialog();
 		}
-		
-		//$container.find("#upload").click();
 	});
 	
 	$container.find("#shelfbutton").click( function() {
@@ -121,13 +144,74 @@ visir.InstrumentFrame.prototype._LoadFromFileSystem = function()
 	this._$container.find("#upload").click();
 }
 
+visir.InstrumentFrame.prototype._ShowLocalStorageSaveDialog = function()
+{
+	this._$container.find(".dialog").hide();
+	this._$container.find(".savedialog").show();
+}
+
+visir.InstrumentFrame.prototype._ShowLocalStorageLoadDialog = function()
+{
+	var me = this;
+	var data = JSON.parse(window.localStorage.getItem("savedata")) || {};
+	
+	this._$container.find(".filedialog .loaddialog .files").empty();
+	
+	var empty = true;
+	
+	for(var key in data) {
+		empty = false;
+
+		var $file = $('<div class="file"><div class="filename">' + key + '</div><div class="delete"></div></div>');
+		
+		function genLoadFunc(loaddata) {
+			return function() {
+				trace("clicked load");
+				me._registry.LoadExperiment(loaddata, me._$container.find(".container"));
+				me._$container.find(".dialog").hide();
+			}
+		}
+		
+		$file.find(".filename").click(genLoadFunc(data[key]));
+				
+		function genDeleteFunc(data, filename) {
+			return function() {
+				var answer = confirm("Are you sure you want to delete this file?");
+				if (answer) {
+					// delete the file
+					delete data[filename];
+					window.localStorage.setItem("savedata", JSON.stringify(data));
+					return me._ShowLocalStorageLoadDialog();
+				}
+			}
+		}
+		
+		$file.find(".delete").click(genDeleteFunc(data, key));
+		
+		this._$container.find(".filedialog .loaddialog .files").append($file);
+	}
+	
+	if (empty) {
+		this._$container.find(".filedialog .loaddialog .files").append('<div class="infotext">No saved files</div>');
+	}
+	
+	this._$container.find(".dialog").hide();
+	this._$container.find(".loaddialog").show();
+}
+
 visir.InstrumentFrame.prototype._SaveToLocalStorage = function(name)
 {
 	if (!window.localStorage) alert("browser doesn't support local storage");
-	var savedata = this._registry.WriteSave();
+	var save = this._registry.WriteSave();
 	trace("save to local storage");
-	trace(savedata);
-	window.localStorage.setItem("savedata:0", savedata);
+	trace(save);
+	
+	var data = JSON.parse(window.localStorage.getItem("savedata")) || {};
+	if (data[name]) {
+		if (!confirm("Overwrite existing file?")) return;
+	}
+	data[name] = save;
+	window.localStorage.setItem("savedata", JSON.stringify(data));
 }
 
 visir.InstrumentFrame.prototype._LoadFromLocalStorage = function(name)
