@@ -1,5 +1,3 @@
-
-
 var visir = visir || {};
 
 function snapPoint(p)
