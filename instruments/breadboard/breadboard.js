@@ -419,17 +419,17 @@ visir.Component.prototype._AddCircle = function()
     // Drag and drop button
 	this._breadboard._$elem.find("#comp_circle").append(this._$circle);
 
-	if ($.browser.msie)
-	{
-		if (parseInt($.browser.version, 10) >= 9) {
-			this._breadboard._$elem.find("#comp_circle").find("*").css("z-index", "15");
-		}
-	}
+//	if ($.browser.msie)
+//	{
+//		if (parseInt($.browser.version, 10) >= 9) {
+//			this._breadboard._$elem.find("#comp_circle").find("*").css("z-index", "15");
+//		}
+//	}
 
 
     var handler = this.generateHandler(this._$circle, function() {
-        // On clicked
-				me._breadboard.SelectComponent(null);
+		// On clicked
+		me._breadboard.SelectComponent(null);
     }, this._$elem, function() {
     }, function () {
     });
@@ -560,6 +560,8 @@ visir.Breadboard = function(id, $elem)
 	if(!teacher_mode) $elem.find(".teacher").hide();
 
     $elem.find(".teacher").click(function(e) {
+    	if (!visir.Config.Get("readOnly"))
+		{
 			$elem.find(".componentbox").show();
 			$elem.find(".componentlist-table").empty();
 			var $components = me._$library.find("component").each(function() {
@@ -580,109 +582,121 @@ visir.Breadboard = function(id, $elem)
 					comp_obj._PlaceInBin();
 				});
 			});
+		}
     });
 
 		$elem.find(".reset").click( function(e) {
-			// Send all the components back to the bin
-			for(var i=0;i<me._components.length;i++) {
-				me._components[i].Move(500,500); // move away from the bin
-			}
-			for(var i=0;i<me._components.length;i++) {
-				me._components[i]._PlaceInBin();
-			}
+			if (!visir.Config.Get("readOnly"))
+			{
+				// Send all the components back to the bin
+				for(var i=0;i<me._components.length;i++) {
+					me._components[i].Move(500,500); // move away from the bin
+				}
+				for(var i=0;i<me._components.length;i++) {
+					me._components[i]._PlaceInBin();
+				}
 
-			me.SelectWire(null);
-			me.SelectComponent(null);
-			me._wires = [];
-			me._DrawWires();
+				me.SelectWire(null);
+				me.SelectComponent(null);
+				me._wires = [];
+				me._DrawWires();
+			}
 		});
 
     $elem.find(".componentbutton button").click(function(e) {
         $elem.find(".componentbox").hide();
     });
 
-
 	$click.on("mousedown touchstart", function(e) {
-		trace("touch");
-		var wires_offset = $wires.offset();
-		var offset = { x: wires_offset.left, y: wires_offset.top };
+		if (!visir.Config.Get("readOnly"))
+		{
+			trace("touch");
+			var wires_offset = $wires.offset();
+			var offset = { x: wires_offset.left, y: wires_offset.top };
 
-		if (!me._color) {
-			// do picking against the wires
+			if (!me._color) {
+				// do picking against the wires
 
-			// don't care if we got more than one touch
-			// we can probably do something smarter here, to avoid problems when scrolling etc.
-			if (e.originalEvent.touches && e.originalEvent.touches.length > 1) return;
+				// don't care if we got more than one touch
+				// we can probably do something smarter here, to avoid problems when scrolling etc.
+				if (e.originalEvent.touches && e.originalEvent.touches.length > 1) return;
 
-			var touch = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
-			var start = new visir.Point(touch.pageX - offset.x, touch.pageY - offset.y);
-			var idx = me._PickWire(start.x, start.y);
-			if (idx !== null) {
-				e.preventDefault();
-				me.SelectWire(idx);
+				var touch = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
+				var start = new visir.Point(touch.pageX - offset.x, touch.pageY - offset.y);
+				var idx = me._PickWire(start.x, start.y);
+				if (idx !== null) {
+					e.preventDefault();
+					me.SelectWire(idx);
+					me.SelectComponent(null);
+					return;
+				}
+
+				// nothing was picked
+				me.SelectWire(null);
 				me.SelectComponent(null);
+
 				return;
 			}
+			//trace("mouse down");
+			e.preventDefault();
 
-			// nothing was picked
-			me.SelectWire(null);
-			me.SelectComponent(null);
+			// Draw new wire
+			var nWire = new visir.Wire(me._color); // XXX: replace with CreateWire
+			me._wires.push(nWire);
 
-			return;
-		}
-		//trace("mouse down");
-		e.preventDefault();
-
-		// Draw new wire
-		var nWire = new visir.Wire(me._color); // XXX: replace with CreateWire
-		me._wires.push(nWire);
-
-		e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
-
-		var start = new visir.Point(e.pageX - offset.x, e.pageY - offset.y);
-		start = start.Add(me._fingerOffset);
-		start.SnapToGrid();
-
-		$click.on("mousemove.rem touchmove.rem", function(e) {
 			e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
-			var end = new visir.Point(e.pageX - offset.x, e.pageY - offset.y);
-			end = end.Add(me._fingerOffset);
-			end.SnapToGrid();
 
-			nWire.SetBentPoints(start, end);
-			me._DrawWires();
+			var start = new visir.Point(e.pageX - offset.x, e.pageY - offset.y);
+			start = start.Add(me._fingerOffset);
+			start.SnapToGrid();
 
-			//trace("move")
-		});
+			$click.on("mousemove.rem touchmove.rem", function(e) {
+				e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
+				var end = new visir.Point(e.pageX - offset.x, e.pageY - offset.y);
+				end = end.Add(me._fingerOffset);
+				end.SnapToGrid();
 
-		$doc.on("mouseup.rem touchend.rem", function(e) {
-			trace("mouseup");
-			$click.off(".rem");
-			$doc.off(".rem");
+				nWire.SetBentPoints(start, end);
+				me._DrawWires();
 
-			// deselect the color picker
-			me._color = null;
-			me._$elem.find(".color").removeClass("selected");
-		});
+				//trace("move")
+			});
+
+			$doc.on("mouseup.rem touchend.rem", function(e) {
+				trace("mouseup");
+				$click.off(".rem");
+				$doc.off(".rem");
+
+				// deselect the color picker
+				me._color = null;
+				me._$elem.find(".color").removeClass("selected");
+			});
+		}
 	});
 
 	$elem.find(".color").click( function() {
-		me.SelectWire(null);
-		me.SelectComponent(null);
+		if (!visir.Config.Get("readOnly"))
+		{
+			me.SelectWire(null);
+			me.SelectComponent(null);
 
-		me._color = $(this).css("background-color");
-		me._$elem.find(".color").removeClass("selected");
-		$(this).addClass("selected");
+			me._color = $(this).css("background-color");
+			me._$elem.find(".color").removeClass("selected");
+			$(this).addClass("selected");
+		}
 	});
 
 	$elem.find(".delete").click( function() {
-		if (me._selectedWire !== null) {
-			me._RemoveWire(me._wires[me._selectedWire]);
-			me.SelectWire(null);
-		}
-		if (me._selectedCompnent) {
-			me._selectedCompnent._PlaceInBin();
-			me.SelectComponent(null);
+		if (!visir.Config.Get("readOnly"))
+		{
+			if (me._selectedWire !== null) {
+				me._RemoveWire(me._wires[me._selectedWire]);
+				me.SelectWire(null);
+			}
+			if (me._selectedCompnent) {
+				me._selectedCompnent._PlaceInBin();
+				me.SelectComponent(null);
+			}
 		}
 	});
 
@@ -1034,9 +1048,12 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
 	};
 
 	$comp.on("mousedown touchstart", generateHandler($comp, function() {
-		// On clicked, add circle
-		me.SelectComponent(comp_obj);
-		me.SelectWire(null);
+		if (!visir.Config.Get("readOnly"))
+		{
+			// On clicked, add circle
+			me.SelectComponent(comp_obj);
+			me.SelectWire(null);
+		}
 	}));
 
 	$comp.hover(

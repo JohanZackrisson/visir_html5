@@ -23,6 +23,17 @@ visir.ConfigClass.prototype.Get = function(name)
 	return undefined;
 }
 
+visir.ConfigClass.prototype.Set = function(name, value)
+{
+	switch(name) {
+		case "teacher": this._teacherMode = value;
+		case "locale": this._locale = value;
+		case "mesServer": this._mesServer = value;
+		case "readOnly": this._readOnly = value;
+		case "transMethod": this._transMethod = value;
+	}
+}
+
 visir.ConfigClass.prototype.SetInstrRegistry = function(registry)
 {
 	this._instrReg = registry;
