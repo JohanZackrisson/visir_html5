@@ -22,7 +22,7 @@
 		var transport = new visir.JSTransport(visir.SetWorking);
 		transport.onerror = function(err) { alert("Error: " + err); }
 
-		transport.Connect("http://194.47.134.182:8080/measureserver", "fnord");
+		transport.Connect(visir.ConfigClass.Get("mesServer"), "fnord");
 
 		var reg = new visir.InstrumentRegistry();
 		var frame = new visir.InstrumentFrame(reg, $("#instrumentframe"));

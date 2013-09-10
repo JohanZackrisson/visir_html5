@@ -10,11 +10,11 @@ visir.JSTransport = function(workingCallback)
 	this._sessionKey = null;
 	this._error = null;
 	this.onerror = function(err) {};
-	
+
 	this._request = this._CreateRequest();
-	
+
 	this._shuttingDown = false;
-	
+
 	var me = this;
 	$(window).bind('beforeunload', function() {
 	//$(window).unload(function() {
@@ -27,19 +27,19 @@ visir.JSTransport = function(workingCallback)
 	If not authenticated, this will first try to get a session key from the server
 	If that succeeds, it will send the request to the server, get a response and pass that back through the callback
 	On error, call onerror
-	
+
 	request: instrument xml to transport
 	callback: a function that takes a xml blob with reponse data
 */
 visir.JSTransport.prototype.Request = function(request, callback)
 {
 	trace("Send request");
-	
+
 	if (!navigator.onLine) {
 		alert("Check your internet connection and try again.");
 		return;
 	}
-	
+
 	this._error = null;
 	if (this._isWorking) return;
 	this.SetWorking(true);
@@ -84,7 +84,7 @@ visir.JSTransport.prototype._SendRequest = function(xmlstring, callback)
 	var xmlstring = '<root><protocol version="1.3"><request>' + xmlstring + '</request></protocol></root>';
 	var $req = $(xmlstring);
 	if (this._sessionKey) $req.find("protocol > request").attr("sessionkey", this._sessionKey);
-	
+
 	var data = $req.html();
 	//trace(data);
 	var tprt = this;
@@ -113,7 +113,7 @@ visir.JSTransport.prototype._AuthReadSessionKey = function(response)
 
 visir.JSTransport.prototype._ReadResponseProtocolHeader = function(response)
 {
-	var $xml = $(response);	
+	var $xml = $(response);
 	if ($xml.find("response").length > 0) {
 		return $xml.html(); // this will strip of the outer protocol tags
 	}
@@ -142,15 +142,15 @@ visir.JSTransport.prototype._SendAuthentication = function(request, cookie, call
 visir.JSTransport.prototype._CreateRequest = function()
 {
 	//return new XMLHttpRequest();
-	
+
 	if (window.XDomainRequest) {
 		// ie.. untested..
 		var req = new window.XDomainRequest();
 	} else {
 		var req = new XMLHttpRequest();
 	}
-	
-	return req;	
+
+	return req;
 }
 
 /*
@@ -214,4 +214,3 @@ visir.JSTransport.prototype.Error = function(errormsg) {
 	this._error = errormsg;
 	this._sessionKey = null; // XXX: all errors lead to requthentication
 }
-

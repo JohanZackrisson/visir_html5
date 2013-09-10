@@ -4,15 +4,23 @@ visir.ConfigClass = function()
 {
 	this._teacherMode = true;
 	this._instrReg = null;
+	this._locale = 'en_UK';
+	this._mesServer = 'http://194.47.134.182:8080/measureserver';
+	this._readOnly = false;
+	this._transMethod = 'http';
 }
 
 visir.ConfigClass.prototype.Get = function(name)
 {
 	switch(name) {
 		case "teacher": return this._teacherMode;
+		case "locale": return this._locale;
+		case "mesServer": return this._mesServer;
+		case "readOnly": return this._readOnly;
+		case "transMethod": return this._transMethod;
 	}
-	
-	return undefined;		
+
+	return undefined;
 }
 
 visir.ConfigClass.prototype.SetInstrRegistry = function(registry)
