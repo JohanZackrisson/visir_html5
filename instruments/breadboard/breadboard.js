@@ -886,8 +886,7 @@ visir.Breadboard.prototype._ReadLibrary = function(url)
 			me._$library = $(xml);
 			if (me._onLibraryLoaded) me._onLibraryLoaded();
 		}
-	}).fail(function() { alert("error"); })
-	;
+	}).fail(function() { alert("error"); });
 }
 
 visir.Breadboard.prototype.CreateComponent = function(type, value)
