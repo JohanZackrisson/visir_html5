@@ -235,6 +235,7 @@
 	width: 30px; height: 37px;
 	position: absolute;
 	bottom: 0; left: 5px;
+	cursor: pointer;
 }
 
 

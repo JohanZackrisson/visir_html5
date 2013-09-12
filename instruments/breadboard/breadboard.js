@@ -974,55 +974,63 @@ visir.Breadboard.prototype._AddComponentEvents = function(comp_obj, $comp)
 			//var start = { x: e.pageX - offset.x, y: e.pageY - offset.y};
 
 			$doc.on("keypress.rem", function(e) {
-				// trace("key: " + e.which);
-				if (e.which == 114) // 'r'
-				comp_obj.Rotate();
+				if (!visir.Config.Get("readOnly"))
+				{
+					// trace("key: " + e.which);
+					if (e.which == 114) // 'r'
+					comp_obj.Rotate();
+				}
 			});
 
 			$doc.on("keyup.rem", function(e){
-				if(e.keyCode == 46)
-				comp_obj.remove();
+				if (!visir.Config.Get("readOnly"))
+				{
+					if(e.keyCode == 46)
+					comp_obj.remove();
+				}
 			})
 
 			$doc.on("mousemove.rem touchmove.rem", function(e) {
-				if(callbackPressed != undefined)
-				callbackPressed();
+				if (!visir.Config.Get("readOnly"))
+				{
+					if(callbackPressed != undefined)
+					callbackPressed();
 
-				touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
-				var touch = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
+					touches = (e.originalEvent.touches) ? e.originalEvent.touches.length : 1;
+					var touch = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
 
-				/*var p = new visir.Point(touch.pageX - offset.left, touch.pageY - offset.top);
-				p.SnapToGrid();
-				comp_obj.Move(p.x, p.y);*/
+					/*var p = new visir.Point(touch.pageX - offset.left, touch.pageY - offset.top);
+					p.SnapToGrid();
+					comp_obj.Move(p.x, p.y);*/
 
-				var p = { x: touch.pageX - offset.left, y: touch.pageY - offset.top };
-				snapPoint(p);
-				//trace("move");
-				component.css({
-					"left": p.x + "px",
-					"top": p.y + "px"
-				});
-				if(internalComponent != undefined) {
-					internalComponent.css({
+					var p = { x: touch.pageX - offset.left, y: touch.pageY - offset.top };
+					snapPoint(p);
+					//trace("move");
+					component.css({
 						"left": p.x + "px",
 						"top": p.y + "px"
 					});
+					if(internalComponent != undefined) {
+						internalComponent.css({
+							"left": p.x + "px",
+							"top": p.y + "px"
+						});
+					}
+
+					// if two fingers are down, turn the component around towards the second finger
+					if (e.originalEvent.touches && e.originalEvent.touches.length > 1) {
+						var turn = e.originalEvent.touches[1];
+						var angle = Math.atan2( touch.pageY - turn.pageY, touch.pageX - turn.pageX ) * 180 / Math.PI;
+						angle = (angle + 360) % 360;
+						var step = 0;
+						if (angle < 45 || angle > 315) step = 0;
+						else if (angle > 45 && angle < 135) step = 1;
+						else if (angle >135 && angle < 225) step = 2;
+						else step = 3;
+
+						comp_obj.Rotate(step);
+					}
 				}
-
-				// if two fingers are down, turn the component around towards the second finger
-				if (e.originalEvent.touches && e.originalEvent.touches.length > 1) {
-					var turn = e.originalEvent.touches[1];
-					var angle = Math.atan2( touch.pageY - turn.pageY, touch.pageX - turn.pageX ) * 180 / Math.PI;
-					angle = (angle + 360) % 360;
-					var step = 0;
-					if (angle < 45 || angle > 315) step = 0;
-					else if (angle > 45 && angle < 135) step = 1;
-					else if (angle >135 && angle < 225) step = 2;
-					else step = 3;
-
-					comp_obj.Rotate(step);
-				}
-
 			});
 
 			$doc.on("mouseup.rem touchend.rem", function(e) {
