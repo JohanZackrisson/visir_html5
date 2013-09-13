@@ -36,12 +36,14 @@ visir.InstrumentFrame = function(instreg, $container)
 		</div>\
 	</div>\
 	<div class="buttonrow">\
-		<div class="loadsave">\
+		' + (!visir.Config.Get("readOnly") ?
+		'<div class="loadsave">\
 			<button id="loadbutton" class="">Load</button>\
 			<button id="savebutton" class="">Save</button>\
 		</div>\
 		<div class="shelf"><button id="shelfbutton"><img src="%img%/images/shelf.png" /></button></div>\
-		<div class="instrumentbuttons"></div>\
+		' : '') +
+		'<div class="instrumentbuttons"></div>\
 		<div class="measurework">\
 			<button id="measurebutton" class="measure">Perform Measurement</button>\
 			<div class="work_indicator"><span><img src="%img%/images/work_indicator.png" alt="work indicator"/></span></div>\
