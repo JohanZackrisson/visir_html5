@@ -142,60 +142,63 @@ visir.AgilentOscilloscope = function(id, elem, props)
 			};
 		}
 
-		// abuses the turnable to get events, but not turning the component at all
-		elem.find(".horz_offset").turnable({turn: newHandleFunc(function() { trace("up");}, function() {trace("down");}) });
+		if(!visir.Config.Get("readOnly"))
+		{
+			// abuses the turnable to get events, but not turning the component at all
+			elem.find(".horz_offset").turnable({turn: newHandleFunc(function() { trace("up");}, function() {trace("down");}) });
 
-		elem.find(".offset_ch1").turnable({turn: newHandleFunc(function() { me._StepDisplayOffset(0, true); }, function() { me._StepDisplayOffset(0, false); }) });
-		elem.find(".offset_ch2").turnable({turn: newHandleFunc(function() { me._StepDisplayOffset(1, true); }, function() { me._StepDisplayOffset(1, false); }) });
+			elem.find(".offset_ch1").turnable({turn: newHandleFunc(function() { me._StepDisplayOffset(0, true); }, function() { me._StepDisplayOffset(0, false); }) });
+			elem.find(".offset_ch2").turnable({turn: newHandleFunc(function() { me._StepDisplayOffset(1, true); }, function() { me._StepDisplayOffset(1, false); }) });
 
-		elem.find(".offset_trg").turnable({turn: newHandleFunc(function() { me._StepTriggerLevel(true); }, function() { me._StepTriggerLevel(false); }) });
-		elem.find(".horz").turnable({turn: newHandleFunc(function() { me._SetTimedivIdx(me._timeIdx+1); }, function() { me._SetTimedivIdx(me._timeIdx-1); }) });
-		elem.find(".selection_knob").turnable({turn: newHandleFunc(function() { me._StepSelection(true); }, function() { me._StepSelection(false); }) });
-		elem.find(".vert_ch1").turnable({turn: newHandleFunc(function() { me._SetVoltIdx(0, me._voltIdx[0]+1); }, function() { me._SetVoltIdx(0, me._voltIdx[0]-1);}) });
-		elem.find(".vert_ch2").turnable({turn: newHandleFunc(function() { me._SetVoltIdx(1, me._voltIdx[1]+1); }, function() { me._SetVoltIdx(1, me._voltIdx[1]-1);}) });
+			elem.find(".offset_trg").turnable({turn: newHandleFunc(function() { me._StepTriggerLevel(true); }, function() { me._StepTriggerLevel(false); }) });
+			elem.find(".horz").turnable({turn: newHandleFunc(function() { me._SetTimedivIdx(me._timeIdx+1); }, function() { me._SetTimedivIdx(me._timeIdx-1); }) });
+			elem.find(".selection_knob").turnable({turn: newHandleFunc(function() { me._StepSelection(true); }, function() { me._StepSelection(false); }) });
+			elem.find(".vert_ch1").turnable({turn: newHandleFunc(function() { me._SetVoltIdx(0, me._voltIdx[0]+1); }, function() { me._SetVoltIdx(0, me._voltIdx[0]-1);}) });
+			elem.find(".vert_ch2").turnable({turn: newHandleFunc(function() { me._SetVoltIdx(1, me._voltIdx[1]+1); }, function() { me._SetVoltIdx(1, me._voltIdx[1]-1);}) });
 
-		elem.find(".button").updownButton();
-		elem.find(".channel_1").click( function() {
-			// XXX: only toggle if its the active selection.. but we have no menus right now
-			me._ToggleChEnabled(0);
-		});
-		elem.find(".channel_2").click( function() {
-			// XXX: only toggle if its the active selection.. but we have no menus right now
-			me._ToggleChEnabled(1);
-		});
-		elem.find(".button.edge").click( function() {
-			// light up the edge button
-			me._$elem.find(".multibutton.edge .state").removeClass("visible");
-			me._$elem.find(".multibutton.edge .state.light").addClass("visible");
+			elem.find(".button").updownButton();
+			elem.find(".channel_1").click( function() {
+				// XXX: only toggle if its the active selection.. but we have no menus right now
+				me._ToggleChEnabled(0);
+			});
+			elem.find(".channel_2").click( function() {
+				// XXX: only toggle if its the active selection.. but we have no menus right now
+				me._ToggleChEnabled(1);
+			});
+			elem.find(".button.edge").click( function() {
+				// light up the edge button
+				me._$elem.find(".multibutton.edge .state").removeClass("visible");
+				me._$elem.find(".multibutton.edge .state.light").addClass("visible");
 
-			me._ShowMenu("menu_edge");
-		});
+				me._ShowMenu("menu_edge");
+			});
 
-		elem.find(".button.cursors").click( function() {
-			me._ToggleCursors();
-		});
+			elem.find(".button.cursors").click( function() {
+				me._ToggleCursors();
+			});
 
-		elem.find(".button.measure").click( function() {
-			me._ToggleMeasurements();
-		});
+			elem.find(".button.measure").click( function() {
+				me._ToggleMeasurements();
+			});
 
-		elem.find(".button.modecoupling").click( function() {
-			me._ShowMenu("menu_modecoupling");
-		});
+			elem.find(".button.modecoupling").click( function() {
+				me._ShowMenu("menu_modecoupling");
+			});
 
-		elem.find(".button.single").click( function() {
-			me._MakeMeasurement("single");
-		});
-		elem.find(".button.runstop").click( function() {
-			me._MakeMeasurement("runstop");
-		});
+			elem.find(".button.single").click( function() {
+				me._MakeMeasurement("single");
+			});
+			elem.find(".button.runstop").click( function() {
+				me._MakeMeasurement("runstop");
+			});
 
-		elem.find(".display_button_1").click( function() { me._DisplayButtonClicked(1); });
-		elem.find(".display_button_2").click( function() { me._DisplayButtonClicked(2); });
-		elem.find(".display_button_3").click( function() { me._DisplayButtonClicked(3); });
-		elem.find(".display_button_4").click( function() { me._DisplayButtonClicked(4); });
-		elem.find(".display_button_5").click( function() { me._DisplayButtonClicked(5); });
-		elem.find(".display_button_6").click( function() { me._DisplayButtonClicked(6); });
+			elem.find(".display_button_1").click( function() { me._DisplayButtonClicked(1); });
+			elem.find(".display_button_2").click( function() { me._DisplayButtonClicked(2); });
+			elem.find(".display_button_3").click( function() { me._DisplayButtonClicked(3); });
+			elem.find(".display_button_4").click( function() { me._DisplayButtonClicked(4); });
+			elem.find(".display_button_5").click( function() { me._DisplayButtonClicked(5); });
+			elem.find(".display_button_6").click( function() { me._DisplayButtonClicked(6); });
+		}
 
 		elem.find(".infobar .box").hide();
 
