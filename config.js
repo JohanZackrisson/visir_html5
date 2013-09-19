@@ -2,12 +2,23 @@ var visir = visir || {};
 
 visir.ConfigClass = function()
 {
-	this._teacherMode = true;
-	this._instrReg = null;
-	this._locale = 'en_UK';
-	this._mesServer = 'http://194.47.134.182:8080/measureserver';
-	this._readOnly = false;
-	this._transMethod = 'http';
+	config = {};
+
+	$.ajax({
+		async: false,
+		dataType: "json",
+		url: 'config.json'
+	}).done(function(data)
+	{
+		config = data;
+	});
+
+	this._teacherMode = config.teacherMode;
+	this._instrReg = config.instrReg;
+	this._locale = config.locale;
+	this._mesServer = config.mesServer;
+	this._readOnly = config.readOnly;
+	this._transMethod = config.transMethod;
 }
 
 visir.ConfigClass.prototype.Get = function(name)
