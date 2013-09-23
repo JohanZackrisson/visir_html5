@@ -22,6 +22,7 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		, "jquery-updownbutton.js"
 		, "instrumentregistry.js"
 		, "config.js"
+		, "language.js"
 		, "instruments/multimeter.js"
 		, "instruments/oscilloscope.js"
 		, "instruments/functiongenerator.js"
