@@ -38,9 +38,7 @@ visir.ConfigClass.prototype.Set = function(name, value)
 {
 	switch(name) {
 		case "teacher": this._teacherMode = value;
-		case "locale":
-			this._locale = value;
-			visir.Lang.ReLoad();
+		case "locale": this._locale = value;
 		case "mesServer": this._mesServer = value;
 		case "readOnly": this._readOnly = value;
 		case "transMethod": this._transMethod = value;

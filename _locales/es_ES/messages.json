@@ -1,7 +1,32 @@
 {
-	"test" :
+	"breadboard" :
 	{
-		"message" : "Prueba",
-		"description" : "Probando"
+		"message" : "Placa de prototipos",
+		"description" : "Placa de prototipos"
+	},
+	"multimeter" :
+	{
+		"message" : "Multímetro",
+		"description" : "Multímetro"
+	},
+	"func_gen" :
+	{
+		"message" : "Generador de funciones",
+		"description" : "Generador de funciones"
+	},
+	"oscilloscope" :
+	{
+		"message" : "Osciloscopio",
+		"description" : "Osciloscopio"
+	},
+	"triple_dc" :
+	{
+		"message" : "Triple DC",
+		"description" : "Triple DC"
+	},
+	"perf_measure" :
+	{
+		"message" : "Realizar medición",
+		"description" : "Realizar medición"
 	}
 }
