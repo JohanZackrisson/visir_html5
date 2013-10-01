@@ -7,26 +7,53 @@
 	"multimeter" :
 	{
 		"message" : "Multímetro",
-		"description" : "Multímetro"
+		"description" : "Multímetro - Fluke 23"
 	},
 	"func_gen" :
 	{
 		"message" : "Generador de funciones",
-		"description" : "Generador de funciones"
+		"description" : "Generador de funciones - HP33120A"
 	},
 	"oscilloscope" :
 	{
 		"message" : "Osciloscopio",
-		"description" : "Osciloscopio"
+		"description" : "Osciloscopio - Agilent 54622A"
 	},
-	"triple_dc" :
+	"dc_power" :
 	{
-		"message" : "Triple DC",
-		"description" : "Triple DC"
+		"message" : "Fuente DC",
+		"description" : "Fuente DC - Agilent E3631A"
+	},
+
+	"load" :
+	{
+		"message" : "Cargar",
+		"description" : "Cargar circuito"
+	},
+	"save" :
+	{
+		"message" : "Guardar",
+		"description" : "Cargar circuito"
 	},
 	"perf_measure" :
 	{
 		"message" : "Realizar medición",
 		"description" : "Realizar medición"
+	},
+
+	"wire_sel" :
+	{
+		"message" : "Color del cable",
+		"description" : "Selector del color del cable"
+	},
+	"close" :
+	{
+		"message" : "Cerrar",
+		"description" : "Cerrar"
+	},
+	"reset" :
+	{
+		"message" : "Restablecer",
+		"description" : "Restablecer"
 	}
 }

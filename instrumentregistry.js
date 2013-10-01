@@ -19,7 +19,7 @@ visir.InstrumentRegistry = function(extService)
 		, FlukeMultimeter: InstrInfo("multimeter", visir.Lang.GetMessage("multimeter"), "multimeter/multimeter.swf")
 		, HPFunctionGenerator: InstrInfo("functiongenerator", visir.Lang.GetMessage("func_gen"), "functiongenerator/functiongenerator.swf")
 		, NationalInstrumentOscilloscope: InstrInfo("oscilloscope", visir.Lang.GetMessage("oscilloscope"), "")
-		, TripleDC: InstrInfo("dcpower", visir.Lang.GetMessage("triple_dc"), "tripledc/tripledc.swf")
+		, TripleDC: InstrInfo("dcpower", visir.Lang.GetMessage("dc_power"), "tripledc/tripledc.swf")
 	}
 
 	this._extServices = extService || null;

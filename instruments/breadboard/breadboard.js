@@ -490,11 +490,11 @@ visir.Breadboard = function(id, $elem)
 	<img class="background" src="' + this.IMAGE_URL + 'breadboard.png" alt="breadboard"/>\
 	<div class="clickarea"></div>\
 	<div class="bin">\
-		<div class="reset">Reset</div>\
+		<div class="reset">'+visir.Lang.GetMessage('reset')+'</div>\
    	<div class="teacher">+</div>\
 	</div>\
 	<div class="colorpicker">\
-		<p class="title">Wire color</p>\
+		<p class="title">'+visir.Lang.GetMessage('wire_sel')+'</p>\
 		<div class="color red"></div>\
 		<div class="color black"></div>\
 		<div class="color green"></div>\
@@ -521,7 +521,7 @@ visir.Breadboard = function(id, $elem)
             </table>\
         </div>\
         <div class="componentbutton">\
-            <button>Close</button>\
+            <button>'+visir.Lang.GetMessage('close')+'</button>\
         </div>\
     </div>\
 	</div>';
@@ -1464,7 +1464,7 @@ visir.Breadboard.prototype._AddMultimeters = function(x, y, num)
 			<div class="connectiontext">Lo</div>\
 		</div>\
 		<div class="title">\
-			<div>Multimeter</div>\
+			<div>'+visir.Lang.GetMessage('multimeter')+'</div>\
 			<div class="voltage">V/&Omega;</div>\
 			<div class="current">mA</div>\
 		</div>\
@@ -1498,7 +1498,7 @@ visir.Breadboard.prototype._AddOSC = function(x, y, num)
 			<div class="connectiontext"></div>\
 			<div class="connectiontext">Ch2</div>\
 		</div>\
-		<div class="title">Oscilloscope</div>\
+		<div class="title">'+visir.Lang.GetMessage('oscilloscope')+'</div>\
 	</div>'
 	);
 
@@ -1533,7 +1533,7 @@ visir.Breadboard.prototype._AddDCPower = function(x, y, num)
 	if (num <= 0) return;
 	var $dcpower = $(
 	'<div class="instrument dcpower">\
-		<div class="title">DC Power Supply</div>\
+		<div class="title">'+visir.Lang.GetMessage('dc_power')+'</div>\
 			<div class="texts">\
 				<div class="connectiontext"></div>\
 				<div class="connectiontext">+20V</div>\
@@ -1573,7 +1573,7 @@ visir.Breadboard.prototype._AddFGEN = function(x, y, num)
 	'<div class="instrument fgen">\
 		<div class="texts">\
 			<div class="connectiontext"></div>\
-			<div class="connectiontext">Function&nbsp;Generator</div>\
+			<div class="connectiontext">'+visir.Lang.GetMessage('func_gen')+'</div>\
 			<div class="connectiontext">GND</div>\
 		</div>\
 		<div class="connectionimages">\

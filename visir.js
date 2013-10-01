@@ -21,8 +21,14 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		, "jquery-draggable.js"
 		, "jquery-updownbutton.js"
 		, "config.js"
-		, "language.js"
-		, "instrumentregistry.js"
+	];
+
+	var stage2_scripts = [
+		"language.js"
+	];
+
+	var stage3_scripts = [
+		"instrumentregistry.js"
 		, "instruments/multimeter.js"
 		, "instruments/oscilloscope.js"
 		, "instruments/functiongenerator.js"
@@ -30,7 +36,7 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		, "instruments/transport.js"
 	];
 
-	var stage2_scripts = [
+	var stage4_scripts = [
 		"instruments/breadboard/breadboard.js"
 		, "instruments/flukemultimeter/flukemultimeter.js"
 		, "instruments/tripledc/tripledc.js"
@@ -92,10 +98,28 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		return defs;
 	}
 
-	function GetStage2() {
+	function GetStage2()
+	{
 		var defs = [];
 		for(var i=0;i<stage2_scripts.length; i++) {
 			defs.push( InjectScript(stage2_scripts[i]) );
+		}
+		return defs;
+	}
+
+	function GetStage3()
+	{
+		var defs = [];
+		for(var i=0;i<stage3_scripts.length; i++) {
+			defs.push( InjectScript(stage3_scripts[i]) );
+		}
+		return defs;
+	}
+
+	function GetStage4() {
+		var defs = [];
+		for(var i=0;i<stage4_scripts.length; i++) {
+			defs.push( InjectScript(stage4_scripts[i]) );
 		}
 		for(var i=0;i<css.length; i++) {
 			defs.push( InjectCSS(css[i]) );
@@ -106,6 +130,12 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 	var deferred_1 = GetStage1();
 	$.when.apply(null, deferred_1).done( function() {
 		var deferred_2 = GetStage2();
-		$.when.apply(null, deferred_2).done(onSuccess);
+		$.when.apply(null, deferred_2).done( function() {
+			var deferred_3 = GetStage3();
+			$.when.apply(null, deferred_3).done( function() {
+				var deferred_4 = GetStage4();
+				$.when.apply(null, deferred_4).done(onSuccess);
+			});
+		});
 	})
 }

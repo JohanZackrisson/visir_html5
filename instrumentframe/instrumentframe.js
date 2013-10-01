@@ -38,8 +38,8 @@ visir.InstrumentFrame = function(instreg, $container)
 	<div class="buttonrow">\
 		' + (!visir.Config.Get("readOnly") ?
 		'<div class="loadsave">\
-			<button id="loadbutton" class="">Load</button>\
-			<button id="savebutton" class="">Save</button>\
+			<button id="loadbutton" class="">'+visir.Lang.GetMessage('load')+'</button>\
+			<button id="savebutton" class="">'+visir.Lang.GetMessage('save')+'</button>\
 		</div>\
 		<div class="shelf"><button id="shelfbutton"><img src="%img%/images/shelf.png" /></button></div>\
 		' : '') +
@@ -305,8 +305,8 @@ visir.InstrumentFrame.prototype._PopulateInstrumentDialog = function()
 		$xml.find("instruments > instrument").each( function(e) {
 			var $elem = $(this);
 			var id = $elem.attr("id");
-			var displayname = $elem.attr("displayname");
-			var type = $elem.attr("displayname");
+			var displayname = visir.Lang.GetDescription($elem.attr("displayname"));
+			var type = $elem.attr("type");
 			var image = $elem.attr("image");
 			var path = $elem.attr("path"); // this is the swf path, do not use
 			var jsclass = $elem.attr("jsclass");

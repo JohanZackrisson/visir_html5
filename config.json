@@ -1,7 +1,7 @@
 {
 	"teacherMode": true,
 	"instrReg": null,
-	"locale": "en_UK",
+	"locale": "es_ES",
 	"mesServer": "http://194.47.134.182:8080/measureserver",
 	"readOnly": false,
 	"transMethod": "http"
