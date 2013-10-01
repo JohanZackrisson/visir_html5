@@ -752,7 +752,7 @@ visir.Breadboard.prototype.Clear = function()
 
 visir.Breadboard.prototype._PickWire = function(x, y)
 {
-	var pickWidth = 15;
+	var pickWidth = 20;
 	this._offWireCtx.clearRect(0,0, this._$wires.width(), this._$wires.height());
 	for(var i=0;i<this._wires.length; i++)
 	{
