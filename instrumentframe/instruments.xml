@@ -1,44 +1,44 @@
 <instrumentlibrary>
 	<instruments>
 		<!-- paths are always relative to the location of the loader component -->
-		<!-- only one of each type of instruments can be loaded at one time (for now at least)-->		
+		<!-- only one of each type of instruments can be loaded at one time (for now at least)-->
 		<instrument	id="Breadboard.OpenLabs"
-			displayname="Breadboard"
+			displayname="breadboard"
 			type="breadboard"
 			image="images/breadboard300.jpg"
 			path="breadboard/breadboard.swf"
 			jsclass="Breadboard" />
-			
+
 		<instrument id="Multimeter.Fluke23"
-			displayname="Multimeter - Fluke 23"
+			displayname="multimeter"
 			buttontext="Multimeter"
 			type="multimeter"
 			image="images/multimeter300.jpg"
 			path="multimeter/multimeter.swf"
 			jsclass="FlukeMultimeter" />
-			
+
 		<instrument id="Fgen.HP33120A"
-			displayname="Function Generator - HP33120A"
+			displayname="func_gen"
 			type="functiongenerator"
 			image="images/functiongenerator300.jpg"
 			path="functiongenerator/functiongenerator.swf"
 			jsclass="HPFunctionGenerator" />
-			
+
 		<instrument id="Osc.Agilent54622A"
-			displayname="Oscilloscope - Agilent 54622A"
+			displayname="oscilloscope"
 			type="oscilloscope"
 			image="images/oscilloscope300.jpg"
 			path="oscilloscope/oscilloscope.swf"
 			jsclass="AgilentOscilloscope" />
-			
+
 		<instrument id="DCPower.AgilentE3631A"
-			displayname="DC Power - Agilent E3631A"
+			displayname="dc_power"
 			buttontext="DC Power"
 			type="dcpower"
 			image="images/tripledc300.jpg"
 			path="tripledc/tripledc.swf"
 			jsclass="TripleDC" />
-		
+
 		<!-- National instruments -->
 		<!--
 		<instrument id="Multimeter.NIDMM"
@@ -66,7 +66,7 @@
 			path="nidcpower/NI_DCPower.swf" />
 			-->
 	</instruments>
-	
+
 	<setups>
 		<setup name="BTH"><!-- the first is the default setup -->
 			<setup_instrument id="Breadboard.OpenLabs" />

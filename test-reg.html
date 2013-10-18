@@ -7,35 +7,35 @@
 	<!--link rel="stylesheet" href="instruments/breadboard/breadboard.css" />
 	<link rel="stylesheet" href="instruments/flukemultimeter/flukemultimeter.css" />
 	<link rel="stylesheet" href="instruments/tripledc/tripledc.css" />
-	<link rel="stylesheet" href="instruments/hp_funcgen/hp_funcgen.css" />	
+	<link rel="stylesheet" href="instruments/hp_funcgen/hp_funcgen.css" />
 	<link rel="stylesheet" href="instruments/ag_oscilloscope/ag_oscilloscope.css" /-->
 	<style>
 		#dmm , #dmm2 {
 			display: inline-block;
 		}
-	
+
 		#turn {
-			width: 188px; height: 188px; 
+			width: 188px; height: 188px;
 		}
 		#turn .top
 		{
 			transform-origin: 94px 94px;
 			-moz-transform-origin: 94px 94px;
 			-webkit-transform-origin: 94px 94px;
-			width: 188px; height: 188px; 
+			width: 188px; height: 188px;
 		}
 		#turn2
 		{
 			height: 94px;
 			width: 94px;
 		}
-		
+
 		#turn2 .top
 		{
 			height: 94px;
 			width: 94px;
 		}
-		
+
 		#bottom
 		{
 			position: fixed;
@@ -44,27 +44,27 @@
 			left: 0;
 			width: 100%;
 			background: white;
-			
+
 		}
-		
+
 		#container
 		{
 			width: 800px;
 			/*height: 500px;*/
 			height: 460px;
-			border: 1px solid black;			
+			border: 1px solid black;
 			position: relative;
 			text-align: center;
 			overflow: hidden;
 		}
-		
+
 		#container > div
 		{
 			margin: 0px auto;
 			position: relative;
 			display: inline-block;
 		}
-		
+
 		.buttonrow {
 			padding: 1px;
 			position: relative;
@@ -72,7 +72,7 @@
 			text-align: center;
 			background: #999999;
 		}
-		
+
 		.buttonrow button
 		{
 			font-size: 11px;
@@ -88,45 +88,45 @@
 			vertical-align: top;
 			-webkit-user-select: none;
 		}
-		
+
 		.instrumentbuttons {
 			display: inline-block;
 			position: relative;
 			left: 40px;
 		}
-		
+
 		#measurebutton {
 			width: 90px;
 			float: right;
-			margin-right: 20px;			
+			margin-right: 20px;
 		}
-		
+
 	</style>
-	<script type="text/javascript" src="jquery-1.8.2.min.js"></script>
+	<script type="text/javascript" src="jquery-1.10.2.min.js"></script>
 	<script type="text/javascript" src="visir.js"></script>
 	<script type="text/javascript" src="instrumentregistry.js"></script>
 	<script>
-		
+
 	function init()
 	{
-		
+
 		function MakeMeasurement()
 		{
 			reg.MakeRequest(transport);
 		}
-		
+
 		function ShowInstr(name) {
 			$("#container > div").hide();
 			$(name).show();
 		}
-				
+
 		trace("starting up..");
 
 		var transport = new visir.JSTransport(visir.SetWorking);
 		transport.onerror = function(err) { alert("Error: " + err); }
-		
+
 		transport.Connect("http://194.47.134.182:8080/measureserver", "fnord");
-		
+
 		var reg = new visir.InstrumentRegistry();
 		reg.CreateInstrument("Breadboard", "#circuit1");
 		reg.CreateInstrument("FlukeMultimeter", "#multimeter1");
@@ -134,23 +134,23 @@
 		reg.CreateInstrument("AgilentOscilloscope", "#oscilloscope1", { MeasureCalling: MakeMeasurement, CheckToContinueCalling: function() { return true; } });
 		reg.CreateInstrument("TripleDC", "#dcpower1");
 		reg.CreateInstrument("HPFunctionGenerator", "#functiongenerator1");
-		
+
 		var savedexperiment = '<save><instruments list="breadboard/breadboard.swf|multimeter/multimeter.swf|functiongenerator/functiongenerator.swf|oscilloscope/oscilloscope.swf|tripledc/tripledc.swf" /><multimeter /><circuit><circuitlist><component>W 0 312 312 235 336 156 364</component><component>W 0 403 325 357.5 309.8 312 325</component><component>W 0 481 312 442 299 403 312</component><component>W 16711680 403 234 442 221 481 234</component><component>W 16711680 312 221 357.5 205.8 403 221</component><component>W 16711680 156 260 229.65 221 312 234</component><component>R 1k 312 273 1</component><component>R 1k 65 52 0</component><component>R 1k 65 39 0</component><component>R 1k 65 78 0</component><component>R 1k 65 65 0</component><component>R 1.6k 481 273 1</component><component>R 10k 260 78 0</component><component>R 10k 403 273 1</component><component>R 10k 260 52 0</component><component>R 10k 260 39 0</component><component>R 10k 260 65 0</component><component>R 2.7k 195 26 0</component><component>R 2.7k 195 52 0</component><component>R 2.7k 195 39 0</component><component>C 56n 312 39 0</component><component>C 56n 312 91 0</component></circuitlist></circuit></save>';
 		//reg.LoadExperiment(savedexperiment, $("#container"));
-		
+
 		$(".measure").click( function() {
 			MakeMeasurement();
 		});
-		
+
 		$("#showlog").click( function() {
 			$("#logwindow").css("display", "block");
 		});
 		$("#hidelog").click( function() {
 			$("#logwindow").css("display", "none");
 		});
-		
+
 		ShowInstr("#circuit1");
-		
+
 		$("#goto_breadboard").click(function() { ShowInstr("#circuit1"); });
 		$("#goto_dmm").click(function() { ShowInstr("#multimeter1"); });
 		$("#goto_dmm2").click(function() { ShowInstr("#multimeter2"); });
@@ -158,11 +158,11 @@
 		$("#goto_fgen").click(function() { ShowInstr("#functiongenerator1"); });
 		$("#goto_tripledc").click(function() { ShowInstr("#dcpower1"); });
 	}
-	$( function() { 
+	$( function() {
 		//init();
 		visir.Load(init);
 	});
-	
+
 	function scrollTo(hash) {
 		location.hash = "#" + hash;
 	}

@@ -11,19 +11,19 @@ visir.InstrumentRegistry = function(extService)
 		oscilloscope: 0
 	};
 	this._listeners = [];
-	
+
 	function InstrInfo(type, name, swf) { return { type: type, displayname: name, swf: swf } };
 	this._instrumentInfo = {
-		AgilentOscilloscope: InstrInfo("oscilloscope", "Oscilloscope", "oscilloscope/oscilloscope.swf")
-		, Breadboard: InstrInfo("circuit", "Breadboard", "breadboard/breadboard.swf")
-		, FlukeMultimeter: InstrInfo("multimeter", "Multimeter", "multimeter/multimeter.swf")
-		, HPFunctionGenerator: InstrInfo("functiongenerator", "Function Generator", "functiongenerator/functiongenerator.swf")
-		, NationalInstrumentOscilloscope: InstrInfo("oscilloscope", "Oscilloscope", "")
-		, TripleDC: InstrInfo("dcpower", "Triple DC", "tripledc/tripledc.swf")
+		AgilentOscilloscope: InstrInfo("oscilloscope", visir.Lang.GetMessage("oscilloscope"), "oscilloscope/oscilloscope.swf")
+		, Breadboard: InstrInfo("circuit", visir.Lang.GetMessage("breadboard"), "breadboard/breadboard.swf")
+		, FlukeMultimeter: InstrInfo("multimeter", visir.Lang.GetMessage("multimeter"), "multimeter/multimeter.swf")
+		, HPFunctionGenerator: InstrInfo("functiongenerator", visir.Lang.GetMessage("func_gen"), "functiongenerator/functiongenerator.swf")
+		, NationalInstrumentOscilloscope: InstrInfo("oscilloscope", visir.Lang.GetMessage("oscilloscope"), "")
+		, TripleDC: InstrInfo("dcpower", visir.Lang.GetMessage("dc_power"), "tripledc/tripledc.swf")
 	}
-	
+
 	this._extServices = extService || null;
-	
+
 	if (visir.Config) visir.Config.SetInstrRegistry(this); // XXX: maybe this need to be more configurable..
 }
 
@@ -48,21 +48,21 @@ visir.InstrumentRegistry.prototype.CreateInstrument = function()
 		F.prototype = constructor.prototype;
 		return new F();
 	}
-	
+
 	if (arguments.length < 2) throw "Invalid number of arguments to CreateInstrument";
 	var name = arguments[0];
 	var id = this._NextInstrID(name);
 	arguments[0] = id; // replace the first argument with the id before passing them along.
 	arguments[1] = $(arguments[1]); // get the jquery dom node
 	var newinstr = construct(visir[name], arguments);
-	
+
 	var entry = { instrument: newinstr, id: id, domnode: arguments[1], instrInfo: this._instrumentInfo[name], name: name };
 	this._instruments.push(entry);
-	
+
 	if (this._extServices && typeof newinstr.UseExteralService == "function") {
 		newinstr.UseExteralService(this._extServices);
 	}
-	
+
 	return newinstr;
 }
 
@@ -166,21 +166,21 @@ visir.InstrumentRegistry.prototype.LoadExperiment = function(xmldata, $loc)
 	this._Reset();
 	var $xml = $(xmldata);
 	var $instr = $xml.find("instruments");
-	
+
 	var flashlocs = $instr.attr("list");
 	var swfs = flashlocs ? flashlocs.split("|") : [];
-	
+
 	for(var i=0;i<swfs.length; i++) {
 		trace("creating instrument from swf: " + swfs[i]);
 		this._CreateInstrFromSWF(swfs[i], $loc);
 	}
-	
+
 	var htmlinstr = $instr.attr("htmlinstruments");
 	var htmlarr = htmlinstr ? htmlinstr.split("|") : [];
 	for(var i=0;i<htmlarr.length; i++) {
 		this.CreateInstrFromJSClass(htmlarr[i], $loc);
 	}
-	
+
 	this.ReadSave($xml);
 	this.Notify("onExperimentLoaded");
 	$("body").trigger("configChanged");

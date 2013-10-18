@@ -22,6 +22,7 @@
 		var transport = new visir.JSTransport(visir.SetWorking);
 		transport.onerror = function(err) { alert("Error: " + err); }
 
+		visir.Config.Set("readOnly", true);
 		transport.Connect(visir.Config.Get("mesServer"), "fnord");
 
 		var reg = new visir.InstrumentRegistry();
