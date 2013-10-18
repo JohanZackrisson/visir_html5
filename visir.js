@@ -130,12 +130,10 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 	var deferred_1 = GetStage1();
 	$.when.apply(null, deferred_1).done( function() {
 		var deferred_2 = GetStage2();
-		$.when.apply(null, deferred_2).done( function() {
-			var deferred_3 = GetStage3();
-			$.when.apply(null, deferred_3).done( function() {
-				var deferred_4 = GetStage4();
-				$.when.apply(null, deferred_4).done(onSuccess);
-			});
-		});
-	})
+	$.when.apply(null, deferred_2).done( function() {
+		var deferred_3 = GetStage3();
+	$.when.apply(null, deferred_3).done( function() {
+		var deferred_4 = GetStage4();
+	$.when.apply(null, deferred_4).done(onSuccess);
+	});});})
 }
