@@ -1,4 +1,5 @@
 
+"use strict";
 
 var visir = visir || {};
 
@@ -893,7 +894,7 @@ visir.Breadboard.prototype._ReadLibrary = function(url)
 			me._$library = $(xml);
 			if (me._onLibraryLoaded) me._onLibraryLoaded();
 		}
-	}).fail(function() { alert("error"); })
+	}).fail(function() { alert("failed to read component library"); })
 	;
 }
 
@@ -1326,9 +1327,8 @@ visir.Breadboard.prototype.LoadCircuit = function(circuit)
 	
 	var offx = -44;
 	var offy = 3;
-
 	
-	$xml = $(circuit);
+	var $xml = $(circuit);
 	$xml.find("component").each(function() {
 		var t = $(this).text();
 		var args = t.split(" ");
@@ -1392,7 +1392,7 @@ visir.Breadboard.prototype.SaveCircuit = function(circuit)
 	var offp = new visir.Point(44, -3);
 	
 	var $xml = $("<circuit><circuitlist/></circuit>");
-	$cirlist = $xml.find("circuitlist");
+	var $cirlist = $xml.find("circuitlist");
 	
 	for(var i=0;i<this._wires.length; i++) {
 		var w = this._wires[i];
@@ -1425,8 +1425,8 @@ visir.Breadboard.prototype._AddInstrumentConnections = function()
 	this._$elem.find(".instruments .instrument").remove();
 	this._AddMultimeters(1 + 13*45,8 + 13*21, (visir.Config) ? visir.Config.GetNrInstrOfType("multimeter") : 2);
 	this._AddOSC(1 + 13*45, 8 + 13 * 16,      (visir.Config) ? visir.Config.GetNrInstrOfType("oscilloscope") : 1);
-	this._AddDCPower(0, 6+13*5,               (visir.Config) ? visir.Config.GetNrInstrOfType("dcpower") : 2);
-	this._AddFGEN(0, 6+13*16,                 (visir.Config) ? visir.Config.GetNrInstrOfType("functiongenerator") : 2);
+	this._AddDCPower(0, 6+13*5,               (visir.Config) ? visir.Config.GetNrInstrOfType("dcpower") : 1);
+	this._AddFGEN(0, 6+13*16,                 (visir.Config) ? visir.Config.GetNrInstrOfType("functiongenerator") : 1);
 	this._AddGND(1 + 13*45, 8 + 13 * 30);
 }
 
