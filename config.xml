@@ -1,0 +1,5 @@
+<configuration>
+	<ignorecookie>1</ignorecookie>
+	<httpurl>http://your.measureserver.url:8080/measureserver</httpurl>
+	<teacher>0</teacher>
+</configuration>
