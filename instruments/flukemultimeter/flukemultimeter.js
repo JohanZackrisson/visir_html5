@@ -44,9 +44,14 @@ visir.FlukeMultimeter = function(id, elem)
 			var rotFuncMap = { 255: "off", 285: "ac volts", 315: "dc volts", 345: "off", 15: "resistance", 45: "off", 75: "ac current", 105: "dc current"};
 			var mode = rotFuncMap[deg];
 			dmm.SetMode(mode);
+			dmm.SetRange(-1);
 			if (mode == "off") dmm._result = "";
-			else if (mode == "resistance") dmm._result = "OL";
-			else dmm._result = 0.0;
+			else if (mode == "resistance") {
+				dmm._result = "OL";
+			}
+			else {
+				dmm._result = 0.0;
+			}
 			dmm.UpdateDisplay();
 			return deg;
 		}
