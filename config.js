@@ -6,21 +6,37 @@ visir.ConfigClass = function()
 	this._instrReg = null;
 	this._manualInstConfig = null;
 	
-	this._deferred = this.LoadConfig("config.xml")
-	this._isLoaded = false;
+	var base = "";
+	if (visir.BaseLocation) base = visir.BaseLocation;
+	this._loadURL = base + "load.php";
+	this._saveURL = base + "save.php";
 }
 
-visir.ConfigClass.prototype.WaitUntilLoaded = function()
+// This is used during the visir startup phase to make sure the config.xml is loaded before any of the instruments are initialized
+visir.ConfigClass.prototype.GetDeferredLoader = function(baseurl)
 {
-	// busy wait, not that good
-	// XXX: this could be solved in the visir.js loader
-	while(!this._isLoaded) {}
+	// we don't want to propagate errors, so we use our own deferred
+	var me = this;
+	var def = $.Deferred();
+		me.LoadConfig(baseurl + "config.xml").always( function() {
+		def.resolve();
+	});
+	
+	/*
+		XXX: maybe there should be an overloading local config defined in the config.xml,
+		so that local sites using the same base js library could load their own config.
+		Should be pretty easy to add here if needed
+	*/
+	
+	return def;
 }
 
 visir.ConfigClass.prototype.Get = function(name)
 {
 	switch(name) {
 		case "teacher": return this._teacherMode;
+		case "loadurl": return this._loadURL;
+		case "saveurl": return this._saveURL;
 	}
 	
 	return undefined;		
@@ -38,13 +54,24 @@ visir.ConfigClass.prototype.SetManualInstrConfig = function(instrmap)
 
 visir.ConfigClass.prototype.GetNrInstrOfType = function(type)
 {
-	this.WaitUntilLoaded();
 	if (this._manualInstConfig) return this._manualInstConfig[type];
 	if (this._instrReg) return this._instrReg.GetNrInstrOfType(type);	
 	return 1;
 }
 
-// XXX: There is a timing problem with this, properties can be read before the config is read
+visir.ConfigClass.prototype.ParseXML = function(rawxml)
+{
+	var $xml = $(rawxml);
+	var teacher = parseInt($xml.find("teacher").text(), 10);
+	this._teacherMode = teacher | false;
+	
+	var xmlloadurl = $xml.find("loadurl").text();
+	if (xmlloadurl) this._loadURL = xmlloadurl;
+	
+	var xmlsaveurl = $xml.find("saveurl").text();
+	if (xmlsaveurl) this._saveURL = xmlsaveurl;
+}
+
 visir.ConfigClass.prototype.LoadConfig = function(url)
 {
 	var me = this;
@@ -52,17 +79,11 @@ visir.ConfigClass.prototype.LoadConfig = function(url)
 		type: "GET",
 		url: url,
 		dataType: "xml",
-		/*async: true, //can't use async: true, chrome bugs out */
 		cache: false
 	}).success( function(rawxml) {
-		var $xml = $(rawxml);
-		var teacher = parseInt($xml.find("teacher").text(), 10);
-		me._teacherMode = teacher | false;
+		me.ParseXML(rawxml);
 	})
 	.fail(function() { trace("config.xml not found"); })
-	.always(function() {
-		me._isLoaded = true;
-	})
 	;
 }
 

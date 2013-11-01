@@ -11,9 +11,8 @@ visir.InstrumentFrame = function(instreg, $container)
 	
 	this._showingInstrumentDialog = false;
 	
-	var protocol = window.location.protocol;
-	var load_url = protocol + "//dev.openlabs.bth.se/~zeta/dav/git/loadsave/load.php";
-	var save_url = protocol + "//dev.openlabs.bth.se/~zeta/dav/git/loadsave/save.php";
+	var load_url = visir.Config.Get("loadurl") || "load.php";
+	var save_url = visir.Config.Get("saveurl") || "save.php";
 	
 	var imgbase = "instrumentframe";
 	if (visir.BaseLocation) imgbase = visir.BaseLocation + imgbase;

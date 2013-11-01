@@ -1,6 +1,6 @@
 var visir = visir || {};
 
-if ($.browser.msie) alert("Upgrade to a modern web browser. This page will probably not work as designed.");
+//if ($.browser.msie) alert("Upgrade to a modern web browser. This page will probably not work as designed.");
 
 visir.Load = function( onSuccess, onFailure, baseurl )
 {
@@ -30,7 +30,7 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		, "instruments/dcpower.js"
 		, "instruments/transport.js"
 	];
-	
+			
 	var stage2_scripts = [
 		"instruments/breadboard/breadboard.js"
 		, "instruments/flukemultimeter/flukemultimeter.js"
@@ -40,6 +40,20 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		, "instruments/ni_oscilloscope/ni_oscilloscope.js"
 		, "instrumentframe/instrumentframe.js"
 	];
+	
+	function PreloadResouce(src)
+	{
+		var def = $.Deferred();
+		
+		var res = $.ajax({
+  		url: src,
+			cache: false
+		});
+		
+		res.always(function() {
+			def.resolve();
+		});		
+	}
 	
 	function InjectCSS(src)
 	{
@@ -104,9 +118,25 @@ visir.Load = function( onSuccess, onFailure, baseurl )
 		return defs;
 	}
 	
-	var deferred_1 = GetStage1();
-	$.when.apply(null, deferred_1).done( function() {
+	function Failed()
+	{
+		alert("VISIR Environment failed to load");
+	}
+	
+	function WaitForStage1() {
+			var deferred_1 = GetStage1();
+			$.when.apply(null, deferred_1).done( WaitForSetup );
+	}
+	
+	function WaitForSetup() {
+		var deferred = visir.Config.GetDeferredLoader(baseurl);
+		deferred.done( WaitForStage2 );
+	}
+	
+	function WaitForStage2() {
 		var deferred_2 = GetStage2();
 		$.when.apply(null, deferred_2).done(onSuccess);
-	})
+	}
+	
+	WaitForStage1();
 }
