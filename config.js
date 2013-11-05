@@ -29,6 +29,7 @@ visir.ConfigClass.prototype.Get = function(name)
 		case "mesServer": return this._mesServer;
 		case "readOnly": return this._readOnly;
 		case "transMethod": return this._transMethod;
+		case "oscRunnable": return this._oscRunnable;
 	}
 
 	return undefined;
@@ -42,6 +43,7 @@ visir.ConfigClass.prototype.Set = function(name, value)
 		case "mesServer": this._mesServer = value;
 		case "readOnly": this._readOnly = value;
 		case "transMethod": this._transMethod = value;
+		case "oscRunnable": this._oscRunnable = value;
 	}
 }
 
