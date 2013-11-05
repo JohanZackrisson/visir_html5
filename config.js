@@ -19,6 +19,7 @@ visir.ConfigClass = function()
 	this._mesServer = config.mesServer;
 	this._readOnly = config.readOnly;
 	this._transMethod = config.transMethod;
+	this._oscRunnable = config.oscRunnable;
 }
 
 visir.ConfigClass.prototype.Get = function(name)
