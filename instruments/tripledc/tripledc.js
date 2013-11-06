@@ -5,11 +5,11 @@ var visir = visir || {};
 visir.TripleDC = function(id, elem)
 {
 	visir.TripleDC.parent.constructor.apply(this, arguments)
-	
+
 	var me = this;
 	this._activeChannel = "6V+";
 	this._elem = elem;
-	
+
 	// all the values are represented times 1000 to avoid floating point trouble
 	// XXX: need to change this later, both voltage and current has an active digit
 	this._values = {
@@ -17,10 +17,10 @@ visir.TripleDC = function(id, elem)
 		"25V+": { voltage: 0, current: 5000, digit: 2, min: 0, max: 25000 },
 		"25V-": { voltage: 0, current: 5000, digit: 2, min: -25000, max: 0 }
 	 }
-	
+
 	var imgbase = "instruments/tripledc/images";
 	if (visir.BaseLocation) imgbase = visir.BaseLocation + imgbase;
-	
+
 	var tpl = '<div class="tripledc">\
 	<img src="%img%/3dc.png" width="720" height="449" />\
 	<div class="bigtext voltage"><span class="green">0</span>.000V</div>\
@@ -42,21 +42,21 @@ visir.TripleDC = function(id, elem)
 	</div>\
 	<div class="manual_link"><a href="http://cp.literature.agilent.com/litweb/pdf/E3631-90002.pdf" target="_blank">Download Manual</a></div>\
 	</div>';
-	
+
 	tpl = tpl.replace(/%img%/g, imgbase);
-		
+
 	elem.append(tpl);
-	
+
 	var $doc = $(document);
-	
+
 	var prev = 0;
-	
+
 	function handleTurn(elem, deg) {
 		var diff = deg - prev;
 		// fixup the wrapping
 		if (diff > 180) diff = -360 + diff;
 		else if (diff < -180) diff = 360 + diff;
-		
+
 		if (Math.abs(diff) > 360/10) {
 			prev = deg;
 			//trace("diff: " + diff);
@@ -66,38 +66,41 @@ visir.TripleDC = function(id, elem)
 
 		return deg;
 	}
-	
-	elem.find(".knob").turnable({offset: 90, turn: handleTurn });
-	
-	// make all buttons updownButtons
-	elem.find(".button").updownButton();
-	
-	elem.find("div.button_p6v").click( function() {
-		me._SetActiveChannel("6V+");
-	});
-	elem.find("div.button_p25v").click( function() {
-		me._SetActiveChannel("25V+");
-	});
-	elem.find("div.button_m25v").click( function() {
-		me._SetActiveChannel("25V-");
-	});
-	elem.find("div.button_left").click( function() {
-			var aCh = me._GetActiveChannel();
-			trace("digit: " + (aCh.digit + 1));
-			me._SetActiveValue(aCh.voltage, aCh.digit + 1);
-	});
-	elem.find("div.button_right").click( function() {
-			var aCh = me._GetActiveChannel();
-			trace("digit: " + (aCh.digit -1));
-			me._SetActiveValue(aCh.voltage, aCh.digit - 1);
-	});
-	
+
+	if(!visir.Config.Get("readOnly"))
+	{
+		elem.find(".knob").turnable({offset: 90, turn: handleTurn });
+
+		// make all buttons updownButtons
+		elem.find(".button").updownButton();
+
+		elem.find("div.button_p6v").click( function() {
+			me._SetActiveChannel("6V+");
+		});
+		elem.find("div.button_p25v").click( function() {
+			me._SetActiveChannel("25V+");
+		});
+		elem.find("div.button_m25v").click( function() {
+			me._SetActiveChannel("25V-");
+		});
+		elem.find("div.button_left").click( function() {
+				var aCh = me._GetActiveChannel();
+				trace("digit: " + (aCh.digit + 1));
+				me._SetActiveValue(aCh.voltage, aCh.digit + 1);
+		});
+		elem.find("div.button_right").click( function() {
+				var aCh = me._GetActiveChannel();
+				trace("digit: " + (aCh.digit -1));
+				me._SetActiveValue(aCh.voltage, aCh.digit - 1);
+		});
+	}
+
 	// XXX: need to fix this when making it possible to change current limits
 	var blink = elem.find(".tripledc .voltage");
 	setInterval(function() {
 		blink.toggleClass("on");
 	},500);
-	
+
 	me._UpdateDisplay();
 }
 
@@ -110,7 +113,7 @@ visir.TripleDC.prototype._UpdateDisplay = function(showMeasured) {
 	if (aCh.voltage >= 10000) {
 		digitoffset = 1;
 	}
-	
+
 	var value = 0;
 	if (showMeasured) {
 		var responseData = this._channels[this._activeChannel];
@@ -120,10 +123,10 @@ visir.TripleDC.prototype._UpdateDisplay = function(showMeasured) {
 	} else {
 		value = (aCh.voltage / 1000);
 	}
-	
+
 	//var value = (showMeasured) ? this._channels[this._activeChannel].measured_voltage : (aCh.voltage / 1000);
 	trace("value: " + value);
-	
+
 	//var fixed = (aCh.voltage >= 10000) ? 2 : 3;
 	//var num = (aCh.voltage / 1000).toFixed(3 - digitoffset);
 	var num = value.toFixed(3 - digitoffset);
@@ -137,7 +140,7 @@ visir.TripleDC.prototype._GetActiveChannel = function() {
 visir.TripleDC.prototype._SetActiveChannel = function(ch) {
 	trace("activechannel: " + ch);
 	this._activeChannel = ch;
-	
+
 	this._elem.find(".channelselect > div").addClass("hide");
 	var show = "";
 	switch(ch) {
@@ -176,6 +179,6 @@ visir.TripleDC.prototype._IncDigit = function() {
 visir.TripleDC.prototype.ReadResponse = function(response) {
 	var me = this;
 	visir.TripleDC.parent.ReadResponse.apply(this, arguments);
-	
+
 	this._UpdateDisplay(true);
 }

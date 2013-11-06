@@ -5,13 +5,13 @@ var visir = visir || {};
 visir.HPFunctionGenerator = function(id, elem)
 {
 	visir.HPFunctionGenerator.parent.constructor.apply(this, arguments)
-	
+
 	var me = this;
 	this._$elem = elem;
 	this._currentValue = "freq";
-	
+
 	/* the multipliers are used to avoid storing the values in floating point
-	which will cause problems when trying to display the values */	
+	which will cause problems when trying to display the values */
 	this._values = {
 		"freq": { value: 1000 * 100000000, multiplier: 100000000, digit: 8, numDigits: 8, unit: "Hz", max: 1*1000*1000*100000000, min: 10000},
 		"ampl": { value: 1 * 10000, multiplier: 10000, digit: 4, numDigits: 4, unit: "Vpp", max: 10*10000, min: 500 },
@@ -20,8 +20,8 @@ visir.HPFunctionGenerator = function(id, elem)
 
 	var imgbase = "instruments/hp_funcgen/images";
 	if (visir.BaseLocation) imgbase = visir.BaseLocation + imgbase;
-		
-	var tpl = 
+
+	var tpl =
 	'<div class="hp_funcgen">\
 	<img src="%img%/fgen.png" width="800" height="356" />\
 	<div class="bigtext num_display">1.00<span class="green">0</span>0000</div>\
@@ -57,14 +57,14 @@ visir.HPFunctionGenerator = function(id, elem)
 	</div>\
 	<div class="manual_link"><a href="http://www.home.agilent.com/upload/cmc_upload/All/6C0633120A_USERSGUIDE_ENGLISH.pdf" target="_blank">Download Manual</a></div>\
 	</div>';
-	
+
 	tpl = tpl.replace(/%img%/g, imgbase);
 	//console.log(tpl);
-		
+
 	elem.append(tpl);
-	
+
 	var $doc = $(document);
-	
+
 	var prev = 0;
 
 	function handleTurn(elem, deg) {
@@ -72,7 +72,7 @@ visir.HPFunctionGenerator = function(id, elem)
 		// fixup the wrapping
 		if (diff > 180) diff = -360 + diff;
 		else if (diff < -180) diff = 360 + diff;
-		
+
 		if (Math.abs(diff) > 360/10) {
 			prev = deg;
 			//trace("diff: " + diff);
@@ -83,39 +83,41 @@ visir.HPFunctionGenerator = function(id, elem)
 		return deg;
 	}
 
-	
-	elem.find(".knob").turnable({offset: 90, turn: handleTurn });
-	
-	// make all buttons updownButtons
-	elem.find(".button").updownButton();
-	
-	elem.find("div.button_sine").click( function() { me.SetWaveform("sine"); me._UpdateDisplay(); });
-	elem.find("div.button_square").click( function() { me.SetWaveform("square"); me._UpdateDisplay(); });
-	elem.find("div.button_triangle").click( function() { me.SetWaveform("triangle"); me._UpdateDisplay(); });
-	elem.find("div.button_rampup").click( function() { me.SetWaveform("rampup"); me._UpdateDisplay(); });
-	elem.find("div.button_freq").click( function() { me.SetActiveValue("freq"); });
-	elem.find("div.button_ampl").click( function() { me.SetActiveValue("ampl"); });
-	elem.find("div.button_offset").click( function() { me.SetActiveValue("offset"); });
-	elem.find("div.button_right").click(function() {
-		var val = me._values[me._currentValue];
-		me._SetActiveValue(val.value, val.digit - 1);
-	});
-	elem.find("div.button_left").click(function() {
-		var val = me._values[me._currentValue];
-		me._SetActiveValue(val.value, val.digit + 1);
-	});
-	elem.find("div.button_up").click(function() {
-		me._IncDigit();
-	});
-	elem.find("div.button_down").click(function() {
-		me._DecDigit()
-	});
-		
+	if(!visir.Config.Get("readOnly"))
+	{
+		elem.find(".knob").turnable({offset: 90, turn: handleTurn });
+
+		// make all buttons updownButtons
+		elem.find(".button").updownButton();
+
+		elem.find("div.button_sine").click( function() { me.SetWaveform("sine"); me._UpdateDisplay(); });
+		elem.find("div.button_square").click( function() { me.SetWaveform("square"); me._UpdateDisplay(); });
+		elem.find("div.button_triangle").click( function() { me.SetWaveform("triangle"); me._UpdateDisplay(); });
+		elem.find("div.button_rampup").click( function() { me.SetWaveform("rampup"); me._UpdateDisplay(); });
+		elem.find("div.button_freq").click( function() { me.SetActiveValue("freq"); });
+		elem.find("div.button_ampl").click( function() { me.SetActiveValue("ampl"); });
+		elem.find("div.button_offset").click( function() { me.SetActiveValue("offset"); });
+		elem.find("div.button_right").click(function() {
+			var val = me._values[me._currentValue];
+			me._SetActiveValue(val.value, val.digit - 1);
+		});
+		elem.find("div.button_left").click(function() {
+			var val = me._values[me._currentValue];
+			me._SetActiveValue(val.value, val.digit + 1);
+		});
+		elem.find("div.button_up").click(function() {
+			me._IncDigit();
+		});
+		elem.find("div.button_down").click(function() {
+			me._DecDigit()
+		});
+	}
+
 	var blink = elem.find(".hp_funcgen .num_display");
 	setInterval(function() {
 		blink.toggleClass("on");
 	},500);
-	
+
 	me._UpdateDisplay();
 }
 
@@ -154,12 +156,12 @@ visir.HPFunctionGenerator.prototype._GetDisplayDigitInfo = function(realval, dig
 {
 	var unit = this._GetUnit(realval);
 	realval /= Math.pow(10, unit.pow); // compensate for prefixes
-	
+
 	var num = numDigits(realval); // count the number of digits before .
 	var display = realval.toFixed(digits - num);
 	var prefixedunit = unit.unit + valunit;
 	var digit = activedigit - unit.pow - num;
-	
+
 	return { display: display, unit: prefixedunit, digit: digit };
 }
 
@@ -173,7 +175,7 @@ visir.HPFunctionGenerator.prototype._UpdateDisplay = function(ch)
 		case "rampdown": set = "rampup"; break;
 	}
 	this._$elem.find(".funcselect img." + set).addClass("active");
-	
+
 	// display the selected value
 	var val = this._values[this._currentValue];
 	/*
@@ -187,13 +189,13 @@ visir.HPFunctionGenerator.prototype._UpdateDisplay = function(ch)
 	var digitoffset = unit.pow;
 	var out = realval.toFixed(len - num);
 	*/
-	
+
 	var info = this._GetDisplayDigitInfo(val.value / val.multiplier, val.numDigits, val.digit, val.unit);
 	this._$elem.find(".num_display").html(visir.LightNum(info.display, info.digit));
 	this._$elem.find(".num_unit").html(info.unit);
-	
+
 	/*this._$elem.find(".num_display").html(visir.LightNum(out, val.digit - digitoffset - num));
-	
+
 	var unitprefix = unit.unit;
 	this._$elem.find(".num_unit").html(unitprefix + val.unit);
 	*/
@@ -216,14 +218,14 @@ visir.HPFunctionGenerator.prototype._GetUnit = function(val)
 	var unit = "";
 	var div = 0;
 	if (val == 0) return { unit: unit, pow: div };
-	
+
 	for (var key in units) {
 		var unit = units[key];
 		if (val >= Math.pow(10, unit[1])) {
 			return {unit: unit[0], pow: unit[1] };
 		}
 	}
-	
+
 	var last = units[units.length - 1];
 	return {unit: last[0], pow: last[1] };
 }
@@ -233,20 +235,20 @@ visir.HPFunctionGenerator.prototype._SetActiveValue = function(value, digit) {
 	var val = this._values[this._currentValue];
 	var ok = true;
 	if (value > val.max || value < val.min)	ok = false;
-	
+
 	trace("XXX: " + Math.pow(10, digit) + " " +  value + " " + (value / val.multiplier));
-	
+
 	// test if active digit is outside display range (upper bound)
 	if ((Math.abs(value / val.multiplier) >= 1.0) && (Math.pow(10, digit) > Math.abs(value))) ok = false;
 	// XXX: lower bounds check of digit should check if the active digit will still be visible after update
-	
+
 	var info = this._GetDisplayDigitInfo(value / val.multiplier, val.numDigits, digit, "");
 	if (info.digit < 0) ok = false;
-	
+
 	if (ok) {
 		val.digit = digit;
 		val.value = value;
-		
+
 		var realvalue = val.value / val.multiplier;
 		switch(this._currentValue) {
 			case "freq": this._frequency = realvalue; break;

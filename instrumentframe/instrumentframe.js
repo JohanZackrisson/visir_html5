@@ -6,18 +6,18 @@ visir.InstrumentFrame = function(instreg, $container)
 {
 	this._registry = instreg;
 	this._$container = $container;
-	
+
 	var frame = this;
-	
+
 	this._showingInstrumentDialog = false;
 	
 	var load_url = visir.Config.Get("loadurl") || "load.php";
 	var save_url = visir.Config.Get("saveurl") || "save.php";
-	
+
 	var imgbase = "instrumentframe";
 	if (visir.BaseLocation) imgbase = visir.BaseLocation + imgbase;
 	this._baseurl = imgbase;
-	
+
 	//XXX: should generate a iframe name with a unique id..
 	var tpl = '<div class="frame">\
 	<div style="display: none">\
@@ -35,12 +35,14 @@ visir.InstrumentFrame = function(instreg, $container)
 		</div>\
 	</div>\
 	<div class="buttonrow">\
-		<div class="loadsave">\
-			<button id="loadbutton" class="">Load</button>\
-			<button id="savebutton" class="">Save</button>\
+		' + (!visir.Config.Get("readOnly") ?
+		'<div class="loadsave">\
+			<button id="loadbutton" class="">'+visir.Lang.GetMessage('load')+'</button>\
+			<button id="savebutton" class="">'+visir.Lang.GetMessage('save')+'</button>\
 		</div>\
 		<div class="shelf"><button id="shelfbutton"><img src="%img%/images/shelf.png" /></button></div>\
-		<div class="instrumentbuttons"></div>\
+		' : '') + // XXX: hard to read this maybe insert after instead
+		'<div class="instrumentbuttons"></div>\
 		<div class="measurework">\
 			<button id="measurebutton" class="measure">Perform Measurement</button>\
 			<div class="work_indicator"><span><img src="%img%/images/work_indicator.png" alt="work indicator"/></span></div>\
@@ -48,19 +50,19 @@ visir.InstrumentFrame = function(instreg, $container)
 	</div>\
 	</div>\
 	';
-	
+
 	tpl = tpl.replace(/%img%/g, imgbase);
 	var $tpl = $(tpl);
-	
+
 	var isTouchDevice = navigator.userAgent.match(/iPhone|iPad/);
-		
+
 	$container.append($tpl);
-	
+
 	var teacher_mode = (visir.Config) ? visir.Config.Get("teacher") : true;
 	if (teacher_mode) {
 		this._$container.find("div.shelf").addClass("show");
 	}
-	
+
 	if (isTouchDevice) {
 		var $dialog = $('\
 		<div class="filedialog">\
@@ -73,7 +75,7 @@ visir.InstrumentFrame = function(instreg, $container)
 			</div>\
 		</div>\
 		');
-		
+
 		$dialog.find(".savedialog button#save").click( function() {
 			var filename = $dialog.find(".savedialog input#filename").val();
 			if (!filename) {
@@ -83,15 +85,15 @@ visir.InstrumentFrame = function(instreg, $container)
 			frame._SaveToLocalStorage(filename);
 			$dialog.find(".dialog").hide();
 		});
-		
+
 		$dialog.find(".closebutton").click( function() {
 			$dialog.find(".dialog").hide();
 		});
-						
+
 		this._$container.find(".container").append($dialog);
 	}
 	instreg.AddListener( { onExperimentLoaded: function() { frame.CreateButtons(); }  })
-	
+
 	$container.find("#savebutton").click( function() {
 		if (!isTouchDevice) {
 			frame._SaveToFileSystem();
@@ -99,7 +101,7 @@ visir.InstrumentFrame = function(instreg, $container)
 			frame._ShowLocalStorageSaveDialog();
 		}
 	});
-		
+
 	$container.find("#loadbutton").click( function() {
 		if (!isTouchDevice) {
 			frame._LoadFromFileSystem();
@@ -107,26 +109,26 @@ visir.InstrumentFrame = function(instreg, $container)
 			frame._ShowLocalStorageLoadDialog();
 		}
 	});
-	
+
 	$container.find("#shelfbutton").click( function() {
 		frame.ShowInstrumentSelection(! frame._showingInstrumentDialog);
 	});
-	
+
 	$container.find("#upload").change( function() { $("#upload_form").submit(); })
 	$container.find("#upload_iframe").unbind().load( function() {
-		trace("loaded: '" + $(this).contents().find("body").html() + "'");
+		trace("loaded: '" + $(this).html() + "'");
 		var savedata = $(this).contents().find("body").html();
 		if (savedata.length == 0) return;
 		instreg.LoadExperiment(savedata, $container.find(".container"));
 		$container.find("#upload").val(""); // trick to make sure we get the change request even if the same file was selected
 	});
-	
+
 	this.ShowWorkingIndicator(false);
-	
+
 	var me = this;
-	
+
 	$("body").on("working", function(e) { me.ShowWorkingIndicator(e.isWorking); });
-	
+
 	/// Note: the .measure button click is handled outside this class
 }
 
@@ -153,16 +155,16 @@ visir.InstrumentFrame.prototype._ShowLocalStorageLoadDialog = function()
 {
 	var me = this;
 	var data = JSON.parse(window.localStorage.getItem("savedata")) || {};
-	
+
 	this._$container.find(".filedialog .loaddialog .files").empty();
-	
+
 	var empty = true;
-	
+
 	for(var key in data) {
 		empty = false;
 
 		var $file = $('<div class="file"><div class="filename">' + key + '</div><div class="delete"></div></div>');
-		
+
 		function genLoadFunc(loaddata) {
 			return function() {
 				trace("clicked load");
@@ -170,9 +172,9 @@ visir.InstrumentFrame.prototype._ShowLocalStorageLoadDialog = function()
 				me._$container.find(".dialog").hide();
 			}
 		}
-		
+
 		$file.find(".filename").click(genLoadFunc(data[key]));
-				
+
 		function genDeleteFunc(data, filename) {
 			return function() {
 				var answer = confirm("Are you sure you want to delete this file?");
@@ -184,16 +186,16 @@ visir.InstrumentFrame.prototype._ShowLocalStorageLoadDialog = function()
 				}
 			}
 		}
-		
+
 		$file.find(".delete").click(genDeleteFunc(data, key));
-		
+
 		this._$container.find(".filedialog .loaddialog .files").append($file);
 	}
-	
+
 	if (empty) {
 		this._$container.find(".filedialog .loaddialog .files").append('<div class="infotext">No saved files</div>');
 	}
-	
+
 	this._$container.find(".dialog").hide();
 	this._$container.find(".loaddialog").show();
 }
@@ -204,7 +206,7 @@ visir.InstrumentFrame.prototype._SaveToLocalStorage = function(name)
 	var save = this._registry.WriteSave();
 	trace("save to local storage");
 	trace(save);
-	
+
 	var data = JSON.parse(window.localStorage.getItem("savedata")) || {};
 	if (data[name]) {
 		if (!confirm("Overwrite existing file?")) return;
@@ -223,7 +225,7 @@ visir.InstrumentFrame.prototype._LoadFromLocalStorage = function(name)
 		return;
 	}
 	trace(loaddata);
-	this._registry.LoadExperiment(loaddata, this._$container.find(".container"));	
+	this._registry.LoadExperiment(loaddata, this._$container.find(".container"));
 }
 
 visir.InstrumentFrame.prototype.GetInstrumentContainer = function()
@@ -239,10 +241,10 @@ visir.InstrumentFrame.prototype._CreateInstrButton = function(name)
 visir.InstrumentFrame.prototype.CreateButtons = function()
 {
 	var instruments = this._registry._instruments; // watch out!
-	
+
 	this._$container.find(".buttonctnr").remove();
 	var me = this;
-	
+
 	function genButtonHandler($dom) {
 		return function() {
 			for(var i=0;i<instruments.length; i++) {
@@ -253,7 +255,7 @@ visir.InstrumentFrame.prototype.CreateButtons = function()
 			$("body").trigger( { type:"working", isWorking: false, shouldContinue: false });
 		}
 	}
-	
+
 	function genCloseButtonHandler($btnctnr, instr) {
 		return function() {
 			me._registry.RemoveInstrument(instr);
@@ -262,7 +264,7 @@ visir.InstrumentFrame.prototype.CreateButtons = function()
 			$("body").trigger("configChanged"); // notify so we can update instrument connections
 		}
 	}
-	
+
 	for(var i=0;i<instruments.length; i++) {
 		var instr = instruments[i];
 		var suffix = "";
@@ -272,7 +274,7 @@ visir.InstrumentFrame.prototype.CreateButtons = function()
 		$newButton.find(".closebutton").click( genCloseButtonHandler($newButton, instruments[i]));
 		this._$container.find(".instrumentbuttons").append($newButton);
 	}
-	
+
 	this.ShowFirstInstrument();
 }
 
@@ -290,24 +292,24 @@ visir.InstrumentFrame.prototype.ShowWorkingIndicator = function(show)
 visir.InstrumentFrame.prototype._PopulateInstrumentDialog = function()
 {
 	var url = this._baseurl + "/instruments.xml";
-	
+
 	var $list = this._$container.find(".instrumentlist");
 	$list.empty();
-	
+
 	var me = this;
-	
+
 	$.get(url, function(rawxml) {
 		var $xml = $(rawxml);
 		trace("instrument library loaded");
 		$xml.find("instruments > instrument").each( function(e) {
 			var $elem = $(this);
 			var id = $elem.attr("id");
-			var displayname = $elem.attr("displayname");
-			var type = $elem.attr("displayname");
+			var displayname = visir.Lang.GetDescription($elem.attr("displayname"));
+			var type = $elem.attr("type");
 			var image = $elem.attr("image");
 			var path = $elem.attr("path"); // this is the swf path, do not use
 			var jsclass = $elem.attr("jsclass");
-			
+
 			var elem = '<div class="list-elem"><img src="%img%/' + image + '" /><div class="title">' + displayname + '</div></div>';
 			elem = elem.replace(/%img%/g, me._baseurl);
 			var $elem = $(elem);
@@ -319,7 +321,7 @@ visir.InstrumentFrame.prototype._PopulateInstrumentDialog = function()
 				me._$container.find(".instrumentbuttons .closebutton").show();
 				$("body").trigger("configChanged"); // notify so we can update instrument connections
 			});
-			
+
 			$list.append($elem);
 		});
 	});

@@ -12,23 +12,38 @@ visir.ConfigClass = function()
 	this._saveURL = base + "save.php";
 }
 
-// This is used during the visir startup phase to make sure the config.xml is loaded before any of the instruments are initialized
-visir.ConfigClass.prototype.GetDeferredLoader = function(baseurl)
+visir.ConfigClass.prototype.GetDeferredConfigLoader = function(baseurl)
 {
-	// we don't want to propagate errors, so we use our own deferred
 	var me = this;
+	
 	var def = $.Deferred();
-		me.LoadConfig(baseurl + "config.xml").always( function() {
+	
+	$.ajax({
+		// there is a bug in chrome that makes the network timeline go bananas on async requests, so work around it
+		/*async: false, */
+		dataType: "json",
+		url: baseurl + "config.json"
+	}).done(function(data) {
+		me.ReadConfig(data);
+	}).error( function(obj, msg) {
+		alert("failed to read config.json. " + msg);
+	}).always( function() {
 		def.resolve();
 	});
 	
-	/*
-		XXX: maybe there should be an overloading local config defined in the config.xml,
-		so that local sites using the same base js library could load their own config.
-		Should be pretty easy to add here if needed
-	*/
-	
-	return def;
+	return def;	
+}
+
+visir.ConfigClass.prototype.ReadConfig = function(config)
+{
+	this._teacherMode = config.teacherMode;
+	this._instrReg = config.instrReg;
+	this._locale = config.locale;
+	this._mesServer = config.mesServer;
+	this._readOnly = config.readOnly;
+	this._transMethod = config.transMethod;
+	this._loadURL = config.loadURL;
+	this._saveURL = config.saveURL;	
 }
 
 visir.ConfigClass.prototype.Get = function(name)
@@ -37,9 +52,26 @@ visir.ConfigClass.prototype.Get = function(name)
 		case "teacher": return this._teacherMode;
 		case "loadurl": return this._loadURL;
 		case "saveurl": return this._saveURL;
+		case "locale": return this._locale;
+		case "mesServer": return this._mesServer;
+		case "readOnly": return this._readOnly;
+		case "transMethod": return this._transMethod;
 	}
-	
-	return undefined;		
+
+	return undefined;
+}
+
+visir.ConfigClass.prototype.Set = function(name, value)
+{
+	switch(name) {
+		case "teacher": this._teacherMode = value;
+		case "locale": this._locale = value;
+		case "mesServer": this._mesServer = value;
+		case "readOnly": this._readOnly = value;
+		case "transMethod": this._transMethod = value;
+		case "loadurl": this._loadURL = value;
+		case "saveurl": this._saveURL = value;
+	}
 }
 
 visir.ConfigClass.prototype.SetInstrRegistry = function(registry)
@@ -57,34 +89,6 @@ visir.ConfigClass.prototype.GetNrInstrOfType = function(type)
 	if (this._manualInstConfig) return this._manualInstConfig[type];
 	if (this._instrReg) return this._instrReg.GetNrInstrOfType(type);	
 	return 1;
-}
-
-visir.ConfigClass.prototype.ParseXML = function(rawxml)
-{
-	var $xml = $(rawxml);
-	var teacher = parseInt($xml.find("teacher").text(), 10);
-	this._teacherMode = teacher | false;
-	
-	var xmlloadurl = $xml.find("loadurl").text();
-	if (xmlloadurl) this._loadURL = xmlloadurl;
-	
-	var xmlsaveurl = $xml.find("saveurl").text();
-	if (xmlsaveurl) this._saveURL = xmlsaveurl;
-}
-
-visir.ConfigClass.prototype.LoadConfig = function(url)
-{
-	var me = this;
-	return $.ajax({
-		type: "GET",
-		url: url,
-		dataType: "xml",
-		cache: false
-	}).success( function(rawxml) {
-		me.ParseXML(rawxml);
-	})
-	.fail(function() { trace("config.xml not found"); })
-	;
 }
 
 visir.Config = new visir.ConfigClass();

@@ -8,7 +8,7 @@
   			-moz-user-select: none;
   			-ms-user-select: none;
   			-o-user-select: none;
-  			user-select: none;      
+  			user-select: none;
 		}
 		.resistor {
 			display: table-cell;
@@ -22,7 +22,7 @@
 			letter-spacing: 0px;
   			word-spacing: 0px;
 			border-radius: 55px;
-			
+
 		}
 		.colorband {
 			border: 0;
@@ -34,7 +34,7 @@
 			background-color: black;
 			vertical-align: top;
 		}
-		
+
 		.colorband .name {
 			position: relative;
 			top: 50%;
@@ -44,14 +44,14 @@
   			-o-transform: rotate(-90deg);
   			transform: rotate(-90deg);
 		}
-		
+
 		.outer {
 			position: relative;
 			display: table;
 			border: 0; padding: 0; margin: 0;
 			vertical-align: middle;
 		}
-		
+
 		.wireend {
 			display: table-cell;
 			border: 0; padding: 0; margin: 0;
@@ -59,18 +59,18 @@
 			height: 100%;
 			vertical-align: middle;
 		}
-		
+
 		.wire {
 			vertical-align: middle;
 			background: black;
 			height: 12px;
 		}
-		
+
 		.value {
 			width: 200px;
 		}
 	</style>
-	<script type="text/javascript" src="jquery-1.8.2.min.js"></script>
+	<script type="text/javascript" src="jquery-1.10.2.min.js"></script>
 	<script type="text/javascript" src="jquery-draggable.js"></script>
 	<script type="text/javascript" src="utils.js"></script>
 	<script type="text/javascript" src="visir.js"></script>
@@ -80,11 +80,11 @@
 	var colors = [ "#000000", "#B8860B", "#FF0000", "#FFA500", "#FFFF00", "#9ACD32", "#6495ED", "#EE82EE", "#A0A0A0", "#FFFFFF", "#FFD700", "#C0C0C0" ];
 	var colorNames = [ "Black", "Brown", "Red", "Orange", "Yellow", "Green", "Blue", "Violet", "Gray", "White", "Gold", "Silver", "None"];
 	var Multipliers = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, -1, -2];
-	
+
 	var Tolerances = [ 1, 2, 0.5, 0.25, 0.1, 0.05, 5, 10, 20];
 	var ToleranceColors = [ "#B8860B", "#FF0000", "#9ACD32", "#6495ED", "#EE82EE", "#FFFFFF", "#FFD700", "#C0C0C0", "rgb(68, 194, 231)" ];
 	var ToleranceColorNames = [ "Brown", "Red", "Green", "Blue", "Violet", "Gray", "Gold", "Silver", "None"];
-	
+
 	function UpdateColors()
 	{
 		$(".color1").css("background-color", colors[colorIdx[0]]);
@@ -98,25 +98,25 @@
 		$(".color4 .name").text(colorNames[colorIdx[3]]);
 		$(".color5 .name").text(ToleranceColorNames[colorIdx[4]]);
 	}
-	
+
 	function CalculateValue()
 	{
 		var value = (colorIdx[0] * 100 + colorIdx[1] * 10 + colorIdx[2]) * Math.pow(10, Multipliers[colorIdx[3]]);
 		$(".value").val((value < 20.0) ? value.toFixed(3) : value);
 		//trace("value: " + value + " " + colorIdx[3]);
-		
+
 		var tolerance = Tolerances[colorIdx[4]];
 		$(".tolerance").val(tolerance + "%");
 		//trace("tolerance: " + tolerance);
 	}
-	
+
 	function ChangeColor(num, dir)
 	{
 		colorIdx[num] += dir;
 		//if (num == 0 && colorIdx[num] < 1) colorIdx[num] = Limit[num];
 		if (colorIdx[num] < 0) colorIdx[num] = Limit[num];
 		if (colorIdx[num] > Limit[num]) colorIdx[num] = 0;
-		
+
 		UpdateColors();
 		CalculateValue();
 	}
@@ -125,7 +125,7 @@
 	{
 		UpdateColors();
 		CalculateValue();
-		
+
 		function genDragFunc(idx)
 		{
 			var prev = 0;
@@ -144,13 +144,13 @@
 				return {x: undefined, y:undefined };
 			}}
 		}
-		
+
 		$(".color1").draggable( genDragFunc(0) );
 		$(".color2").draggable( genDragFunc(1) );
 		$(".color3").draggable( genDragFunc(2) );
 		$(".color4").draggable( genDragFunc(3) );
 		$(".color5").draggable( genDragFunc(4) );
-		
+
 		$(".resistor").on("mousedown touchstart", function(e) { e.preventDefault(); });
 	}
 	$(init);

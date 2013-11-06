@@ -8,7 +8,7 @@ visir.AgilentOscilloscope = function(id, elem, props)
 {
 	var me = this;
 	visir.AgilentOscilloscope.parent.constructor.apply(this, arguments);
-	
+
 	var options = $.extend({
 		MeasureCalling: function() {
 			if (me._extService) me._extService.MakeMeasurement();
@@ -19,30 +19,30 @@ visir.AgilentOscilloscope = function(id, elem, props)
 		}
 	}, props || {});
 	this._options = options;
-	
+
 	this._voltages = [5, 2, 1, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001];
 	this._voltIdx = [2,2];
-	
+
 	this._timedivs = [0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001, 0.00005, 0.00002, 0.00001, 0.000005, 0.000002, 0.000001, 0.0000005];
 	this._timeIdx = 1;
-	
+
 	this._triggerModes = ["autolevel", "auto", "normal"];
 	this._triggerModesDisplay = ["Auto Level", "Auto", "Normal"];
 	this._triggerModesLight = ["Level", "Auto", "Trig'd"];
 	this._triggerModeIdx = 0;
 	this._triggerLevelUnclamped = 0.0;
-	
+
 	var me = this;
 	this._$elem = elem;
-	
+
 	this._channels[0].visible = true;
 	this._channels[0].display_offset = 0.0;
 	this._channels[1].visible = true;
 	this._channels[1].display_offset = 0.0;
-	
+
 	this._extService = null;
 	this._canContinueMeasuring = false;
-	
+
 	$("body").on("working", function(e) {
 		if (!e.isWorking) {
 			me._canContinueMeasuring =  e.shouldContinue;
@@ -52,63 +52,68 @@ visir.AgilentOscilloscope = function(id, elem, props)
 			}
 		}
 	});
-	
-	
+
 	function NewMeasInfo(display, str, unit, proto) {
 		return { display: display, str: str, unit: unit, proto: proto };
 	}
-	
+
 	this._measurementInfo = [
 		NewMeasInfo("Amplitude", "Ampl", "V", "voltageamplitude")
 		, NewMeasInfo("Avgerage", "Avg", "V", "voltageaverage")
 		, NewMeasInfo("Base", "Base", "V", "voltagebase")
 		, NewMeasInfo("Duty Cycle", "Duty", "%", "negativedutycycle")
 		, NewMeasInfo("Fall Time", "Fall", "s", "falltime")
-		
+
 		, NewMeasInfo("Frequency", "Freq", "Hz", "frequency")
 		, NewMeasInfo("Maximum", "Max", "V", "voltagemax")
 		, NewMeasInfo("Minimum", "Min", "V", "voltagemin")
 		, NewMeasInfo("Overshoot", "Over", "%", "overshoot")
 		, NewMeasInfo("Peak-Peak", "Pk-Pk", "V", "voltagepeaktopeak")
-		
+
 		, NewMeasInfo("Period", "Period", "s", "period")
 		, NewMeasInfo("Phase", "Phase", "deg", "phasedelay")
 		, NewMeasInfo("Preshoot", "Pre", "%", "preshoot")
 		, NewMeasInfo("Rise Time", "Rise", "s", "risetime")
 		, NewMeasInfo("RMS", "RMS", "V", "voltagerms")
-		
+
 		, NewMeasInfo("Top", "Top", "V", "voltagetop")
 		, NewMeasInfo("+ Width", "+Width", "s", "positivewidth")
 		, NewMeasInfo("- Width", "-Width", "s", "negativewidth")
 	];
-	
+
 	this._measurementActiveCh = 1;
 	this._measurementSelectionIdx = 0;
 	this._measurementsVisible = false;
-	
+
 	this._activeMenu = ""; // the current menu displayed
 	this._activeMenuHandler = null;
-	
+
 	this._activeIndicator = null;
 	this._menuTitleTimer = null;
-	
+
 	//this._isMeasuring = false;
 	this._isMeasuringContinuous = false;
-	
-	var imgbase = "instruments/ag_oscilloscope/images";	
+
+	var imgbase = "instruments/ag_oscilloscope/images";
 	if (visir.BaseLocation) imgbase = visir.BaseLocation + imgbase;
-	
+
 	var tplLocation = "instruments/ag_oscilloscope/ag_oscilloscope.tpl";
 	if (visir.BaseLocation) tplLocation = visir.BaseLocation + tplLocation;
-	
+
 	// the placeholder is only used while loading, so that size computations are done right
 	var $placeholder = $('<div class="ag_osc" />');
 	elem.append($placeholder);
-	
+
 	$.get(tplLocation, function(tpl) {
 		$placeholder.remove();
 		tpl = tpl.replace(/%img%/g, imgbase);
 		elem.append(tpl);
+
+		if (typeof G_vmlCanvasManager !== "undefined")
+		{
+			G_vmlCanvasManager.initElement(elem.find(".grid"));
+			G_vmlCanvasManager.initElement(elem.find(".plot"));
+		}
 
 		var unitstring_tpl = '<div class="large strings visible">V</div><div class="small strings"><div class="top">m</div><div class="bottom">v</div></div>';
 		elem.find(".unitstring").append(unitstring_tpl);
@@ -137,68 +142,71 @@ visir.AgilentOscilloscope = function(id, elem, props)
 			};
 		}
 
-		// abuses the turnable to get events, but not turning the component at all
-		elem.find(".horz_offset").turnable({turn: newHandleFunc(function() { trace("up");}, function() {trace("down");}) });
+		if(!visir.Config.Get("readOnly"))
+		{
+			// abuses the turnable to get events, but not turning the component at all
+			elem.find(".horz_offset").turnable({turn: newHandleFunc(function() { trace("up");}, function() {trace("down");}) });
 
-		elem.find(".offset_ch1").turnable({turn: newHandleFunc(function() { me._StepDisplayOffset(0, true); }, function() { me._StepDisplayOffset(0, false); }) });
-		elem.find(".offset_ch2").turnable({turn: newHandleFunc(function() { me._StepDisplayOffset(1, true); }, function() { me._StepDisplayOffset(1, false); }) });
+			elem.find(".offset_ch1").turnable({turn: newHandleFunc(function() { me._StepDisplayOffset(0, true); }, function() { me._StepDisplayOffset(0, false); }) });
+			elem.find(".offset_ch2").turnable({turn: newHandleFunc(function() { me._StepDisplayOffset(1, true); }, function() { me._StepDisplayOffset(1, false); }) });
 
-		elem.find(".offset_trg").turnable({turn: newHandleFunc(function() { me._StepTriggerLevel(true); }, function() { me._StepTriggerLevel(false); }) });
-		elem.find(".horz").turnable({turn: newHandleFunc(function() { me._SetTimedivIdx(me._timeIdx+1); }, function() { me._SetTimedivIdx(me._timeIdx-1); }) });
-		elem.find(".selection_knob").turnable({turn: newHandleFunc(function() { me._StepSelection(true); }, function() { me._StepSelection(false); }) });
-		elem.find(".vert_ch1").turnable({turn: newHandleFunc(function() { me._SetVoltIdx(0, me._voltIdx[0]+1); }, function() { me._SetVoltIdx(0, me._voltIdx[0]-1);}) });
-		elem.find(".vert_ch2").turnable({turn: newHandleFunc(function() { me._SetVoltIdx(1, me._voltIdx[1]+1); }, function() { me._SetVoltIdx(1, me._voltIdx[1]-1);}) });
+			elem.find(".offset_trg").turnable({turn: newHandleFunc(function() { me._StepTriggerLevel(true); }, function() { me._StepTriggerLevel(false); }) });
+			elem.find(".horz").turnable({turn: newHandleFunc(function() { me._SetTimedivIdx(me._timeIdx+1); }, function() { me._SetTimedivIdx(me._timeIdx-1); }) });
+			elem.find(".selection_knob").turnable({turn: newHandleFunc(function() { me._StepSelection(true); }, function() { me._StepSelection(false); }) });
+			elem.find(".vert_ch1").turnable({turn: newHandleFunc(function() { me._SetVoltIdx(0, me._voltIdx[0]+1); }, function() { me._SetVoltIdx(0, me._voltIdx[0]-1);}) });
+			elem.find(".vert_ch2").turnable({turn: newHandleFunc(function() { me._SetVoltIdx(1, me._voltIdx[1]+1); }, function() { me._SetVoltIdx(1, me._voltIdx[1]-1);}) });
 
-		elem.find(".button").updownButton();
-		elem.find(".channel_1").click( function() {
-			// XXX: only toggle if its the active selection.. but we have no menus right now
-			me._ToggleChEnabled(0);
-		});
-		elem.find(".channel_2").click( function() {
-			// XXX: only toggle if its the active selection.. but we have no menus right now
-			me._ToggleChEnabled(1);
-		});
-		elem.find(".button.edge").click( function() {
-			// light up the edge button
-			me._$elem.find(".multibutton.edge .state").removeClass("visible");
-			me._$elem.find(".multibutton.edge .state.light").addClass("visible");
+			elem.find(".button").updownButton();
+			elem.find(".channel_1").click( function() {
+				// XXX: only toggle if its the active selection.. but we have no menus right now
+				me._ToggleChEnabled(0);
+			});
+			elem.find(".channel_2").click( function() {
+				// XXX: only toggle if its the active selection.. but we have no menus right now
+				me._ToggleChEnabled(1);
+			});
+			elem.find(".button.edge").click( function() {
+				// light up the edge button
+				me._$elem.find(".multibutton.edge .state").removeClass("visible");
+				me._$elem.find(".multibutton.edge .state.light").addClass("visible");
 
-			me._ShowMenu("menu_edge");
-		});
-		
-		elem.find(".button.cursors").click( function() {
-			me._ToggleCursors();
-		});
-		
-		elem.find(".button.measure").click( function() {
-			me._ToggleMeasurements();
-		});
+				me._ShowMenu("menu_edge");
+			});
 
-		elem.find(".button.modecoupling").click( function() {
-			me._ShowMenu("menu_modecoupling");
-		});
+			elem.find(".button.cursors").click( function() {
+				me._ToggleCursors();
+			});
 
-		elem.find(".button.single").click( function() {
-			me._MakeMeasurement("single");
-		});
-		elem.find(".button.runstop").click( function() {
-			me._MakeMeasurement("runstop");
-		});
+			elem.find(".button.measure").click( function() {
+				me._ToggleMeasurements();
+			});
 
-		elem.find(".display_button_1").click( function() { me._DisplayButtonClicked(1); });
-		elem.find(".display_button_2").click( function() { me._DisplayButtonClicked(2); });
-		elem.find(".display_button_3").click( function() { me._DisplayButtonClicked(3); });
-		elem.find(".display_button_4").click( function() { me._DisplayButtonClicked(4); });
-		elem.find(".display_button_5").click( function() { me._DisplayButtonClicked(5); });
-		elem.find(".display_button_6").click( function() { me._DisplayButtonClicked(6); });
-		
+			elem.find(".button.modecoupling").click( function() {
+				me._ShowMenu("menu_modecoupling");
+			});
+
+			elem.find(".button.single").click( function() {
+				me._MakeMeasurement("single");
+			});
+			elem.find(".button.runstop").click( function() {
+				me._MakeMeasurement("runstop");
+			});
+
+			elem.find(".display_button_1").click( function() { me._DisplayButtonClicked(1); });
+			elem.find(".display_button_2").click( function() { me._DisplayButtonClicked(2); });
+			elem.find(".display_button_3").click( function() { me._DisplayButtonClicked(3); });
+			elem.find(".display_button_4").click( function() { me._DisplayButtonClicked(4); });
+			elem.find(".display_button_5").click( function() { me._DisplayButtonClicked(5); });
+			elem.find(".display_button_6").click( function() { me._DisplayButtonClicked(6); });
+		}
+
 		elem.find(".infobar .box").hide();
 
 		me._plotWidth = me._$elem.find(".graph").width();
 		me._plotHeight = me._$elem.find(".graph").height();
-		
+
 		me._DrawGrid(elem.find(".grid"));
-		me._DrawPlot(elem.find(".plot"));	
+		me._DrawPlot(elem.find(".plot"));
 		me._UpdateChannelDisplay(0);
 		me._UpdateChannelDisplay(1);
 		me._UpdateDisplay();
@@ -211,9 +219,9 @@ visir.AgilentOscilloscope = function(id, elem, props)
 			, 'menu_measure': CreateMeasurementMenu(me, me._$elem.find(".menu_measure"))
 			, 'menu_cursors': CreateCursorsMenu(me, me._$elem.find(".menu_cursors"))
 		};
-		
+
 		me._UpdateRunStopSingleButtons("stopped");
-		
+
 		me._ShowCursors(false);
 
 	});
@@ -224,23 +232,23 @@ extend(visir.AgilentOscilloscope, visir.Oscilloscope);
 visir.AgilentOscilloscope.prototype._DrawGrid = function($elem)
 {
 	var context = $elem[0].getContext('2d');
-	
+
 	//context.strokeStyle = "#004000";
 	context.strokeStyle = "#00ff00";
 	context.lineWidth		= 0.5;
 	context.beginPath();
-	
+
 	var len = 3.5;
 	/* Get the size from the .graph element instead.
 		This works around the problem where canvases get no size if a parent node has display:none.
 	*/
 	var w = $elem.parent().width();
 	var h = $elem.parent().height()
-		
+
 	var xspacing = w / 10;
 	var yspacing = h / 8;
 	var i, x, y;
-	
+
 	for(i=1;i<=9;i++) {
 		x = xspacing * i;
 		x += 0.5;
@@ -262,7 +270,7 @@ visir.AgilentOscilloscope.prototype._DrawGrid = function($elem)
 		context.moveTo(0, y+0.5);
 		context.lineTo(w, y+0.5);
 	}
-	
+
 	for(i=1;i<=7*5 ;i++) {
 		if (i % 4 === 0) { continue; }
 		y = (yspacing / 4) * i;
@@ -272,7 +280,7 @@ visir.AgilentOscilloscope.prototype._DrawGrid = function($elem)
 		context.moveTo(w2 - len, y);
 		context.lineTo(w2 + len, y);
 	}
-	
+
 	context.stroke();
 };
 
@@ -281,7 +289,7 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 	var context = $elem[0].getContext('2d');
 	context.strokeStyle = "#00ff00";
 	context.lineWidth		= 1.2;
-	
+
 	/* Get the size from the .graph element instead.
 		This works around the problem where canvases get no size if a parent node has display:none.
 	*/
@@ -308,7 +316,7 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 			}
 		}
 	}
-	
+
 	DrawChannel(0);
 	DrawChannel(1);
 
@@ -320,13 +328,13 @@ visir.AgilentOscilloscope.prototype._SetVoltIdx = function(ch, idx)
 	if (idx < 0) { idx = 0; }
 	if (idx > this._voltages.length - 1) { idx = this._voltages.length - 1; }
 	this._voltIdx[ch] = idx;
-	
+
 	// sets value for serialization
 	this._channels[ch].range = this._voltages[idx];
 	this._channels[ch].offset = this._voltages[idx] * -this._channels[ch].display_offset;
-	
+
 	var indicatorName = (ch === 0 ? ".voltage_ch1" : ".voltage_ch2");
-	var $indicator = this._$elem.find(indicatorName);	
+	var $indicator = this._$elem.find(indicatorName);
 	this._LightIndicator($indicator);
 	this._UpdateTriggerLevel();
 	this._UpdateDisplay();
@@ -338,7 +346,7 @@ visir.AgilentOscilloscope.prototype._SetTimedivIdx = function(idx)
 	if (idx > this._timedivs.length - 1) { idx = this._timedivs.length - 1; }
 	this._timeIdx = idx;
 	this._sampleRate = 1.0 / this._timedivs[this._timeIdx]; // sets value for serialization
-	
+
 	var $indicator = this._$elem.find(".timediv");
 	this._LightIndicator($indicator);
 	this._UpdateDisplay();
@@ -356,10 +364,10 @@ visir.AgilentOscilloscope.prototype._SetDisplayOffset = function(ch, offset)
 	var stepsize = 0.05;
 	offset = Math.round(offset / stepsize) * stepsize;
 	this._channels[ch].display_offset = offset;
-	
+
 	// set values for serialization
 	this._channels[ch].offset = this._voltages[this._voltIdx[ch]] * -this._channels[ch].display_offset;
-	
+
 	// move and update offset indicators
 	var $group = this._$elem.find(".display .vertical " + (ch === 0 ? ".offset_group_ch1" : ".offset_group_ch2"));
 	$group.find(".ch_offset").removeClass("visible");
@@ -374,7 +382,7 @@ visir.AgilentOscilloscope.prototype._SetDisplayOffset = function(ch, offset)
 		$indicator.addClass("visible");
 		$indicator.css("top", top + "px");
 	}
-	
+
 	this._UpdateTriggerLevel();
 	this._UpdateDisplay();
 };
@@ -391,14 +399,14 @@ visir.AgilentOscilloscope.prototype._StepTriggerLevel = function(up)
 	if (this._triggerModeIdx === 0) {
 		this._SetTriggerMode(1);
 	}
-	
+
 	var level = this._ClampTriggerLevel(this._triggerLevelUnclamped);
-	
+
 	var trigch = this._channels[this._trigger.source - 1];
 	var stepsize = trigch.range / 10;
 	var newval = level + (up ? stepsize : -stepsize);
 	this._triggerLevelUnclamped = newval;
-	
+
 	this._SetTriggerLevel(newval, true);
 };
 
@@ -407,9 +415,9 @@ visir.AgilentOscilloscope.prototype._SetTriggerLevel = function(level, showLight
 {
 	showLight = showLight || false;
 	level = this._ClampTriggerLevel(level);
-	
+
 	this._trigger.level = level;
-	
+
 	var $indicator = this._$elem.find(".triglevel .lighttext");
 	//this._$elem.find(".triglevel .lighttext").text(this._FormatValue(level) + "V");
 	this._LightIndicator($indicator);
@@ -433,15 +441,15 @@ visir.AgilentOscilloscope.prototype._UpdateTriggerLevel = function()
 	var trigch = this._channels[this._trigger.source - 1];
 	var level = this._ClampTriggerLevel(this._triggerLevelUnclamped);
 	this._trigger.level = level; // XXX: updating the serialized value here is not optimal..
-	
+
 	//trace("update trigger level: " + (this._trigger.source - 1) + " " + level);
 
 	var markerPos = (((-level + trigch.offset) / trigch.range) ) * (this._plotHeight / 8.0) + (this._plotHeight / 2.0);
 	markerPos = Math.round(markerPos);
-	
+
 	var $group = this._$elem.find(".display .vertical .group.trigger_group");
 	$group.find(".ch_offset").removeClass("visible");
-	
+
 	if (markerPos <= 0) { // show overflow indicator
 		$group.find(".overflow_up").addClass("visible");
 	} else if (markerPos >= this._plotHeight) { // show underflow indicator
@@ -451,7 +459,7 @@ visir.AgilentOscilloscope.prototype._UpdateTriggerLevel = function()
 		$indicator.addClass("visible");
 		$indicator.css("top", markerPos + "px");
 	}
-	
+
 	this._SetIndicatorValue(this._$elem.find(".triglevel .lighttext"), level);
 	//SetText(this._$elem.find(".triglevel .lighttext"), this._FormatValue(level));
 	//this._$elem.find(".triglevel .lighttext").text(this._FormatValue(level));
@@ -499,7 +507,7 @@ visir.AgilentOscilloscope.prototype._SetTriggerMode = function(modeIdx)
 	}
 	this._triggerModeIdx = modeIdx;
 	this._trigger.mode = this._triggerModes[modeIdx];
-	
+
 	this._$elem.find(".lighttext.triggermode").text(this._triggerModesLight[modeIdx]);
 	this._$elem.find(".menu_modecoupling .value.mode").text(this._triggerModesDisplay[this._triggerModeIdx]); // need to update the menu (if its active)
 };
@@ -526,7 +534,7 @@ visir.AgilentOscilloscope.prototype._AddMeasurementAndAnimate = function(ch, sel
 	var $box1 = $infobar.find(".box1");
 	var $box2 = $infobar.find(".box2");
 	var $box3 = $infobar.find(".box3");
-	
+
 	var pos = [ 0, 110, 220];
 	var fast = 250;
 	var slowanim = { left: "-=110" };
@@ -536,7 +544,7 @@ visir.AgilentOscilloscope.prototype._AddMeasurementAndAnimate = function(ch, sel
 
 	if (replaced >= 0) {
 		// move first box back to second and animate back to first
-		if (replaced < 1) { $box1.stop().css("left", pos[1] + "px").animate(slowanim); } 
+		if (replaced < 1) { $box1.stop().css("left", pos[1] + "px").animate(slowanim); }
 		// move second to third and animate to second
 		if (replaced < 2) { $box2.stop().css("left", pos[2] + "px").animate(slowanim); }
 	} else if (full) {
@@ -544,11 +552,11 @@ visir.AgilentOscilloscope.prototype._AddMeasurementAndAnimate = function(ch, sel
 		$box1.show().stop().css("left", pos[1] + "px").animate(slowanim);
 		$box2.show().stop().css("left", pos[2] + "px").animate(slowanim);
 	}
-	
+
 	$box1.text("(" + this._measurements[0].channel + ") " + this._measurementInfo[this._measurements[0].extra].str + ":");
 	if (this._measurements.length > 1) $box2.text("(" + this._measurements[1].channel + ") " + this._measurementInfo[this._measurements[1].extra].str + ":");
 	if (this._measurements.length > 2) $box3.text("(" + this._measurements[2].channel + ") " + this._measurementInfo[this._measurements[2].extra].str + ":");
-	
+
 	// move in the last item with greater speed
 	if (this._measurements.length == 1) { $box1.show().stop().css("left", pos[0] + fast + "px").animate(fastanim); }
 	if (this._measurements.length == 2) { $box2.show().stop().css("left", pos[1] + fast + "px").animate(fastanim); }
@@ -579,7 +587,7 @@ visir.AgilentOscilloscope.prototype._ShowMenu = function(menuname)
 	}
 	this._$elem.find(".display .menubar .menu").removeClass("visible");
 	$menu.addClass("visible");
-	
+
 	this._activeMenu = menuname;
 	this._activeMenuHandler = this._menuHandlers[menuname];
 	var name = this._activeMenuHandler.GetName();
@@ -614,14 +622,14 @@ visir.AgilentOscilloscope.prototype._GetUnit = function(val)
 	if (val === 0) {
 		return { unit: "", pow: 0 };
 	}
-	
+
 	for (var key in units) {
 		var unit = units[key];
 		if (val >= Math.pow(10, unit[1])) {
 			return {unit: unit[0], pow: unit[1] };
 		}
 	}
-	
+
 	var last = units[units.length - 1];
 	return {unit: last[0], pow: last[1] };
 };
@@ -646,14 +654,14 @@ visir.AgilentOscilloscope.prototype._LightIndicator = function($elem)
 		this._activeIndicator.Destroy();
 		this._activeIndicator = null;
 	}
-	
+
 	var me = this;
 	$elem.addClass("light");
 	var timer = setTimeout(function() {
 		me._activeIndicator.Destroy();
 		me._activeIndicator = null;
 	}, 2000);
-	
+
 	this._activeIndicator = {
 		Destroy: function() { $elem.removeClass("light"); clearInterval(timer); }
 	};
@@ -694,19 +702,19 @@ visir.AgilentOscilloscope.prototype._UpdateDisplay = function()
 	//this._$elem.find(".voltage_ch1").text(this._FormatValue(this._voltages[this._voltIdx[0]]) + "V");
 	//this._$elem.find(".voltage_ch2").text(this._FormatValue(this._voltages[this._voltIdx[1]]) + "V");
 	//this._$elem.find(".timediv").text(this._FormatValue(this._timedivs[this._timeIdx]) + "s");
-						
+
 	this._DrawPlot(this._$elem.find(".plot"));
 };
 
 visir.AgilentOscilloscope.prototype._ToggleCursors = function()
 {
-	
+
 }
 
 visir.AgilentOscilloscope.prototype._ShowCursors = function(show)
 {
 	this._$elem.find(".graph .cursors").toggle(show);
-	
+
 	var $infobar = this._$elem.find(".infobar");
 	var $box1 = $infobar.find(".box1");
 	var $box2 = $infobar.find(".box2");
@@ -720,7 +728,7 @@ visir.AgilentOscilloscope.prototype.ReadResponse = function(response) {
 	var me = this;
 	visir.AgilentOscilloscope.parent.ReadResponse.apply(this, arguments);
 	this._DrawPlot(this._$elem.find(".plot"));
-	
+
 	// check if we should continue measuring
 	if (this._isMeasuringContinuous && this._options.CheckToContinueCalling()) {
 		this._options.MeasureCalling();
@@ -731,7 +739,7 @@ visir.AgilentOscilloscope.prototype.ReadResponse = function(response) {
 		this._$elem.find(".button.single .state").removeClass("visible");
 		this._$elem.find(".button.single .state.dark").addClass("visible");
 	}
-	
+
 	function UpdateResult($elem, measurement) {
 		var str = "(" + measurement.channel + ") " + me._measurementInfo[measurement.extra].str + ": ";
 		var unit = visir.GetUnit(measurement.result);
@@ -740,8 +748,8 @@ visir.AgilentOscilloscope.prototype.ReadResponse = function(response) {
 		str += me._measurementInfo[measurement.extra].unit;
 		$elem.text(str);
 	}
-	
-	var $measurements = this._$elem.find(".measurements");	
+
+	var $measurements = this._$elem.find(".measurements");
 	if (this._measurements.length > 0) UpdateResult($measurements.find(".box1"), this._measurements[0]);
 	if (this._measurements.length > 1) UpdateResult($measurements.find(".box2"), this._measurements[1]);
 	if (this._measurements.length > 2) UpdateResult($measurements.find(".box3"), this._measurements[2]);
@@ -756,20 +764,20 @@ visir.AgilentOscilloscope.prototype._UpdateRunStopSingleButtons = function(state
 			this._$elem.find(".button.single .state").removeClass("visible");
 			this._$elem.find(".button.single .state.light").addClass("visible");
 		break;
-		
+
 		case "run":
 			this._$elem.find(".button.single .state").removeClass("visible");
 			this._$elem.find(".button.single .state.dark").addClass("visible");
 			this._$elem.find(".button.runstop .state").removeClass("visible");
 			this._$elem.find(".button.runstop .state.green").addClass("visible");
 		break;
-		
+
 		case "stopped":
 		default:
 			this._$elem.find(".button.runstop .state").removeClass("visible");
 			this._$elem.find(".button.runstop .state.red").addClass("visible");
 			this._$elem.find(".button.single .state").removeClass("visible");
-			this._$elem.find(".button.single .state.dark").addClass("visible");		
+			this._$elem.find(".button.single .state.dark").addClass("visible");
 		break;
 	}
 }
@@ -777,13 +785,13 @@ visir.AgilentOscilloscope.prototype._UpdateRunStopSingleButtons = function(state
 visir.AgilentOscilloscope.prototype._MakeMeasurement = function(button) {
 	switch(button) {
 		case "single":
-			this._UpdateRunStopSingleButtons("single");			
+			this._UpdateRunStopSingleButtons("single");
 			this._isMeasuringContinuous = false;
 			this._options.MeasureCalling();
-			
+
 		break;
 		case "runstop":
-			this._UpdateRunStopSingleButtons("run");		
+			this._UpdateRunStopSingleButtons("run");
 			if (this._isMeasuringContinuous) {
 				this._isMeasuringContinuous = false;
 				this._UpdateRunStopSingleButtons("stopped");
@@ -820,11 +828,11 @@ function CreateChannelMenu(osc, ch, $menu)
 					osc._ToggleChCoupling(ch);
 					this.Redraw();
 				break;
-				
+
 				default:
 				break;
 			}
-			
+
 		},
 		Redraw: function() {
 			var coupling = osc._channels[ch].coupling;
@@ -916,16 +924,16 @@ function CreateTriggerModeCouplingMenu(osc, $menu)
 function CreateMeasurementMenu(osc, $menu)
 {
 	var timer = null;
-	
+
 	var $sel = $menu.find(".sel_meas_selection");
 	for(var i=0;i < osc._measurementInfo.length; i++) {
 		var $row = $('<div class="selection"><div class="checkmark_holder"><div class="checkmark" /></div><span>' + osc._measurementInfo[i].display + '</span></div>');
 		$sel.append($row);
 	}
-	
+
 	//$sel.find(".selection").first().addClass("selected");
 	$sel.find(":nth-child(3)").addClass("selected");
-	
+
 	return {
 		GetName: function() { this.Redraw(); return "Measurement Menu"; },
 		ButtonPressed: function(nr) {
@@ -941,7 +949,7 @@ function CreateMeasurementMenu(osc, $menu)
 						clearInterval(timer);
 						timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
 					}
-					
+
 					osc._measurementActiveCh = (osc._measurementActiveCh == 1) ? 2 : 1;
 				break;
 				case 2:
@@ -957,11 +965,11 @@ function CreateMeasurementMenu(osc, $menu)
 					osc._measurementSelectionIdx++;
 					if (osc._measurementSelectionIdx >= osc._measurementInfo.length) osc._measurementSelectionIdx = 0;
 				break;
-				
+
 				case 3:
 					osc._AddMeasurementAndAnimate(osc._measurementActiveCh, osc._measurementSelectionIdx);
 				break;
-				
+
 				case 4:
 					osc._ClearMeasurement();
 				break;
@@ -1039,4 +1047,3 @@ function CreateCursorsMenu(osc, $menu)
 		}
 	};
 }
-
