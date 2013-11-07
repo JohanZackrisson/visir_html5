@@ -6,5 +6,6 @@
 	"readOnly": false,
 	"transMethod": "http",
 	"loadURL": "http://dev.openlabs.bth.se/~zeta/dav/git/loadsave/load.php",
-	"saveURL": "http://dev.openlabs.bth.se/~zeta/dav/git/loadsave/save.php"
+	"saveURL": "http://dev.openlabs.bth.se/~zeta/dav/git/loadsave/save.php",
+	"oscRunnable": true
 }

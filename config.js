@@ -5,7 +5,7 @@ visir.ConfigClass = function()
 	this._teacherMode = true;
 	this._instrReg = null;
 	this._manualInstConfig = null;
-	
+
 	var base = "";
 	if (visir.BaseLocation) base = visir.BaseLocation;
 	this._loadURL = base + "load.php";
@@ -15,9 +15,9 @@ visir.ConfigClass = function()
 visir.ConfigClass.prototype.GetDeferredConfigLoader = function(baseurl)
 {
 	var me = this;
-	
+
 	var def = $.Deferred();
-	
+
 	$.ajax({
 		// there is a bug in chrome that makes the network timeline go bananas on async requests, so work around it
 		/*async: false, */
@@ -30,8 +30,8 @@ visir.ConfigClass.prototype.GetDeferredConfigLoader = function(baseurl)
 	}).always( function() {
 		def.resolve();
 	});
-	
-	return def;	
+
+	return def;
 }
 
 visir.ConfigClass.prototype.ReadConfig = function(config)
@@ -43,7 +43,8 @@ visir.ConfigClass.prototype.ReadConfig = function(config)
 	this._readOnly = config.readOnly;
 	this._transMethod = config.transMethod;
 	this._loadURL = config.loadURL;
-	this._saveURL = config.saveURL;	
+	this._saveURL = config.saveURL;
+	this._oscRunnable = config.oscRunnable;
 }
 
 visir.ConfigClass.prototype.Get = function(name)
@@ -56,6 +57,7 @@ visir.ConfigClass.prototype.Get = function(name)
 		case "mesServer": return this._mesServer;
 		case "readOnly": return this._readOnly;
 		case "transMethod": return this._transMethod;
+		case "oscRunnable": return this._oscRunnable;
 	}
 
 	return undefined;
@@ -71,6 +73,7 @@ visir.ConfigClass.prototype.Set = function(name, value)
 		case "transMethod": this._transMethod = value;
 		case "loadurl": this._loadURL = value;
 		case "saveurl": this._saveURL = value;
+		case "oscRunnable": this._oscRunnable = value;
 	}
 }
 
@@ -87,7 +90,7 @@ visir.ConfigClass.prototype.SetManualInstrConfig = function(instrmap)
 visir.ConfigClass.prototype.GetNrInstrOfType = function(type)
 {
 	if (this._manualInstConfig) return this._manualInstConfig[type];
-	if (this._instrReg) return this._instrReg.GetNrInstrOfType(type);	
+	if (this._instrReg) return this._instrReg.GetNrInstrOfType(type);
 	return 1;
 }
 
