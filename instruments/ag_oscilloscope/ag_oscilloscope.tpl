@@ -233,5 +233,5 @@
 			</div>
 		</div>
 	</div>
-	<div class="manual_link"><a href="http://cp.literature.agilent.com/litweb/pdf/54622-97036.pdf" target="_blank">Download Manual</a></div>\
+	<div class="manual_link"><a href="http://cp.literature.agilent.com/litweb/pdf/54622-97036.pdf" target="_blank">Download Manual</a></div>
 </div>
