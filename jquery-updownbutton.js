@@ -64,17 +64,22 @@
 								_setButtonState($button, BUTTON_UP);
 							}
 						});
-		
-						$doc.on("mouseup.rem touchend.rem", function(e) {
-							_setButtonState($button, BUTTON_UP);
-		
-							$button.off(".rem");
-							$doc.off(".rem");
-			
-							if (isTouched) {
-								$button.click();
+						
+						function endFunc(touchend) {
+							return function() {
+								_setButtonState($button, BUTTON_UP);
+								$button.off(".rem");
+								$doc.off(".rem");
+
+								// Generate a click event if this is a touchend event and the button is touched
+								if (touchend && isTouched) {
+									$button.click();
+								}
 							}
-						});
+						}
+		
+						$doc.on("mouseup.rem", endFunc(false));
+						$doc.on("touchend.rem", endFunc(true));
 					});
 
 			});
