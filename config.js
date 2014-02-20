@@ -18,14 +18,10 @@ visir.ConfigClass.prototype.GetDeferredConfigLoader = function(baseurl)
 
 	var def = $.Deferred();
 
-	$.ajax({
-		// there is a bug in chrome that makes the network timeline go bananas on async requests, so work around it
-		/*async: false, */
-		dataType: "json",
-		url: baseurl + "config.json"
-	}).done(function(data) {
+	$.get(baseurl + "config.json", function(data) {
 		me.ReadConfig(data);
-	}).error( function(obj, msg) {
+	}, "json")
+	.error( function(obj, msg) {
 		alert("failed to read config.json. " + msg);
 	}).always( function() {
 		def.resolve();
