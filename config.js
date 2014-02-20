@@ -8,8 +8,6 @@ visir.ConfigClass = function()
 
 	var base = "";
 	if (visir.BaseLocation) base = visir.BaseLocation;
-	this._loadURL = base + "load.php";
-	this._saveURL = base + "save.php";
 }
 
 visir.ConfigClass.prototype.GetDeferredConfigLoader = function(baseurl)
@@ -38,8 +36,6 @@ visir.ConfigClass.prototype.ReadConfig = function(config)
 	this._mesServer = config.mesServer;
 	this._readOnly = config.readOnly;
 	this._transMethod = config.transMethod;
-	this._loadURL = config.loadURL;
-	this._saveURL = config.saveURL;
 	this._oscRunnable = config.oscRunnable;
 }
 
@@ -47,8 +43,6 @@ visir.ConfigClass.prototype.Get = function(name)
 {
 	switch(name) {
 		case "teacher": return this._teacherMode;
-		case "loadurl": return this._loadURL;
-		case "saveurl": return this._saveURL;
 		case "locale": return this._locale;
 		case "mesServer": return this._mesServer;
 		case "readOnly": return this._readOnly;
@@ -67,8 +61,6 @@ visir.ConfigClass.prototype.Set = function(name, value)
 		case "mesServer": this._mesServer = value;
 		case "readOnly": this._readOnly = value;
 		case "transMethod": this._transMethod = value;
-		case "loadurl": this._loadURL = value;
-		case "saveurl": this._saveURL = value;
 		case "oscRunnable": this._oscRunnable = value;
 	}
 }
