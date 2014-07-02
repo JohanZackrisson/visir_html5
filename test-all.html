@@ -46,6 +46,7 @@
 		}
 	</style>
 	<script type="text/javascript" src="jquery-2.1.0.min.js"></script>
+	<script type="text/javascript" src="visir.js"></script>
 	<script type="text/javascript" src="utils.js"></script>
 	<script type="text/javascript" src="jquery-turnable.js"></script>
 	<script type="text/javascript" src="jquery-draggable.js"></script>
@@ -96,7 +97,7 @@
 		var transport = new visir.JSTransport(visir.SetWorking);
 		transport.onerror = function(err) { alert("Error: " + err); }
 
-		transport.Connect("http://194.47.134.182:8080/measureserver", "fnord");
+		transport.Connect("http://194.47.149.107:8080/measureserver", "fnord");
 
 		var breadboard = new visir.Breadboard(1, $("#breadboard"));
 		var flukedmm = new visir.FlukeMultimeter(1, $("#dmm"));
@@ -127,7 +128,8 @@
 			$("#logwindow").css("display", "none");
 		});
 	}
-	$( function() { init(); });
+	//$( function() { init(); });
+	$( function() {	visir.Load(init); });
 </script>
 </head>
 <body>
