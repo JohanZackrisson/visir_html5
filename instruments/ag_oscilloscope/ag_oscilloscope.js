@@ -35,13 +35,22 @@ visir.AgilentOscilloscope = function(id, elem, props)
 	var me = this;
 	this._$elem = elem;
 
+	// extend the channel information from base class with local per channel settings
 	this._channels[0].visible = true;
 	this._channels[0].display_offset = 0.0;
+	this._channels[0].inverted = false;
 	this._channels[1].visible = true;
 	this._channels[1].display_offset = 0.0;
+	this._channels[1].inverted = false;
+
+	this._math = { visible: false, display_offset: 0.0, method: "sub" };
 
 	this._extService = null;
 	this._canContinueMeasuring = false;
+
+	this._menuPrev = null;
+	this._menuTimer = null;
+
 
 	$("body").on("working", function(e) {
 		if (!e.isWorking) {
@@ -166,6 +175,7 @@ visir.AgilentOscilloscope = function(id, elem, props)
 				// XXX: only toggle if its the active selection.. but we have no menus right now
 				me._ToggleChEnabled(1);
 			});
+
 			elem.find(".button.edge").click( function() {
 				// light up the edge button
 				me._$elem.find(".multibutton.edge .state").removeClass("visible");
@@ -184,6 +194,10 @@ visir.AgilentOscilloscope = function(id, elem, props)
 
 			elem.find(".button.modecoupling").click( function() {
 				me._ShowMenu("menu_modecoupling");
+			});
+
+			elem.find(".button.math").click( function() {
+				me._ToggleMathEnabled();
 			});
 
 			elem.find(".button.single").click( function() {
@@ -219,6 +233,7 @@ visir.AgilentOscilloscope = function(id, elem, props)
 			, 'menu_modecoupling': CreateTriggerModeCouplingMenu(me, me._$elem.find(".menu_modecoupling"))
 			, 'menu_measure': CreateMeasurementMenu(me, me._$elem.find(".menu_measure"))
 			, 'menu_cursors': CreateCursorsMenu(me, me._$elem.find(".menu_cursors"))
+			, 'menu_math': CreateMathMenu(me, me._$elem.find(".menu_math"))
 		};
 
 		me._UpdateRunStopSingleButtons("stopped");
@@ -308,7 +323,7 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 		var len = graph.length;
 		for(var i=0;i<len;i++) {
 			var x = i*w / len;
-			var y = -((graph[i] / ch.range) + ch.display_offset) * (h / 8.0) + h/2;
+			var y = -((graph[i] * (me._channels[chnr].inverted ? -1 : 1) / ch.range) + ch.display_offset) * (h / 8.0) + h/2;
 			y+=0.5;
 			if (i===0) {
 				context.moveTo(x,y);
@@ -318,8 +333,49 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 		}
 	}
 
+	function DrawMath() {
+		if (!me._math.visible) return;
+		var maxrange = Math.max(me._channels[0].range, me._channels[1].range);
+		var graph1 = me._channels[0].graph;
+		var graph2 = me._channels[1].graph;
+		var len = Math.min(graph1.length, graph2.length);
+		for(var i=0;i<len;i++) {
+			var sum = 0.0;
+			var sample = 0.0;
+			var sample1 = graph1[i] * (me._channels[0].inverted ? -1 : 1);
+		 	var sample2 = graph2[i] * (me._channels[1].inverted ? -1 : 1);
+			switch(me._math.method) {
+				case "sub":
+					sample = sample1 - sample2;
+					break;
+				case "mul":
+					sample = sample1 * sample2;
+					break;
+				case "derive":
+					break;
+				case "integrate":
+					break;
+			}
+
+			var x = i*w / len;
+			var y = -((sample / maxrange) + me._math.display_offset) * (h / 8.0) + h/2;
+			y+=0.5;
+			if (i===0) {
+				context.moveTo(x,y);
+			} else {
+				context.lineTo(x,y);
+			}
+		}
+
+	}
+
 	DrawChannel(0);
 	DrawChannel(1);
+	context.stroke();
+
+	context.strokeStyle = "#ff0000";
+	context.beginPath();
+	DrawMath();
 
 	context.stroke();
 };
@@ -519,6 +575,15 @@ visir.AgilentOscilloscope.prototype._ToggleChEnabled = function(ch)
 	this._SetChEnabled(ch, visibile);
 };
 
+visir.AgilentOscilloscope.prototype._ToggleMathEnabled = function()
+{
+	var visible = this._activeMenu !== "menu_math" || !this._math.visible;
+	this._ShowMenu("menu_math");
+	this._math.visible = visible;
+	this._SetLightButtonState(this._$elem.find(".multibutton.math"), visible);
+	this._UpdateDisplay();
+}
+
 visir.AgilentOscilloscope.prototype._ToggleChCoupling = function(ch)
 {
 	this._channels[ch].coupling = (this._channels[ch].coupling === "dc") ? "ac" : "dc";
@@ -640,7 +705,7 @@ visir.AgilentOscilloscope.prototype._ShowMenu = function(menuname)
 	this._$elem.find(".display .menubar .menutitle").addClass("visible");
 
 	if (this._menuTitleTimer) {
-		clearInterval(this._menuTitleTimer);
+		clearTimeout(this._menuTitleTimer);
 	}
 	var me = this;
 	this._menuTitleTimer = setTimeout( function() { me._$elem.find(".display .menubar .menutitle").removeClass("visible"); this._menuTitleTimer = null; }, 1000);
@@ -718,6 +783,16 @@ visir.AgilentOscilloscope.prototype._FormatValue = function(val)
 	val /= Math.pow(10,unit.pow);
 	return val.toPrecision(3) + unit.unit;
 };
+
+visir.AgilentOscilloscope.prototype._SetLightButtonState = function($btn, lightOn)
+{
+	$btn.find(".state").removeClass("visible");
+	if (lightOn) {
+		$btn.find(".light").addClass("visible");
+	} else {
+		$btn.find(".dark").addClass("visible");
+	}
+}
 
 // this should be called when the channel properties have changed
 // currently: visible is tracked
@@ -857,27 +932,51 @@ visir.AgilentOscilloscope.prototype.UseExteralService = function(service) {
 	this._extService = service;
 }
 
+visir.AgilentOscilloscope.prototype._HideMenuAfter = function(menu, unique, duration_ms) {
+	duration_ms = duration_ms || 1000;
+	unique = unique || 1;
+
+	//var same = menu === this._menuPrev;
+
+	var me = this;
+	var hideFunc = function() { menu.HideMenu(unique); me._menuPrev = null; trace("---------- hiding ---------");}
+
+	var same = (!!this._menuPrev) && (this._menuPrev.menu === menu) && (this._menuPrev.unique == unique);
+	trace("prevmenu: " + this._menuPrev);
+
+	if (!same && this._menuPrev) {
+		trace("hiding previous");
+		this._menuPrev.hideFunc();
+	}
+
+	if (this._menuTimer) {
+		trace("clear timer");
+		clearTimeout(this._menuTimer);
+	}
+	
+	this._menuTimer = setTimeout(hideFunc, duration_ms); 
+	this._menuPrev = { menu: menu, unique: unique, hideFunc: hideFunc };
+
+	trace("same: " + same);
+	return same;
+}
+
 function CreateChannelMenu(osc, ch, $menu)
 {
 	var timer = null;
 	return {
-		GetName: function() { return "Channel " + (ch+1) + " Menu"; },
+		GetName: function() { this.Redraw(); return "Channel " + (ch+1) + " Menu"; },
 		ButtonPressed: function(nr) {
 			switch(nr) {
 				case 1:
-					$menu.find(".menu_selection.sel_ch_" + (ch+1)).addClass("visible");
-					var menu = this;
-					if (!timer) {
-						timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
-						return;
-					} else {
-						clearInterval(timer);
-						timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
-					}
+					if (!this.ShowMenu()) return;
 					osc._ToggleChCoupling(ch);
 					this.Redraw();
 				break;
-
+				case 2:
+					osc._channels[ch].inverted = !osc._channels[ch].inverted;
+					this.Redraw();
+					osc._UpdateDisplay();
 				default:
 				break;
 			}
@@ -888,6 +987,14 @@ function CreateChannelMenu(osc, ch, $menu)
 			$menu.find(".value.coupling").text(coupling.toUpperCase());
 			$menu.find(".selection").removeClass("selected");
 			$menu.find(".selection.sel_" + coupling).addClass("selected");
+			$menu.find(".checkbox.invert").removeClass("selected");
+			if(osc._channels[ch].inverted) {
+				$menu.find(".checkbox.invert").addClass("selected");
+			}
+		},
+		ShowMenu: function() {
+			$menu.find(".menu_selection.sel_ch_" + (ch+1)).addClass("visible");
+			return osc._HideMenuAfter(this);
 		},
 		HideMenu: function() {
 			$menu.find(".menu_selection.sel_ch_" + (ch+1)).removeClass("visible");
@@ -989,28 +1096,11 @@ function CreateMeasurementMenu(osc, $menu)
 			this.Redraw();
 			switch(nr) {
 				case 1:
-					$menu.find(".menu_selection.sel_meas_source").addClass("visible");
-					var menu = this;
-					if (!timer) {
-						timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
-						return;
-					} else {
-						clearInterval(timer);
-						timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
-					}
-
+					if (!this.ShowMenu("sel_meas_source")) return;
 					osc._measurementActiveCh = (osc._measurementActiveCh == 1) ? 2 : 1;
 				break;
 				case 2:
-					$menu.find(".menu_selection.sel_meas_selection").addClass("visible");
-					var menu = this;
-					if (!timer) {
-						timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
-						return;
-					} else {
-						clearInterval(timer);
-						timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
-					}
+					if (!this.ShowMenu("sel_meas_selection")) return false;
 					osc._measurementSelectionIdx++;
 					if (osc._measurementSelectionIdx >= osc._measurementInfo.length) osc._measurementSelectionIdx = 0;
 				break;
@@ -1096,3 +1186,55 @@ function CreateCursorsMenu(osc, $menu)
 		}
 	};
 }
+
+function CreateMathMenu(osc, $menu)
+{
+	var timer = null;
+	return {
+		GetName: function() { this.Redraw(); return "Math Menu"; },
+		ButtonPressed: function(nr) {
+			switch(nr) {
+				case 1:
+				break;
+				case 2:
+				break;
+				case 3:
+					osc._math.method = "mul";
+				break;
+				case 4:
+					osc._math.method = "sub";
+				break;
+				case 5:
+					//osc._math.method = "derive";
+				break;
+				case 6:
+					//osc._math.method = "integrate";
+				break;
+			}
+			this.Redraw();
+			osc._UpdateDisplay();
+		},
+		Redraw: function() {
+			$menu.find(".menubox .value .checkmark").removeClass("selected");
+			$menu.find(".menubox .value .checkmark."+ osc._math.method).addClass("selected");
+		},
+		ShowMenu: function(name) {
+			this.HideMenu();
+			$menu.find(".menu_selection." + name).addClass("visible");
+			var menu = this;
+			if (!timer) {
+				timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
+				return false;
+			} else {
+				clearInterval(timer);
+				timer = setTimeout(function() { timer=null; menu.HideMenu(); }, 1000);
+				return true;
+			}
+		},
+		HideMenu: function() {
+			$menu.find(".menu_selection").removeClass("visible");
+		}
+	};
+}
+
+
