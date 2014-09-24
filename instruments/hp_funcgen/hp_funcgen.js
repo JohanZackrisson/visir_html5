@@ -178,8 +178,8 @@ visir.HPFunctionGenerator.prototype._SetEnteredNumber = function(scale)
 {
 	var num = parseInt(this._enterNumStr, 10);
 	var val = this._values[this._currentValue];
-	val.value = num * val.multiplier * scale;
 
+	this._SetActiveValue(num * val.multiplier * scale, val.digit);
 	this._SetButtonMode(this.NORMAL);
 }
 
