@@ -19,6 +19,9 @@
 	<div class="button modecoupling">
 		<img class="up active" src="%img%/osc_button_mode_coupling_up.png" alt="mode coupling" /><img class="down" src="%img%/osc_button_mode_coupling_down.png" alt="mode coupling" />
 	</div>
+	<div class="button saverecall">
+		<img class="up active" src="%img%/osc_save_recall_up.png" alt="save / recall" /><img class="down" src="%img%/osc_save_recall_down.png" alt="save / recall" />
+	</div>
 	<div class="button multibutton channel_1">
 		<div class="state dark visible">
 			<img class="up active" src="%img%/osc_vert_off_up_enable_1.png" alt="display button" /><img class="down" src="%img%/osc_vert_off_down_enable_1.png" alt="display button" />

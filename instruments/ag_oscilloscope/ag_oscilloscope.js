@@ -43,7 +43,9 @@ visir.AgilentOscilloscope = function(id, elem, props)
 	this._channels[1].display_offset = 0.0;
 	this._channels[1].inverted = false;
 
-	this._math = { visible: false, display_offset: 0.0, method: "sub" };
+	this._math = { visible: false, display_offset: 0.0, method: "sub", sourceCh: 0 };
+
+	this._cursors = { visible: false, sourceCh: 0, p1: { x: 0.004, y: 0.002 }, p2: { x: -0.004, y: -0.002 }, selected: 0 };
 
 	this._extService = null;
 	this._canContinueMeasuring = false;
@@ -196,6 +198,10 @@ visir.AgilentOscilloscope = function(id, elem, props)
 				me._ShowMenu("menu_modecoupling");
 			});
 
+			elem.find(".button.saverecall").click( function() {
+				me._SaveWaveform();
+			});			
+
 			elem.find(".button.math").click( function() {
 				me._ToggleMathEnabled();
 			});
@@ -339,8 +345,8 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 		var graph1 = me._channels[0].graph;
 		var graph2 = me._channels[1].graph;
 		var len = Math.min(graph1.length, graph2.length);
+		var sum = 0.0;
 		for(var i=0;i<len;i++) {
-			var sum = 0.0;
 			var sample = 0.0;
 			var sample1 = graph1[i] * (me._channels[0].inverted ? -1 : 1);
 		 	var sample2 = graph2[i] * (me._channels[1].inverted ? -1 : 1);
@@ -352,8 +358,14 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 					sample = sample1 * sample2;
 					break;
 				case "derive":
+					var g = me._channels[me._math.sourceCh].graph;
+					sample = (i == 0) ? 0 : g[i] - g[i-1];
 					break;
 				case "integrate":
+					var g = me._channels[me._math.sourceCh].graph;
+					//sum = sum + (i == 0) ? 0 : (g[i] + g[i-1]) / 2.0;
+					sum = sum + (g[i] / 4) ;
+					sample = sum;
 					break;
 			}
 
@@ -366,12 +378,48 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 				context.lineTo(x,y);
 			}
 		}
+	}
 
+	function transformX(x)
+	{
+		var timediv = me._timedivs[me._timeIdx];
+		return (w / 2.0) + x / timediv * (w/10.0);
+	}
+
+	function transformY(ch, y)
+	{
+			return -((y * (ch.inverted ? -1 : 1) / ch.range) + ch.display_offset) * (h / 8.0) + h/2;
+	}
+
+	function DrawCursors()
+	{
+		function DrawCursor(x1, y1, x2, y2, color, dash) {
+			if (typeof context.setLineDash == "function") context.setLineDash(dash);
+			context.save(); 
+			context.strokeStyle = color;
+			context.beginPath();
+			context.moveTo(x1+0.5, y1+0.5);
+			context.lineTo(x2+0.5, y2+0.5);
+			context.stroke();
+			context.restore();
+			if (typeof context.setLineDash == "function") context.setLineDash([0]);
+		}
+
+		var ch = me._channels[me._cursors.sourceCh];
+
+		if (!me._cursors.visible) return;
+		var selcolor = "#ffff00";
+		var unselcolor = "#00ffff";
+		DrawCursor(transformX(me._cursors.p1.x), 0, transformX(me._cursors.p1.x), h, me._cursors.selected & 1 ? selcolor : unselcolor, [4]);
+		DrawCursor(transformX(me._cursors.p2.x), 0, transformX(me._cursors.p2.x), h, me._cursors.selected & 2 ? selcolor : unselcolor, [5]);
+		DrawCursor(0, transformY(ch, me._cursors.p1.y), w, transformY(ch, me._cursors.p1.y), me._cursors.selected & 4 ? selcolor : unselcolor, [6]);
+		DrawCursor(0, transformY(ch, me._cursors.p2.y), w, transformY(ch, me._cursors.p2.y), me._cursors.selected & 8 ? selcolor : unselcolor, [7]);
 	}
 
 	DrawChannel(0);
 	DrawChannel(1);
 	context.stroke();
+	DrawCursors();
 
 	context.strokeStyle = "#ff0000";
 	context.beginPath();
@@ -960,6 +1008,26 @@ visir.AgilentOscilloscope.prototype._HideMenuAfter = function(menu, unique, dura
 	trace("same: " + same);
 	return same;
 }
+
+visir.AgilentOscilloscope.prototype._SaveWaveform = function() {
+	trace("Saving waveform to csv");
+	var out = '';
+	out += 'sep=\t\r\n';
+	out += 'Time\tChannel1\tChannel2\r\n';
+
+	var ch1 = this._channels[0].graph;
+	var ch2 = this._channels[1].graph;
+	var dtime1 = this._timedivs[this._timeIdx] * 10.0 / this._channels[0].graph.length;
+	for(var i=0;i<ch1.length;i++) {
+		var t1 = (i - (ch1.length / 2)) * dtime1;
+		out += t1 + "\t" + ch1[i] + "\t" + ch2[i] + "\r\n";
+	}
+
+	var blob = new Blob([out], {type: "text/csv;charset=UTF-8"});
+	saveAs(blob, "waveform.csv");
+}
+
+/* Menus */
 
 function CreateChannelMenu(osc, ch, $menu)
 {
