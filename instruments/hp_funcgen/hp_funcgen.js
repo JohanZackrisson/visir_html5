@@ -28,7 +28,7 @@ visir.HPFunctionGenerator = function(id, elem)
 
 	var tpl =
 	'<div class="hp_funcgen">\
-	<img src="%img%/fgen.png" width="800" height="356" />\
+	<img src="%img%/fgen.png" width="800" height="356" draggable="false" />\
 	<div class="bigtext num_display">1.00<span class="green">0</span>0000</div>\
 	<div class="bigtext num_unit">KHz</div>\
 	<div class="funcselect">\
