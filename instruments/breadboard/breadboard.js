@@ -1494,9 +1494,9 @@ visir.Breadboard.prototype._AddOSC = function(x, y, num)
 	'<div class="instrument osc">\
 		<div class="connectionimages">\
 			<div style="height: 13px"></div>\
-			<img src="' + 	this.IMAGE_URL + 'connections_1.png" />\
+			<img src="' + 	this.IMAGE_URL + 'connections_1.png" draggable="false" />\
 			<div style="height: 9px"></div>\
-			<img src="' + 	this.IMAGE_URL + 'connections_1.png" />\
+			<img src="' + 	this.IMAGE_URL + 'connections_1.png" draggable="false" />\
 		</div>\
 		<div class="texts">\
 			<div class="connectiontext"></div>\
