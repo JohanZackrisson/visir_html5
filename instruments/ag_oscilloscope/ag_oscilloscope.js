@@ -1011,6 +1011,12 @@ visir.AgilentOscilloscope.prototype._HideMenuAfter = function(menu, unique, dura
 
 visir.AgilentOscilloscope.prototype._SaveWaveform = function() {
 	trace("Saving waveform to csv");
+
+	if (navigator.userAgent.match(/iPhone|iPad|Android/)) {
+		trace("Save not supported on handheld devices");
+		return;
+	}
+
 	var out = '';
 	out += 'sep=\t\r\n';
 	out += 'Time\tChannel1\tChannel2\r\n';
