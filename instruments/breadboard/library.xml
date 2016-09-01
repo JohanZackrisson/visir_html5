@@ -75,6 +75,17 @@
 			</rotation>
 		</rotations>
 	</component>
+
+	<component type="R" value="220" pins="2">
+		<rotations>
+			<rotation ox="-26" oy ="-9" image="r_220.png" rot="0">
+				<pins><pin x="-26" y="0" /><pin x="26"  y="0" /></pins>
+			</rotation>
+			<rotation ox="-8" oy ="-26" image="r_220.png" rot="90">
+				<pins><pin x="0" y="-26" /><pin x="0" y="26" /></pins>
+			</rotation>
+		</rotations>
+	</component>
 	
 	<component type="R" value="1k" pins="2">
 		<rotations>
@@ -393,7 +404,7 @@
 			</rotation>
 		</rotations>
 	</component>
-	
+		
 	<component type="C" value="0.1u" pins="2">
 		<rotations>
 			<rotation ox="-19" oy ="-24" image="c_0.1u.png" rot="0">
