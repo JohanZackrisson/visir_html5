@@ -1,8 +1,8 @@
 {
 	"breadboard" :
 	{
-		"message" : "Matriz de Contato",
-		"description" : "Matriz de Contato"
+		"message" : "Matriz de Contatos",
+		"description" : "Matriz de Contatos"
 	},
 	"multimeter" :
 	{
@@ -27,13 +27,13 @@
 
 	"load" :
 	{
-		"message" : "Carga",
-		"description" : "Circuito de Carga"
+		"message" : "Abrir",
+		"description" : "Abrir o Circuito"
 	},
 	"save" :
 	{
 		"message" : "Salvar",
-		"description" : "Salvar Circuito"
+		"description" : "Salvar o Circuito"
 	},
 	"perf_measure" :
 	{
