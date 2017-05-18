@@ -60,10 +60,11 @@ visir.HPFunctionGenerator = function(id, elem)
 			<img src="%img%/wheel.png" alt="handle" />\
 		</div>\
 	</div>\
-	<div class="manual_link"><a href="http://www.home.agilent.com/upload/cmc_upload/All/6C0633120A_USERSGUIDE_ENGLISH.pdf" target="_blank">Download Manual</a></div>\
+	<div class="manual_link"><a href="http://www.home.agilent.com/upload/cmc_upload/All/6C0633120A_USERSGUIDE_ENGLISH.pdf" target="_blank">%downloadManual%</a></div>\
 	</div>';
 
 	tpl = tpl.replace(/%img%/g, imgbase);
+	tpl = tpl.replace(/%downloadManual%/g, visir.Lang.GetMessage("down_man"));
 	//console.log(tpl);
 
 	elem.append(tpl);

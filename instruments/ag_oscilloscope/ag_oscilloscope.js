@@ -118,6 +118,7 @@ visir.AgilentOscilloscope = function(id, elem, props)
 	$.get(tplLocation, function(tpl) {
 		$placeholder.remove();
 		tpl = tpl.replace(/%img%/g, imgbase);
+		tpl = tpl.replace(/%downloadManual%/g, visir.Lang.GetMessage("down_man"));
 		elem.append(tpl);
 
 		if (typeof G_vmlCanvasManager !== "undefined")

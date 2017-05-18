@@ -40,10 +40,11 @@ visir.TripleDC = function(id, elem)
 			<img src="%img%/3dc_wheel.png" alt="handle" />\
 		</div>\
 	</div>\
-	<div class="manual_link"><a href="http://cp.literature.agilent.com/litweb/pdf/E3631-90002.pdf" target="_blank">Download Manual</a></div>\
+	<div class="manual_link"><a href="http://cp.literature.agilent.com/litweb/pdf/E3631-90002.pdf" target="_blank">%downloadManual%</a></div>\
 	</div>';
 
 	tpl = tpl.replace(/%img%/g, imgbase);
+	tpl = tpl.replace(/%downloadManual%/g, visir.Lang.GetMessage("down_man"));
 
 	elem.append(tpl);
 
