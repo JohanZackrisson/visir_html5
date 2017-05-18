@@ -296,5 +296,5 @@
 			</div>
 		</div>
 	</div>
-	<div class="manual_link"><a href="http://cp.literature.agilent.com/litweb/pdf/54622-97036.pdf" target="_blank">%downloadManual%</a></div>
+	<div class="manual_link"><a href="http://docs-europe.electrocomponents.com/webdocs/0030/0900766b800301c5.pdf" target="_blank">%downloadManual%</a></div>
 </div>
