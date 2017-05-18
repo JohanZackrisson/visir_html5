@@ -29,7 +29,7 @@ visir.FlukeMultimeter = function(id, elem)
 			<img src="' + imgbase + 'fluke23_vred.png" alt="handle" />\
 		</div>\
 	</div>\
-	<div class="manual_link"><a href="" target="_blank">%downloadManual%</a></div>\
+	<div class="manual_link"><a href="http://assets.fluke.com/manuals/23______omeng0000.pdf" target="_blank">%downloadManual%</a></div>\
 	</div>';
 
 	tpl = tpl.replace(/%downloadManual%/g, visir.Lang.GetMessage("down_man"));
