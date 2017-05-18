@@ -11,8 +11,8 @@
 	},
 	"func_gen" :
 	{
-		"message" : "Gerador de Função",
-		"description" : "Gerador de Função - HP33120A"
+		"message" : "Gerador de funções",
+		"description" : "Gerador de funções - HP33120A"
 	},
 	"oscilloscope" :
 	{
@@ -43,8 +43,8 @@
 
 	"wire_sel" :
 	{
-		"message" : "Cor da Linha",
-		"description" : "Selecionar Cor da Linha"
+		"message" : "Cor do cabo",
+		"description" : "Seletor de cores de cabos"
 	},
 	"close" :
 	{
@@ -61,9 +61,10 @@
 		"message" : "O osciloscópio não está configurado para aquisição em tempo real",
 		"description" : "O osciloscópio não está configurado para aquisição em tempo real"
 	},
+
 	"down_man" :
 	{
 		"message" : "Baixar Manual",
-		"description" : "Baixar Manual do usuário"
+		"description" : "Baixar Manual do Usuário"
 	}
 }
