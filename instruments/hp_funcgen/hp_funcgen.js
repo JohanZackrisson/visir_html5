@@ -15,6 +15,14 @@ visir.HPFunctionGenerator = function(id, elem)
 	this._enterMode = this.NORMAL;
 	this._enterNumStr = "";
 
+	var argu = "0:0:sine";
+	var valini = argu.split(":");
+
+	if (arguments[2] != null) 
+	{
+		valini = arguments[2].split(":");
+	} 
+	
 	/* the multipliers are used to avoid storing the values in floating point
 	which will cause problems when trying to display the values */
 	this._values = {
@@ -69,6 +77,11 @@ visir.HPFunctionGenerator = function(id, elem)
 
 	elem.append(tpl);
 
+	this._SetInitialValue("freq", Number(valini[0]), 8);
+	this._SetInitialValue("ampl", Number(valini[1]), 4);
+	this._SetInitialWaveform(valini[2]);
+	this.SetActiveValue("freq");
+	
 	var $doc = $(document);
 
 	var prev = 0;
@@ -177,7 +190,7 @@ visir.HPFunctionGenerator.prototype._NumSign = function()
 
 visir.HPFunctionGenerator.prototype._SetEnteredNumber = function(scale)
 {
-	var num = parseInt(this._enterNumStr, 10);
+	var num = Number(this._enterNumStr, 10);
 	var val = this._values[this._currentValue];
 
 	this._SetActiveValue(num * val.multiplier * scale, val.digit);
@@ -226,6 +239,14 @@ visir.HPFunctionGenerator.prototype._NormalButtonPressed = function(buttonName)
 
 visir.HPFunctionGenerator.prototype._EnterNumButtonPressed = function(buttonName)
 {
+	var mega = 1;
+	var kilo = 1;
+	var uni = 1;
+	switch(this._currentValue) {
+		case "freq": mega = 1000000; kilo = 1000; uni = 1; break;
+		case "ampl": mega = 1; kilo = 2.829; uni = 0.7096; break;
+		case "offset": mega = 1; kilo = 1; uni = 1; break;
+	}
 	switch(buttonName) {
 		case "sine":	this._AddNum("1"); break;
 		case "square":	this._AddNum("2"); break;
@@ -244,9 +265,10 @@ visir.HPFunctionGenerator.prototype._EnterNumButtonPressed = function(buttonName
 		case "arb": 	this._NumSign();		break;
 
 		case "enter":	this._SetEnteredNumber(1);	break;
-		case "up":		this._SetEnteredNumber(1000000);	break;
-		case "down":	this._SetEnteredNumber(1000); break;
-		case "right":	this._SetEnteredNumber(1); break;
+
+		case "up":		this._SetEnteredNumber(mega);	break;
+		case "down":	this._SetEnteredNumber(kilo); break;
+		case "right":	this._SetEnteredNumber(uni); break;
 		default:
 			trace("unknown button in enter number mode: " + buttonName);
 			break;		
@@ -339,10 +361,11 @@ visir.HPFunctionGenerator.prototype._GetUnit = function(val)
 visir.HPFunctionGenerator.prototype._SetActiveValue = function(value, digit) {
 	trace("SetActiveValue: " + value + " " + digit);
 	var val = this._values[this._currentValue];
+
 	var ok = true;
 	if (value > val.max || value < val.min)	ok = false;
 
-	trace("XXX: " + Math.pow(10, digit) + " " +  value + " " + (value / val.multiplier));
+	trace("XXX: " + Math.pow(10, digit) + " " + value + " " + (value / val.multiplier));
 
 	// test if active digit is outside display range (upper bound)
 	if ((Math.abs(value / val.multiplier) >= 1.0) && (Math.pow(10, digit) > Math.abs(value))) ok = false;
@@ -379,4 +402,20 @@ visir.HPFunctionGenerator.prototype._IncDigit = function() {
 	//val.value += Math.pow(10, val.digit);
 	var tmp = val.value + Math.pow(10, val.digit);
 	this._SetActiveValue(tmp, val.digit);
+}
+
+visir.HPFunctionGenerator.prototype._ReadCurrentValues = function() {
+	var volts = "";
+	volts = this._values["freq"].value + ":" + this._values["ampl"].value + ":" + this.GetWaveform();
+	return volts;
+}
+
+visir.HPFunctionGenerator.prototype._SetInitialValue = function(ch, val, digit) {
+	this._currentValue = ch;
+	this._SetActiveValue(val, digit);
+}
+
+visir.HPFunctionGenerator.prototype._SetInitialWaveform = function(wave) {
+	this.SetWaveform(wave); 
+	this._UpdateDisplay();
 }

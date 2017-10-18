@@ -53,7 +53,8 @@ visir.InstrumentRegistry.prototype.CreateInstrument = function()
 	var name = arguments[0];
 	var id = this._NextInstrID(name);
 	arguments[0] = id; // replace the first argument with the id before passing them along.
-	arguments[1] = $(arguments[1]); // get the jquery dom node
+	arguments[1] = $(arguments[1]); // get the jquery dom 
+	
 	var newinstr = construct(visir[name], arguments);
 
 	var entry = { instrument: newinstr, id: id, domnode: arguments[1], instrInfo: this._instrumentInfo[name], name: name };
@@ -102,12 +103,21 @@ visir.InstrumentRegistry.prototype.WriteSave = function()
 {
 	$xml = $('<save version="2" />');
 	var instrumentlist = "";
+	var instrumentlistvalues = "";
+	var vi = 0;
 	for(var i=0;i<this._instruments.length; i++) {
 		if (i>0) instrumentlist += "|";
 		instrumentlist += this._instruments[i].name;
+		if (this._instruments[i].name == "HPFunctionGenerator" || this._instruments[i].name == "TripleDC") {
+			instrumentlistvalues += this._instruments[i].name + "#" + this._instruments[i].instrument._ReadCurrentValues().toString();
+			if (vi<1) instrumentlistvalues += "|";
+			vi++;
+		}
 	}
 	var $instruments = $('<instruments />').attr("htmlinstruments", instrumentlist);
 	$xml.append($instruments);
+	var $instruments_values = $('<instrumentsvalues />').attr("htmlinstrumentsvalues", instrumentlistvalues);
+	$xml.append($instruments_values);
 	for(var i=0;i<this._instruments.length; i++) {
 		if (typeof (this._instruments[i].instrument.WriteSave) == "function") {
 			$xml.append(this._instruments[i].instrument.WriteSave());
@@ -152,11 +162,11 @@ visir.InstrumentRegistry.prototype.LoadExperimentFromURL = function(url, $loc)
 	});
 }
 
-visir.InstrumentRegistry.prototype.CreateInstrFromJSClass = function(classname, $loc)
+visir.InstrumentRegistry.prototype.CreateInstrFromJSClass = function(classname, $loc, inival)
 {
 	trace("creating instrument from js name: " + classname);
 	var $ctnr = this._CreateInstrContainer(this._instrumentInfo[classname].type);
-	this.CreateInstrument(classname, $ctnr);
+	this.CreateInstrument(classname, $ctnr, inival);
 	$loc.append($ctnr);
 }
 
@@ -179,7 +189,8 @@ visir.InstrumentRegistry.prototype.LoadExperiment = function(xmldata, $loc)
 	$loc.find(".instrument").remove();
 	this._Reset();
 	var $instr = $xml.find("instruments");
-
+	var $instrv = $xml.find("instrumentsvalues");
+	
 	var flashlocs = $instr.attr("list");
 	var swfs = flashlocs ? flashlocs.split("|") : [];
 
@@ -190,8 +201,23 @@ visir.InstrumentRegistry.prototype.LoadExperiment = function(xmldata, $loc)
 
 	var htmlinstr = $instr.attr("htmlinstruments");
 	var htmlarr = htmlinstr ? htmlinstr.split("|") : [];
+	
+	var htmlinstrvalues = $instrv.attr("htmlinstrumentsvalues");
+	var htmlarrval = htmlinstrvalues ? htmlinstrvalues.split("|") : [];
+	
+	var _initvalue;
+	
 	for(var i=0;i<htmlarr.length; i++) {
-		this.CreateInstrFromJSClass(htmlarr[i], $loc);
+		
+		if (htmlarrval.length > 0) {
+			for(var v=0;v<htmlarrval.length;v++) {
+				var inival = htmlarrval[v].split("#");
+				if (htmlarr[i] == inival[0]) {
+					_initvalue = inival[1];
+				}
+			}
+		}
+		this.CreateInstrFromJSClass(htmlarr[i], $loc, _initvalue);
 	}
 
 	this.ReadSave($xml);
