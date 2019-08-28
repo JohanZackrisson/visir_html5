@@ -5,6 +5,10 @@ visir.ConfigClass = function()
 	this._teacherMode = true;
 	this._instrReg = null;
 	this._manualInstConfig = null;
+    this._readOnly = false;
+    this._dcPower25 = true;
+    this._dcPowerM25 = true;
+    this._dcPower6 = true;
 
 	var base = "";
 	if (visir.BaseLocation) base = visir.BaseLocation;
@@ -37,6 +41,21 @@ visir.ConfigClass.prototype.ReadConfig = function(config)
 	this._readOnly = config.readOnly;
 	this._transMethod = config.transMethod;
 	this._oscRunnable = config.oscRunnable;
+    if (config.dcPower25 !== undefined) {
+        this._dcPower25 = config.dcPower25;
+    } else {
+        this._dcPower25 = true;
+    }
+    if (config.dcPowerM25 !== undefined) {
+        this._dcPowerM25 = config.dcPowerM25;
+    } else {
+        this._dcPowerM25 = true;
+    }
+    if (config.dcPower6 !== undefined) {
+        this._dcPower6 = config.dcPower6;
+    } else {
+        this._dcPower6 = true;
+    }
 }
 
 visir.ConfigClass.prototype.Get = function(name)
@@ -48,6 +67,9 @@ visir.ConfigClass.prototype.Get = function(name)
 		case "readOnly": return this._readOnly;
 		case "transMethod": return this._transMethod;
 		case "oscRunnable": return this._oscRunnable;
+		case "dcPower25": return this._dcPower25;
+		case "dcPowerM25": return this._dcPowerM25;
+		case "dcPower6": return this._dcPower6;
 	}
 
 	return undefined;
@@ -62,6 +84,9 @@ visir.ConfigClass.prototype.Set = function(name, value)
 		case "readOnly": this._readOnly = value;
 		case "transMethod": this._transMethod = value;
 		case "oscRunnable": this._oscRunnable = value;
+		case "dcPower25": this._dcPower25 = value;
+		case "dcPowerM25": this._dcPowerM25 = value;
+		case "dcPower6": this._dcPower6 = value;
 	}
 }
 
