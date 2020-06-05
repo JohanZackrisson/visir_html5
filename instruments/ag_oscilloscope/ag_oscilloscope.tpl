@@ -181,6 +181,11 @@
 						<span class="title">Invert</span>
 						<div class="invert checkbox" />
 					</div>
+					<div class="menubox">
+						<span class="title">X - Y</span>
+						<div class="xyg checkbox" />
+					</div>					
+					
 				</div>
 
 				<!-- menu_edge -->
