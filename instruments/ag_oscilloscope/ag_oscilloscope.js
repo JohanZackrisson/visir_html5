@@ -43,7 +43,7 @@ visir.AgilentOscilloscope = function(id, elem, props)
 	this._channels[1].display_offset = 0.0;
 	this._channels[1].inverted = false;
 	this._channels[1].xyg = false;
-	
+
 	this._math = { visible: false, display_offset: 0.0, method: "sub", sourceCh: 0 };
 
 	this._cursors = { visible: false, sourceCh: 0, p1: { x: 0.004, y: 0.002 }, p2: { x: -0.004, y: -0.002 }, selected: 0 };
@@ -340,7 +340,7 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 			}
 		}
 	}
-	
+
 	function DrawXY(chnr1, chnr2) {
 		if (!me._channels[chnr2].xyg) { return; }
 		var maxrange = Math.max(me._channels[0].range, me._channels[1].range);
@@ -359,7 +359,7 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 			}
 			var x = ((sample2 / me._channels[1].range) + me._math.display_offset) * (w / 8.0) + w/2;
 			var y = -((sample / me._channels[0].range) + me._math.display_offset) * (h / 8.0) + h/2;
-			y+=0.5; 
+			y += 0.5;
 			if (i===0) {
 				context.moveTo(x,y);
 			} else {
@@ -367,7 +367,7 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 			}
 		}
 	}
-	
+
 	function DrawMath() {
 		if (!me._math.visible) return;
 		var maxrange = Math.max(me._channels[0].range, me._channels[1].range);
@@ -444,7 +444,7 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 		DrawCursor(0, transformY(ch, me._cursors.p1.y), w, transformY(ch, me._cursors.p1.y), me._cursors.selected & 4 ? selcolor : unselcolor, [6]);
 		DrawCursor(0, transformY(ch, me._cursors.p2.y), w, transformY(ch, me._cursors.p2.y), me._cursors.selected & 8 ? selcolor : unselcolor, [7]);
 	}
-	if (!me._channels[1].xyg) { 
+	if (!me._channels[1].xyg) {
 		DrawChannel(0);
 		DrawChannel(1);
 		context.stroke();
@@ -1087,11 +1087,11 @@ function CreateChannelMenu(osc, ch, $menu)
 					osc._UpdateDisplay();
 					break;
 				case 3:
-					if (ch == 1) { 
-						osc._channels[ch].xyg = !osc._channels[ch].xyg; 
+					if (ch == 1) {
+						osc._channels[ch].xyg = !osc._channels[ch].xyg;
 						this.Redraw();
 						osc._UpdateDisplay();
-						}
+					}
 				default:
 				break;
 			}

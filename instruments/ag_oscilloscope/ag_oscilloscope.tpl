@@ -184,8 +184,7 @@
 					<div class="menubox">
 						<span class="title">X - Y</span>
 						<div class="xyg checkbox" />
-					</div>					
-					
+					</div>
 				</div>
 
 				<!-- menu_edge -->

@@ -53,8 +53,7 @@ visir.InstrumentRegistry.prototype.CreateInstrument = function()
 	var name = arguments[0];
 	var id = this._NextInstrID(name);
 	arguments[0] = id; // replace the first argument with the id before passing them along.
-	arguments[1] = $(arguments[1]); // get the jquery dom 
-	
+	arguments[1] = $(arguments[1]); // get the jquery dom node
 	var newinstr = construct(visir[name], arguments);
 
 	var entry = { instrument: newinstr, id: id, domnode: arguments[1], instrInfo: this._instrumentInfo[name], name: name };
@@ -190,7 +189,7 @@ visir.InstrumentRegistry.prototype.LoadExperiment = function(xmldata, $loc)
 	this._Reset();
 	var $instr = $xml.find("instruments");
 	var $instrv = $xml.find("instrumentsvalues");
-	
+
 	var flashlocs = $instr.attr("list");
 	var swfs = flashlocs ? flashlocs.split("|") : [];
 
@@ -201,14 +200,13 @@ visir.InstrumentRegistry.prototype.LoadExperiment = function(xmldata, $loc)
 
 	var htmlinstr = $instr.attr("htmlinstruments");
 	var htmlarr = htmlinstr ? htmlinstr.split("|") : [];
-	
+
 	var htmlinstrvalues = $instrv.attr("htmlinstrumentsvalues");
 	var htmlarrval = htmlinstrvalues ? htmlinstrvalues.split("|") : [];
-	
+
 	var _initvalue;
-	
-	for(var i=0;i<htmlarr.length; i++) {
-		
+
+	for(var i=0; i < htmlarr.length; i++) {
 		if (htmlarrval.length > 0) {
 			for(var v=0;v<htmlarrval.length;v++) {
 				var inival = htmlarrval[v].split("#");

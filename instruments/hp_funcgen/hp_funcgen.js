@@ -18,11 +18,11 @@ visir.HPFunctionGenerator = function(id, elem)
 	var argu = "0:0:sine";
 	var valini = argu.split(":");
 
-	if (arguments[2] != null) 
+	if (arguments[2] != null)
 	{
 		valini = arguments[2].split(":");
-	} 
-	
+	}
+
 	/* the multipliers are used to avoid storing the values in floating point
 	which will cause problems when trying to display the values */
 	this._values = {
@@ -81,7 +81,7 @@ visir.HPFunctionGenerator = function(id, elem)
 	this._SetInitialValue("ampl", Number(valini[1]), 4);
 	this._SetInitialWaveform(valini[2]);
 	this.SetActiveValue("freq");
-	
+
 	var $doc = $(document);
 
 	var prev = 0;
@@ -416,6 +416,6 @@ visir.HPFunctionGenerator.prototype._SetInitialValue = function(ch, val, digit) 
 }
 
 visir.HPFunctionGenerator.prototype._SetInitialWaveform = function(wave) {
-	this.SetWaveform(wave); 
+	this.SetWaveform(wave);
 	this._UpdateDisplay();
 }

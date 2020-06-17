@@ -27,11 +27,10 @@ visir.TripleDC = function(id, elem)
 	var argu = "0:0:0";
 	var valini = argu.split(":");
 
-	if (arguments[2] != null) 
-	{
+	if (arguments[2] != null) {
 		valini = arguments[2].split(":");
-	} 
-	
+	}
+
 	// all the values are represented times 1000 to avoid floating point trouble
 	// XXX: need to change this later, both voltage and current has an active digit
 	this._values = {
@@ -92,13 +91,13 @@ visir.TripleDC = function(id, elem)
 	tpl = tpl.replace(/%downloadManual%/g, visir.Lang.GetMessage("down_man"));
 
 	elem.append(tpl);
-	
+
 	this._SetInitialValue("6V+", Number(valini[0]), 2);
 	this._SetInitialValue("25V+", Number(valini[1]), 2);
 	this._SetInitialValue("25V-", Number(valini[2]), 2);
 	this._SetActiveChannel("6V+");
 	this._activeChannel = "6V+";
-	
+
 	var $doc = $(document);
 
 	var prev = 0;
