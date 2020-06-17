@@ -382,12 +382,12 @@ visir.Component.prototype._AddCircle = function()
 		this._$circle.height(CIRCLE_SIZE);
 	var transform = 'translate(-' + (CIRCLE_SIZE / 2) + 'px,-' + (CIRCLE_SIZE / 2) + 'px)';
 	this._$circle.css({
-	    'position'  : 'absolute',
-	    'top'       : newTop + 'px',
-	    'left'      : newLeft + 'px',
-	    'transform' : transform,
-	    '-moz-transform' : transform,
-	    '-webkit-transform' : transform
+		'position'  : 'absolute',
+		'top'       : newTop + 'px',
+		'left'      : newLeft + 'px',
+		'transform' : transform,
+		'-moz-transform' : transform,
+		'-webkit-transform' : transform
 	});
 
 	// Circle
@@ -396,9 +396,9 @@ visir.Component.prototype._AddCircle = function()
 	$circleImg.width(CIRCLE_SIZE - 2 * (1 - CIRCLE_OVERLAP) * ICON_SIZE);
 	$circleImg.height(CIRCLE_SIZE - 2 * (1 - CIRCLE_OVERLAP) * ICON_SIZE);
 	$circleImg.css({
-	    'position' : 'absolute',
-	    'left'     : (1 - CIRCLE_OVERLAP) * ICON_SIZE,
-	    'top'      : (1 - CIRCLE_OVERLAP) * ICON_SIZE
+		'position' : 'absolute',
+		'left'     : (1 - CIRCLE_OVERLAP) * ICON_SIZE,
+		'top'      : (1 - CIRCLE_OVERLAP) * ICON_SIZE
 	});
 	this._$circle.append($circleImg);
 
@@ -409,12 +409,12 @@ visir.Component.prototype._AddCircle = function()
 	$rotateImg.width(ICON_SIZE);
 	$rotateImg.height(ICON_SIZE);
 	$rotateImg.css({
-	    'position' : 'absolute',
-	    'left'     : CIRCLE_SIZE - ICON_SIZE,
-	    'top'      : CIRCLE_SIZE - ICON_SIZE
+		'position' : 'absolute',
+		'left'     : CIRCLE_SIZE - ICON_SIZE,
+		'top'      : CIRCLE_SIZE - ICON_SIZE
 	});
 	$rotateImg.click(function() {
-	    me.Rotate();
+		me.Rotate();
 	});
 	this._$circle.append($rotateImg);
 
@@ -608,7 +608,7 @@ visir.Breadboard = function(id, $elem)
 		});
 
 	$elem.find(".componentbutton button").click(function(e) {
-	    $elem.find(".componentbox").hide();
+		$elem.find(".componentbox").hide();
 	});
 
 	$click.on("mousedown touchstart", function(e) {
@@ -1548,14 +1548,14 @@ visir.Breadboard.prototype._AddDCPower = function(x, y, num)
 				<div class="connectiontext"></div>\n';
 
 	if (dcPower25)
-	    dcPowerHtml += '<div class="connectiontext">+20V</div>\n';
+		dcPowerHtml += '<div class="connectiontext">+20V</div>\n';
 	else
-	    dcPowerHtml += '<div class="connectiontext"></div>\n';
+		dcPowerHtml += '<div class="connectiontext"></div>\n';
 
 	if (dcPower25 || dcPowerM25)
-	    dcPowerHtml += '<div class="connectiontext">COM</div>\n';
+		dcPowerHtml += '<div class="connectiontext">COM</div>\n';
 	else
-	    dcPowerHtml += '<div class="connectiontext"></div>\n';
+		dcPowerHtml += '<div class="connectiontext"></div>\n';
 
 	if (dcPowerM25) 
 		dcPowerHtml += '<div class="connectiontext">-20V</div>\n';
@@ -1578,33 +1578,33 @@ visir.Breadboard.prototype._AddDCPower = function(x, y, num)
 	var lowerImage = null;
 
 	if (dcPower25) {
-	    upperHeight = 13;
-	    if (dcPowerM25) {
-	        lowerHeight = 10;
-	        upperImage = this.IMAGE_URL + 'connections_3.png';
-	    } else {
-	        lowerHeight = 10 + 13;
-	        upperImage = this.IMAGE_URL + 'connections_2.png';
-	    }
+		upperHeight = 13;
+		if (dcPowerM25) {
+			lowerHeight = 10;
+			upperImage = this.IMAGE_URL + 'connections_3.png';
+		} else {
+			lowerHeight = 10 + 13;
+			upperImage = this.IMAGE_URL + 'connections_2.png';
+		}
 	} else {
-	    if (dcPowerM25) {
-	        upperHeight = 13 + 13;
-	        lowerHeight = 10;
-	        upperImage = this.IMAGE_URL + 'connections_2.png';
-	    } else {
-	        // No upperImage: 13 upper + 42 image + 10 lower
-	        lowerHeight = 13 + 42 + 10;
-	    }
+		if (dcPowerM25) {
+			upperHeight = 13 + 13;
+			lowerHeight = 10;
+			upperImage = this.IMAGE_URL + 'connections_2.png';
+		} else {
+			// No upperImage: 13 upper + 42 image + 10 lower
+			lowerHeight = 13 + 42 + 10;
+		}
 	}
 	if (dcPower6) {
-	    lowerImage = this.IMAGE_URL + 'connections_2.png';
+		lowerImage = this.IMAGE_URL + 'connections_2.png';
 	}
 
 	dcPowerHtml += '</div>\
 			<div class="connectionimages">\
 				<div style="height: ' + upperHeight + 'px"></div>\n';
 	if (upperImage != null)
-	    dcPowerHtml += '<img src="' + upperImage + '" draggable="false" />\n';
+		dcPowerHtml += '<img src="' + upperImage + '" draggable="false" />\n';
 
 	dcPowerHtml += '<div style="height: ' + lowerHeight + 'px"></div>\n';
 	if (lowerImage != null) 
