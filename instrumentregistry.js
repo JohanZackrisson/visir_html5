@@ -103,14 +103,19 @@ visir.InstrumentRegistry.prototype.WriteSave = function()
 	$xml = $('<save version="2" />');
 	var instrumentlist = "";
 	var instrumentlistvalues = "";
-	var vi = 0;
-	for(var i=0;i<this._instruments.length; i++) {
-		if (i>0) instrumentlist += "|";
+	var firstTime = true;
+
+	for(var i = 0; i < this._instruments.length; i++) {
+		if (i>0) {
+			instrumentlist += "|";
+		}
 		instrumentlist += this._instruments[i].name;
 		if (this._instruments[i].name == "HPFunctionGenerator" || this._instruments[i].name == "TripleDC") {
 			instrumentlistvalues += this._instruments[i].name + "#" + this._instruments[i].instrument._ReadCurrentValues().toString();
-			if (vi<1) instrumentlistvalues += "|";
-			vi++;
+			if (firstTime) {
+				instrumentlistvalues += "|";
+				firstTime = false;
+			}
 		}
 	}
 	var $instruments = $('<instruments />').attr("htmlinstruments", instrumentlist);
@@ -161,11 +166,11 @@ visir.InstrumentRegistry.prototype.LoadExperimentFromURL = function(url, $loc)
 	});
 }
 
-visir.InstrumentRegistry.prototype.CreateInstrFromJSClass = function(classname, $loc, inival)
+visir.InstrumentRegistry.prototype.CreateInstrFromJSClass = function(classname, $loc, initialValue)
 {
 	trace("creating instrument from js name: " + classname);
 	var $ctnr = this._CreateInstrContainer(this._instrumentInfo[classname].type);
-	this.CreateInstrument(classname, $ctnr, inival);
+	this.CreateInstrument(classname, $ctnr, initialValue);
 	$loc.append($ctnr);
 }
 
@@ -188,7 +193,7 @@ visir.InstrumentRegistry.prototype.LoadExperiment = function(xmldata, $loc)
 	$loc.find(".instrument").remove();
 	this._Reset();
 	var $instr = $xml.find("instruments");
-	var $instrv = $xml.find("instrumentsvalues");
+	var $instrvalues = $xml.find("instrumentsvalues");
 
 	var flashlocs = $instr.attr("list");
 	var swfs = flashlocs ? flashlocs.split("|") : [];
@@ -201,21 +206,22 @@ visir.InstrumentRegistry.prototype.LoadExperiment = function(xmldata, $loc)
 	var htmlinstr = $instr.attr("htmlinstruments");
 	var htmlarr = htmlinstr ? htmlinstr.split("|") : [];
 
-	var htmlinstrvalues = $instrv.attr("htmlinstrumentsvalues");
+	var htmlinstrvalues = $instrvalues.attr("htmlinstrumentsvalues");
 	var htmlarrval = htmlinstrvalues ? htmlinstrvalues.split("|") : [];
 
-	var _initvalue;
+	for(var i = 0; i < htmlarr.length; i++) {
+		var initialValue;
 
-	for(var i=0; i < htmlarr.length; i++) {
 		if (htmlarrval.length > 0) {
 			for(var v=0;v<htmlarrval.length;v++) {
 				var inival = htmlarrval[v].split("#");
 				if (htmlarr[i] == inival[0]) {
-					_initvalue = inival[1];
+					initialValue = inival[1];
 				}
 			}
 		}
-		this.CreateInstrFromJSClass(htmlarr[i], $loc, _initvalue);
+
+		this.CreateInstrFromJSClass(htmlarr[i], $loc, initialValue);
 	}
 
 	this.ReadSave($xml);
