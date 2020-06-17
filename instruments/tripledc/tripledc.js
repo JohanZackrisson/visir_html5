@@ -8,20 +8,20 @@ visir.TripleDC = function(id, elem)
 
 	var me = this;
 
-    var dcPower25 = (visir.Config) ? visir.Config.Get("dcPower25") : true;
-    var dcPowerM25 = (visir.Config) ? visir.Config.Get("dcPowerM25") : true;
-    var dcPower6 = (visir.Config) ? visir.Config.Get("dcPower6") : true;
+	var dcPower25 = (visir.Config) ? visir.Config.Get("dcPower25") : true;
+	var dcPowerM25 = (visir.Config) ? visir.Config.Get("dcPowerM25") : true;
+	var dcPower6 = (visir.Config) ? visir.Config.Get("dcPower6") : true;
 
-    if (dcPower6) {
-    	this._activeChannel = "6V+";
-    } else if (dcPower25) {
-    	this._activeChannel = "25V+";
-    } else if (dcPowerM25) {
-    	this._activeChannel = "25V-";
-    } else {
-        // No dcPower?
-        return;
-    }
+	if (dcPower6) {
+		this._activeChannel = "6V+";
+	} else if (dcPower25) {
+		this._activeChannel = "25V+";
+	} else if (dcPowerM25) {
+		this._activeChannel = "25V-";
+	} else {
+	    // No dcPower?
+	    return;
+	}
 	this._elem = elem;
 
 	// all the values are represented times 1000 to avoid floating point trouble
@@ -41,35 +41,35 @@ visir.TripleDC = function(id, elem)
 	<div class="bigtext current">0.500A</div>\
 	<div class="channelselect">\n'
 
-    if (dcPower6) {
-    	tpl += '<div class="smalltext p6v">+6V</div>';
-    }
+	if (dcPower6) {
+		tpl += '<div class="smalltext p6v">+6V</div>';
+	}
 
-    if (dcPower25) {
-        if (this._activeChannel == "25V+") {
-            tpl += '<div class="smalltext p25v">+25V</div>';
-        } else {
-            tpl += '<div class="smalltext p25v hide">+25V</div>';
-        }
-    }
+	if (dcPower25) {
+	    if (this._activeChannel == "25V+") {
+	        tpl += '<div class="smalltext p25v">+25V</div>';
+	    } else {
+	        tpl += '<div class="smalltext p25v hide">+25V</div>';
+	    }
+	}
 
-    if (dcPowerM25) {
-        if (this._activeChannel == "25V-") {
-            tpl += '<div class="smalltext m25v">-25V</div>';
-        } else {
-            tpl += '<div class="smalltext m25v hide">-25V</div>';
-        }
-    }
+	if (dcPowerM25) {
+	    if (this._activeChannel == "25V-") {
+	        tpl += '<div class="smalltext m25v">-25V</div>';
+	    } else {
+	        tpl += '<div class="smalltext m25v hide">-25V</div>';
+	    }
+	}
 	tpl += '</div>\n';
-    if (dcPower6) {
+	if (dcPower6) {
 	    tpl += '<div class="button button_p6v"><img class="up active" src="%img%/6v_up.png" alt="+6v button" /><img class="down" src="%img%/6v_down.png" alt="+6v button" /></div>\n';
-    }
-    if (dcPower25) {
+	}
+	if (dcPower25) {
 	    tpl += '<div class="button button_p25v"><img class="up active" src="%img%/25plusv_up.png" alt="+25v button" /><img class="down" src="%img%/25plusv_down.png" alt="+25v button" /></div>\n';
-    }
-    if (dcPowerM25) {
+	}
+	if (dcPowerM25) {
 	    tpl += '<div class="button button_m25v"><img class="up active" src="%img%/25minusv_up.png" alt="-25v button" /><img class="down" src="%img%/25minusv_down.png" alt="-25v button" /></div>\n';
-    }
+	}
 	tpl += '<div class="button button_left"><img class="up active" src="%img%/arrowleft_up.png" alt="left button" /><img class="down" src="%img%/arrowleft_down.png" alt="left button" /></div>\
 	<div class="button button_right"><img class="up active" src="%img%/arrowright_up.png" alt="right button" /><img class="down" src="%img%/arrowright_down.png" alt="right button" /></div>\
 	<div class="knob">\
