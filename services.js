@@ -16,4 +16,4 @@ visir.ExtServices.prototype.MakeMeasurement = function()
 {
 	trace("ExtServices::MakeMeasurement");
 	this._options.MakeMeasurement();
-}
+}; /* Important ";" to avoid issues when creating a bundle */
