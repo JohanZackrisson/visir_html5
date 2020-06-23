@@ -92,11 +92,25 @@ visir.TripleDC = function(id, elem)
 
 	elem.append(tpl);
 
-	this._SetInitialValue("6V+", Number(valini[0]), 2);
-	this._SetInitialValue("25V+", Number(valini[1]), 2);
-	this._SetInitialValue("25V-", Number(valini[2]), 2);
+	if (dcPower6) {
+		this._SetInitialValue("6V+", Number(valini[0]), 2);
+	}
+	if (dcPower25) {
+		this._SetInitialValue("25V+", Number(valini[1]), 2);
+	}
+	if (dcPowerM25) {
+		this._SetInitialValue("25V-", Number(valini[2]), 2);
+	}
+	if (dcPower6) {
 	this._SetActiveChannel("6V+");
-	this._activeChannel = "6V+";
+		this._activeChannel = "6V+";
+	} else if (dcPower25) {
+	this._SetActiveChannel("25V+");
+		this._activeChannel = "25V+";
+	} else if (dcPowerM25) {
+	this._SetActiveChannel("25V-");
+		this._activeChannel = "25V-";
+	}
 
 	var $doc = $(document);
 
