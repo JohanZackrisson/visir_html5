@@ -41,21 +41,9 @@ visir.ConfigClass.prototype.ReadConfig = function(config)
 	this._readOnly = config.readOnly;
 	this._transMethod = config.transMethod;
 	this._oscRunnable = config.oscRunnable;
-	if (config.dcPower25 !== undefined) {
-		this._dcPower25 = config.dcPower25;
-	} else {
-		this._dcPower25 = true;
-	}
-	if (config.dcPowerM25 !== undefined) {
-		this._dcPowerM25 = config.dcPowerM25;
-	} else {
-		this._dcPowerM25 = true;
-	}
-	if (config.dcPower6 !== undefined) {
-		this._dcPower6 = config.dcPower6;
-	} else {
-		this._dcPower6 = true;
-	}
+	this._dcPower25 = (config.dcPower25 !== undefined)?config.dcPower25:true;
+	this._dcPowerM25 = (config.dcPowerM25 !== undefined)?config.dcPowerM25:true;
+	this._dcPower6 = (config.dcPower6 !== undefined)?config.dcPower6:true;
 }
 
 visir.ConfigClass.prototype.Get = function(name)
