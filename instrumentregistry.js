@@ -173,11 +173,11 @@ visir.InstrumentRegistry.prototype.LoadExperimentFromURL = function(url, $loc)
 	});
 }
 
-visir.InstrumentRegistry.prototype.CreateInstrFromJSClass = function(classname, $loc, initialValue)
+visir.InstrumentRegistry.prototype.CreateInstrFromJSClass = function(classname, $loc)
 {
 	trace("creating instrument from js name: " + classname);
 	var $ctnr = this._CreateInstrContainer(this._instrumentInfo[classname].type);
-	this.CreateInstrument(classname, $ctnr, initialValue);
+	this.CreateInstrument(classname, $ctnr);
 	$loc.append($ctnr);
 }
 
@@ -212,26 +212,9 @@ visir.InstrumentRegistry.prototype.LoadExperiment = function(xmldata, $loc)
 
 	var htmlinstr = $instr.attr("htmlinstruments");
 	var htmlarr = htmlinstr ? htmlinstr.split("|") : [];
-	
-	var htmlinstrvalues = $instrvalues.attr("htmlinstrumentsvalues");
-	var htmlarrval = htmlinstrvalues ? htmlinstrvalues.split("|") : [];
 
 	for(var i = 0; i < htmlarr.length; i++) {
-		var initialValue;
-
-		if (visir.Config.Get("unrFormat")) {
-			if (htmlarrval.length > 0) {
-				for(var v=0;v<htmlarrval.length;v++) {
-					var inival = htmlarrval[v].split("#");
-					if (htmlarr[i] == inival[0]) {
-						initialValue = inival[1];
-					}
-				}
-			}
-		}
-
-		console.log(initialValue, visir.Config.Get("unrFormat"));
-		this.CreateInstrFromJSClass(htmlarr[i], $loc, initialValue);
+		this.CreateInstrFromJSClass(htmlarr[i], $loc);
 	}
 
 	this.ReadSave($xml);
