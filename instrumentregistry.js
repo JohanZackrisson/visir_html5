@@ -110,18 +110,25 @@ visir.InstrumentRegistry.prototype.WriteSave = function()
 			instrumentlist += "|";
 		}
 		instrumentlist += this._instruments[i].name;
-		if (this._instruments[i].name == "HPFunctionGenerator" || this._instruments[i].name == "TripleDC") {
-			instrumentlistvalues += this._instruments[i].name + "#" + this._instruments[i].instrument._ReadCurrentValues().toString();
-			if (firstTime) {
-				instrumentlistvalues += "|";
-				firstTime = false;
+
+		if (visir.Config.Get("unrFormat")) {
+			if (this._instruments[i].name == "HPFunctionGenerator" || this._instruments[i].name == "TripleDC") {
+				instrumentlistvalues += this._instruments[i].name + "#" + this._instruments[i].instrument._ReadCurrentValues().toString();
+				if (firstTime) {
+					instrumentlistvalues += "|";
+					firstTime = false;
+				}
 			}
 		}
 	}
 	var $instruments = $('<instruments />').attr("htmlinstruments", instrumentlist);
 	$xml.append($instruments);
-	var $instruments_values = $('<instrumentsvalues />').attr("htmlinstrumentsvalues", instrumentlistvalues);
-	$xml.append($instruments_values);
+
+	if (visir.Config.Get("unrFormat")) {
+		var $instruments_values = $('<instrumentsvalues />').attr("htmlinstrumentsvalues", instrumentlistvalues);
+		$xml.append($instruments_values);
+	}
+
 	for(var i=0;i<this._instruments.length; i++) {
 		if (typeof (this._instruments[i].instrument.WriteSave) == "function") {
 			$xml.append(this._instruments[i].instrument.WriteSave());
@@ -205,22 +212,25 @@ visir.InstrumentRegistry.prototype.LoadExperiment = function(xmldata, $loc)
 
 	var htmlinstr = $instr.attr("htmlinstruments");
 	var htmlarr = htmlinstr ? htmlinstr.split("|") : [];
-
+	
 	var htmlinstrvalues = $instrvalues.attr("htmlinstrumentsvalues");
 	var htmlarrval = htmlinstrvalues ? htmlinstrvalues.split("|") : [];
 
 	for(var i = 0; i < htmlarr.length; i++) {
 		var initialValue;
 
-		if (htmlarrval.length > 0) {
-			for(var v=0;v<htmlarrval.length;v++) {
-				var inival = htmlarrval[v].split("#");
-				if (htmlarr[i] == inival[0]) {
-					initialValue = inival[1];
+		if (visir.Config.Get("unrFormat")) {
+			if (htmlarrval.length > 0) {
+				for(var v=0;v<htmlarrval.length;v++) {
+					var inival = htmlarrval[v].split("#");
+					if (htmlarr[i] == inival[0]) {
+						initialValue = inival[1];
+					}
 				}
 			}
 		}
 
+		console.log(initialValue, visir.Config.Get("unrFormat"));
 		this.CreateInstrFromJSClass(htmlarr[i], $loc, initialValue);
 	}
 

@@ -5,10 +5,11 @@ visir.ConfigClass = function()
 	this._teacherMode = true;
 	this._instrReg = null;
 	this._manualInstConfig = null;
-    this._readOnly = false;
-    this._dcPower25 = true;
-    this._dcPowerM25 = true;
-    this._dcPower6 = true;
+	this._readOnly = false;
+	this._dcPower25 = true;
+	this._dcPowerM25 = true;
+	this._dcPower6 = true;
+	this._unrFormat = false;
 
 	var base = "";
 	if (visir.BaseLocation) base = visir.BaseLocation;
@@ -41,21 +42,10 @@ visir.ConfigClass.prototype.ReadConfig = function(config)
 	this._readOnly = config.readOnly;
 	this._transMethod = config.transMethod;
 	this._oscRunnable = config.oscRunnable;
-    if (config.dcPower25 !== undefined) {
-        this._dcPower25 = config.dcPower25;
-    } else {
-        this._dcPower25 = true;
-    }
-    if (config.dcPowerM25 !== undefined) {
-        this._dcPowerM25 = config.dcPowerM25;
-    } else {
-        this._dcPowerM25 = true;
-    }
-    if (config.dcPower6 !== undefined) {
-        this._dcPower6 = config.dcPower6;
-    } else {
-        this._dcPower6 = true;
-    }
+	this._dcPower25 = (config.dcPower25 !== undefined)?config.dcPower25:true;
+	this._dcPowerM25 = (config.dcPowerM25 !== undefined)?config.dcPowerM25:true;
+	this._dcPower6 = (config.dcPower6 !== undefined)?config.dcPower6:true;
+	this._unrFormat = (config.unrFormat !== undefined)?config.unrFormat:false;
 }
 
 visir.ConfigClass.prototype.Get = function(name)
@@ -70,6 +60,7 @@ visir.ConfigClass.prototype.Get = function(name)
 		case "dcPower25": return this._dcPower25;
 		case "dcPowerM25": return this._dcPowerM25;
 		case "dcPower6": return this._dcPower6;
+		case "unrFormat": return this._unrFormat;
 	}
 
 	return undefined;
@@ -87,6 +78,7 @@ visir.ConfigClass.prototype.Set = function(name, value)
 		case "dcPower25": this._dcPower25 = value;
 		case "dcPowerM25": this._dcPowerM25 = value;
 		case "dcPower6": this._dcPower6 = value;
+		case "unrFormat": this._unrFormat = value;
 	}
 }
 
