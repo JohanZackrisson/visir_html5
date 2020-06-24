@@ -52,7 +52,7 @@ visir.ConfigClass.prototype.ReadConfig = function(config)
 	this._readOnly = config.readOnly;
 	this._transMethod = config.transMethod;
 	this._oscRunnable = config.oscRunnable;
-	this._libraryXml= (config.libraryXml !== undefined)?config.libraryXml:null;
+	this._libraryXml = (config.libraryXml !== undefined)?config.libraryXml:null;
 	this._maxOscMeasureCount = (config.maxOscMeasureCount !== undefined)?config.maxOscMeasureCount:10;
 	this._dcPower25 = (config.dcPower25 !== undefined)?config.dcPower25:true;
 	this._dcPowerM25 = (config.dcPowerM25 !== undefined)?config.dcPowerM25:true;
