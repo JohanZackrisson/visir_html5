@@ -15,21 +15,29 @@ visir.ConfigClass = function()
 	if (visir.BaseLocation) base = visir.BaseLocation;
 }
 
-visir.ConfigClass.prototype.GetDeferredConfigLoader = function(baseurl)
+visir.ConfigClass.prototype.GetDeferredConfigLoader = function(configUrlOrObject)
 {
 	var me = this;
 
 	var def = $.Deferred();
 
-	$.get(baseurl + "config.json", function(data) {
-		me.ReadConfig(data);
-	}, "json")
-	.error( function(obj, msg) {
-		alert("failed to read config.json. " + msg);
-	}).always( function() {
+	if (typeof(configUrlOrObject) === 'object') {
+		me.ReadConfig(configUrlOrObject);
 		def.resolve();
-	});
-
+	} else {
+		var url = configUrlOrObject;
+		if (!url.endsWith(".json")) {
+			url = url + "config.json";
+		}
+		$.get(url, function(data) {
+			me.ReadConfig(data);
+		}, "json")
+		.error( function(obj, msg) {
+			alert("failed to read config.json. " + msg);
+		}).always( function() {
+			def.resolve();
+		});
+	}
 	return def;
 }
 
