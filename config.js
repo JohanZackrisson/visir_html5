@@ -9,9 +9,10 @@ visir.ConfigClass = function()
 	this._dcPower25 = true;
 	this._dcPowerM25 = true;
 	this._dcPower6 = true;
-	this._unrFormat = false;
+	this._unrFormat = false; // Support Universidad Nacional de Rosario format
 	this._libraryXml = null;
 	this._maxOscMeasureCount = 10;
+	this._displayManuals = true;
 
 	var base = "";
 	if (visir.BaseLocation) base = visir.BaseLocation;
@@ -57,6 +58,7 @@ visir.ConfigClass.prototype.ReadConfig = function(config)
 	this._dcPower25 = (config.dcPower25 !== undefined)?config.dcPower25:true;
 	this._dcPowerM25 = (config.dcPowerM25 !== undefined)?config.dcPowerM25:true;
 	this._dcPower6 = (config.dcPower6 !== undefined)?config.dcPower6:true;
+	this._displayManuals = (config.displayManuals !== undefined)?config.displayManuals:true;
 	this._unrFormat = (config.unrFormat !== undefined)?config.unrFormat:false;
 }
 
@@ -74,6 +76,7 @@ visir.ConfigClass.prototype.Get = function(name)
 		case "dcPower25": return this._dcPower25;
 		case "dcPowerM25": return this._dcPowerM25;
 		case "dcPower6": return this._dcPower6;
+		case "displayManuals": return this._displayManuals;
 		case "unrFormat": return this._unrFormat;
 	}
 
@@ -115,6 +118,9 @@ visir.ConfigClass.prototype.Set = function(name, value)
 			break;
 		case "dcPower6": 
 			this._dcPower6 = value;
+			break;
+		case "displayManuals": 
+			this._displayManuals = value;
 			break;
 		case "unrFormat": 
 			this._unrFormat = value;

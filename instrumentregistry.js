@@ -96,6 +96,10 @@ visir.InstrumentRegistry.prototype.ReadSave = function(response)
 			this._instruments[i].instrument.ReadSave(response);
 		}
 	}
+
+	if (visir.Config.Get("displayManuals") == false) {
+		$(".manual_link").remove();
+	}
 }
 
 visir.InstrumentRegistry.prototype.WriteSave = function()

@@ -257,6 +257,9 @@ visir.AgilentOscilloscope = function(id, elem, props)
 
 		me._ShowCursors(false);
 
+		if (visir.Config.Get("displayManuals") == false) {
+			elem.find(".manual_link").remove();
+		}
 	});
 };
 
