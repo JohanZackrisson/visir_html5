@@ -200,7 +200,6 @@ visir.InstrumentRegistry.prototype.LoadExperiment = function(xmldata, $loc)
 	$loc.find(".instrument").remove();
 	this._Reset();
 	var $instr = $xml.find("instruments");
-	var $instrvalues = $xml.find("instrumentsvalues");
 
 	var flashlocs = $instr.attr("list");
 	var swfs = flashlocs ? flashlocs.split("|") : [];
@@ -212,8 +211,7 @@ visir.InstrumentRegistry.prototype.LoadExperiment = function(xmldata, $loc)
 
 	var htmlinstr = $instr.attr("htmlinstruments");
 	var htmlarr = htmlinstr ? htmlinstr.split("|") : [];
-
-	for(var i = 0; i < htmlarr.length; i++) {
+	for(var i=0; i<htmlarr.length; i++) {
 		this.CreateInstrFromJSClass(htmlarr[i], $loc);
 	}
 
