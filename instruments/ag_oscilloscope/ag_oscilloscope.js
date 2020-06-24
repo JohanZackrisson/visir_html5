@@ -1281,16 +1281,22 @@ function CreateCursorsMenu(osc, $menu)
 			this.Redraw();
 			switch(nr) {
 				case 1:
+					// mode
 				break;
 				case 2:
+					// source
 				break;
 				case 3:
+					// x / y
 				break;
 				case 4:
+					// xy1
 				break;
 				case 5:
+					// xy2
 				break;
 				case 6:
+					// xy both
 				break;
 			}
 			this.Redraw();
