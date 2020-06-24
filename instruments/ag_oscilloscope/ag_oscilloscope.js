@@ -8,13 +8,22 @@ visir.AgilentOscilloscope = function(id, elem, props)
 {
 	var me = this;
 	visir.AgilentOscilloscope.parent.constructor.apply(this, arguments);
+	this._measureCount = 0;
 
 	var options = $.extend({
 		MeasureCalling: function() {
+			me._measureCount++;
 			if (me._extService) me._extService.MakeMeasurement();
 		}
 		,CheckToContinueCalling: function() {
 			//if (me._extService) return me._extService.CanContinueMeasuring();
+			var maxMeasureCount = visir.Config.Get("maxOscMeasureCount");
+			if (maxMeasureCount == undefined || maxMeasureCount == null) {
+				maxMeasureCount = 10;
+			}
+ 			if (me._measureCount >= maxMeasureCount)
+				return false;
+
 			return visir.Config.Get("oscRunnable") && me._canContinueMeasuring;
 		}
 	}, props || {});
@@ -986,6 +995,7 @@ visir.AgilentOscilloscope.prototype._UpdateRunStopSingleButtons = function(state
 }
 
 visir.AgilentOscilloscope.prototype._MakeMeasurement = function(button) {
+	this._measureCount = 0;
 	switch(button) {
 		case "single":
 			this._UpdateRunStopSingleButtons("single");
