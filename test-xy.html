@@ -1,0 +1,80 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>VISIR HTML5 Test</title>
+	<link rel="stylesheet" href="instrumentframe/instrumentframe.css" />
+	<script type="text/javascript" src="jquery-2.1.3.min.js"></script>
+	<script type="text/javascript" src="visir.js"></script>
+	<script>
+
+	function init()
+	{
+		function ReadCircuitFromUrl() {
+			console.log(location.search);
+			var match = /cir=([^&]+)/.exec(location.search);
+			if (!match) {
+				return null;
+			}
+			var circuit = match[1];
+			console.log(circuit);
+			var decoded = base64_decode(circuit);
+			console.log(decoded);
+			var asString = String.fromCharCode.apply(null, decoded) // map to fromCharCode
+			return asString
+		}
+
+		function MakeMeasurement()
+		{
+			reg.MakeRequest(transport);
+		}
+
+		trace("starting up..");
+
+		var transport = new visir.JSTransport(visir.SetWorking);
+		transport.onerror = function(err) { alert("Error: " + err); }
+
+		transport.Connect(visir.Config.Get("mesServer"), "fnord");
+
+		var extservice = new visir.ExtServices({ MakeMeasurement: MakeMeasurement });
+		var reg = new visir.InstrumentRegistry(extservice);
+		var frame = new visir.InstrumentFrame(reg, transport, $("#instrumentframe"));
+
+		var emptyexperiment = '<save version="2"><instruments htmlinstruments="Breadboard|FlukeMultimeter|HPFunctionGenerator|AgilentOscilloscope|TripleDC"></instruments><circuit></circuit></save>';
+		reg.LoadExperiment(emptyexperiment, frame.GetInstrumentContainer());
+
+		var urlCircuit = ReadCircuitFromUrl();
+		if (urlCircuit) {
+			reg.LoadExperiment(urlCircuit, frame.GetInstrumentContainer());
+		}		
+
+		var requestXY = '<protocol version="1.3"><request sessionkey="e72db34ff9a4eca6e4b370edaf35ec07"><circuit><circuitlist>W_X 0 A12↵W_X F8 VFGENA_1_1↵W_X PROBE1_1_1 F8↵W_X PROBE2_1_1 A8↵R_X A8 A12 1k↵D_X A8 F8 1N4007↵PROBE1_1 PROBE1_1_1↵PROBE2_1 PROBE2_1_1↵VFGENA_1 VFGENA_1_1 0↵</circuitlist></circuit><functiongenerator id="1"><fg_waveform value="sine"></fg_waveform><fg_frequency value="1000"></fg_frequency><fg_amplitude value="3"></fg_amplitude><fg_offset value="0"></fg_offset></functiongenerator><oscilloscope id="1"><horizontal><horz_samplerate value="500"></horz_samplerate><horz_refpos value="50"></horz_refpos><horz_recordlength value="500"></horz_recordlength></horizontal><channels><channel number="1"><chan_enabled value="1"></chan_enabled><chan_coupling value="dc"></chan_coupling><chan_range value="1"></chan_range><chan_offset value="0"></chan_offset><chan_attenuation value="1"></chan_attenuation></channel><channel number="2"><chan_enabled value="1"></chan_enabled><chan_coupling value="dc"></chan_coupling><chan_range value="1"></chan_range><chan_offset value="0"></chan_offset><chan_attenuation value="1"></chan_attenuation></channel></channels><trigger><trig_source value="channel 1"></trig_source><trig_slope value="positive"></trig_slope><trig_coupling value="dc"></trig_coupling><trig_level value="0"></trig_level><trig_mode value="autolevel"></trig_mode><trig_timeout value="1"></trig_timeout><trig_delay value="0"></trig_delay></trigger><measurements><measurement number="1"><meas_channel value="channel 1"></meas_channel><meas_selection value="none"></meas_selection></measurement><measurement number="2"><meas_channel value="channel 1"></meas_channel><meas_selection value="none"></meas_selection></measurement><measurement number="3"><meas_channel value="channel 1"></meas_channel><meas_selection value="none"></meas_selection></measurement></measurements><osc_autoscale value="0"></osc_autoscale></oscilloscope><dcpower id="1"><dc_outputs><dc_output channel="6V+"><dc_voltage value="0"></dc_voltage><dc_current value="0.5"></dc_current></dc_output><dc_output channel="25V+"><dc_voltage value="0"></dc_voltage><dc_current value="0.5"></dc_current></dc_output><dc_output channel="25V-"><dc_voltage value="0"></dc_voltage><dc_current value="0.5"></dc_current></dc_output></dc_outputs></dcpower></request></protocol>';
+		var responseXY = "<protocol version=\"1.3\">\n<response>\n<functiongenerator>\n<fg_waveform value=\"sine\"/>\n<fg_amplitude value=\"3.000000e+00\"/>\n<fg_frequency value=\"1.000000e+03\"/>\n<fg_offset value=\"0.000000e+00\"/>\n<fg_startphase value=\"0.000000e+00\"/>\n<fg_triggermode value=\"continous\"/>\n<fg_triggersource value=\"immediate\"/>\n<fg_burstcount value=\"0\"/>\n<fg_dutycycle value=\"5.000000e-01\"/>\n</functiongenerator>\n<oscilloscope>\n<osc_autoscale value=\"0\"/>\n<horizontal>\n<horz_samplerate value=\"2.500000e+04\"/>\n<horz_refpos value=\"5.000000e+01\"/>\n<horz_recordlength value=\"500\"/>\n</horizontal>\n<channels>\n<channel number=\"1\">\n<chan_enabled value=\"1\"/>\n<chan_coupling value=\"dc\"/>\n<chan_range value=\"8.000000e+00\"/>\n<chan_offset value=\"0.000000e+00\"/>\n<chan_attenuation value=\"1.000000e+00\"/>\n<chan_gain value=\"3.376100e-02\"/>\n<chan_samples encoding=\"base64\">\nFT9jf39/f39/dlUuA9ixjYCAgICAgJq/6hY+YX9/f39/f3dVLgTYsI2AgICAgICav+kVP2J/f39/f392VS8E2K6MgICAgICAmb/rFT5hf39/f39/dlUtA9iwjICAgICAgJq/6hY+Yn9/f39/f3VULgPZsYyAgICAgICawOkWPmJ/f39/f392Vi4D2K+LgICAgICAm7/pFj5jf39/f39/dlMtA9ixjYCAgICAgJy/6xU/YX9/f39/f3ZVLgPYr4yAgICAgICawOsVQGJ/f39/f391VC8D2K+NgICAgICAm8DqFj9if39/f39/dlMuA9ewjYCAgICAgJq/6xY/Yn9/f39/f3ZVLQTZr4yAgICAgICav+oXP2J/f39/f391VS4C2rCMgICAgICAmsDqFj5if39/f39/dlUtA9ixjICAgICAgJvA6hY/Y39/f39/f3ZULQPYroyAgICAgICawOoWQGJ/f39/f392VS4D2LCMgICAgICAm8DqFj9hf39/f39/dlYuBNixioCAgICAgJvA6RY+Y39/f39/f3VVLgLZsYuAgICAgICav+sWPmF/f39/f391VS4D2bGNgICAgICAm8DrFj9jf39/f39/dlMuA9mujICAgICAgJm/6xY/YX9/f39/f3VVLQPar42AgICAgICbv+o=</chan_samples>\n</channel>\n<channel number=\"2\">\n<chan_enabled value=\"1\"/>\n<chan_coupling value=\"dc\"/>\n<chan_range value=\"8.000000e+00\"/>\n<chan_offset value=\"0.000000e+00\"/>\n<chan_attenuation value=\"1.000000e+00\"/>\n<chan_gain value=\"3.398600e-02\"/>\n<chan_samples encoding=\"base64\">\nBy1QbX9/f398Y0EeAgEBAgEDAQECAQEBAQcsUG1/f39/fGJCHgICAQECAQEBAQEBAQIHLE9tf39/f3xiQR4BAgIBAgECAQIBAgIBBy1PbX9/f398YUEeAgIDAQIBAQECAQEBAggvUG9/f39/e2JBHgECAgEBAQEBAgEBAQEHLVBtf39/f3xhQR0BAgIBAQIBAQEBAQEBBi1Qb39/f398YkEdAQMBAQEBAQIBAQEBAQguUG1/f39/fGFCHgEBAQMBAgEBAgEBAgIHLlBvf39/f3xhQR0BAQEBAQEBAgEBAgIBBixQbX9/f398YUEeAQIBAQIBAQEBAgEBAggvUG9/f39/fGFBHAEBAgEBAQECAQECAQEHLVBtf39/f31jQR4CAgIBAgMCAQIBAQIBCCxSbX9/f397YkMeAQECAQEBAQICAQEBAQctUG1/f39/fGJCHgEBAgECAQIBAwEDAQEHLVBtf39/f3xhQh0BAQEBAQIBAQEBAQEBCS1Qb39/f398YUEeAQICAQMBAQIBAQEBAQguUG1/f39/fGJBHgECAQIDAQEBAQEBAgEHLVBsf39/f3xhQR4CAQEBAQEBAgEBAQEBCC1Qb39/f396YkEeAQICAgIBAQICAgEDAgktUG9/f39/fWFBHgIBAwEBAQEBAQEBAgE=</chan_samples>\n</channel>\n</channels>\n<trigger>\n<trig_source value=\"channel 1\"/>\n<trig_slope value=\"positive\"/>\n<trig_coupling value=\"dc\"/>\n<trig_level value=\"0.000000e+00\"/>\n<trig_mode value=\"autolevel\"/>\n<trig_delay value=\"0.000000e+00\"/>\n<trig_received value=\"1\"/>\n</trigger>\n<measurements>\n<measurement number=\"1\">\n<meas_channel value=\"channel 1\"/>\n<meas_selection value=\"none\"/>\n<meas_result value=\"0.000000e+00\"/>\n</measurement>\n<measurement number=\"2\">\n<meas_channel value=\"channel 1\"/>\n<meas_selection value=\"none\"/>\n<meas_result value=\"0.000000e+00\"/>\n</measurement>\n<measurement number=\"3\">\n<meas_channel value=\"channel 1\"/>\n<meas_selection value=\"none\"/>\n<meas_result value=\"0.000000e+00\"/>\n</measurement>\n</measurements>\n</oscilloscope>\n<dcpower>\n<dc_outputs>\n<dc_output channel=\"6V+\">\n<dc_voltage value=\"0.000000e+00\"/>\n<dc_current value=\"5.000000e-01\"/>\n<dc_voltage_actual value=\"0.000000e+00\"/>\n<dc_current_actual value=\"0.000000e+00\"/>\n<dc_output_enabled value=\"1\"/>\n<dc_output_limited value=\"0\"/>\n</dc_output>\n<dc_output channel=\"25V+\">\n<dc_voltage value=\"0.000000e+00\"/>\n<dc_current value=\"5.000000e-01\"/>\n<dc_voltage_actual value=\"0.000000e+00\"/>\n<dc_current_actual value=\"0.000000e+00\"/>\n<dc_output_enabled value=\"1\"/>\n<dc_output_limited value=\"0\"/>\n</dc_output>\n<dc_output channel=\"25V-\">\n<dc_voltage value=\"0.000000e+00\"/>\n<dc_current value=\"5.000000e-01\"/>\n<dc_voltage_actual value=\"0.000000e+00\"/>\n<dc_current_actual value=\"0.000000e+00\"/>\n<dc_output_enabled value=\"1\"/>\n<dc_output_limited value=\"0\"/>\n</dc_output>\n</dc_outputs>\n</dcpower>\n</response>\n</protocol>";
+
+		$(".measure").click( function() {
+			reg.ReadResponse(responseXY);
+		});
+
+		$("#showlog").click( function() {
+			$("#logwindow").css("display", "block");
+		});
+		$("#hidelog").click( function() {
+			$("#logwindow").css("display", "none");
+		});
+	}
+	$( function() {	visir.Load(init); });
+</script>
+</head>
+<body>
+	<!--[if lt IE 9]><p style="font-weight: bold; color: #CC2222">This experiment is not supported in your current browser. We strongly recommend you to update it or to get a new browser, such as <a href="http://chrome.google.com/" alt="Download Google Chrome">Google Chrome</a></p><![endif]-->
+	<p>Don't build a circuit. Just go to the oscilloscope, click on "Perform measuremement" and you will be able to test XY and everything else.</p>
+	<div id="instrumentframe"></div>
+	<div>
+		Log window:
+		<button id="showlog">Show</button>
+		<button id="hidelog">Hide</button>
+	</div>
+	<div id="logwindow" style="border: 1px solid #000000; padding: 2px; height: 500px; width: 800px; overflow: scroll; display:none"></div>
+	<br/>
+	<br/>
+</body>
+</html>
