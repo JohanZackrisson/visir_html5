@@ -8,13 +8,22 @@ visir.AgilentOscilloscope = function(id, elem, props)
 {
 	var me = this;
 	visir.AgilentOscilloscope.parent.constructor.apply(this, arguments);
+	this._measureCount = 0;
 
 	var options = $.extend({
 		MeasureCalling: function() {
+			me._measureCount++;
 			if (me._extService) me._extService.MakeMeasurement();
 		}
 		,CheckToContinueCalling: function() {
 			//if (me._extService) return me._extService.CanContinueMeasuring();
+			var maxMeasureCount = visir.Config.Get("maxOscMeasureCount");
+			if (maxMeasureCount == undefined || maxMeasureCount == null) {
+				maxMeasureCount = 10;
+			}
+ 			if (me._measureCount >= maxMeasureCount)
+				return false;
+
 			return visir.Config.Get("oscRunnable") && me._canContinueMeasuring;
 		}
 	}, props || {});
@@ -43,7 +52,7 @@ visir.AgilentOscilloscope = function(id, elem, props)
 	this._channels[1].display_offset = 0.0;
 	this._channels[1].inverted = false;
 	this._channels[1].xyg = false;
-	
+
 	this._math = { visible: false, display_offset: 0.0, method: "sub", sourceCh: 0 };
 
 	this._cursors = { visible: false, sourceCh: 0, p1: { x: 0.004, y: 0.002 }, p2: { x: -0.004, y: -0.002 }, selected: 0 };
@@ -71,7 +80,7 @@ visir.AgilentOscilloscope = function(id, elem, props)
 
 	this._measurementInfo = [
 		NewMeasInfo("Amplitude", "Ampl", "V", "voltageamplitude")
-		, NewMeasInfo("Avgerage", "Avg", "V", "voltageaverage")
+		, NewMeasInfo("Average", "Avg", "V", "voltageaverage")
 		, NewMeasInfo("Base", "Base", "V", "voltagebase")
 		, NewMeasInfo("Duty Cycle", "Duty", "%", "negativedutycycle")
 		, NewMeasInfo("Fall Time", "Fall", "s", "falltime")
@@ -111,6 +120,10 @@ visir.AgilentOscilloscope = function(id, elem, props)
 
 	var tplLocation = "instruments/ag_oscilloscope/ag_oscilloscope.tpl";
 	if (visir.BaseLocation) tplLocation = visir.BaseLocation + tplLocation;
+
+	if (visir.Config.Get("cacheBuster") != null) {
+		tplLocation = tplLocation + "?cacheBuster=" + visir.Config.Get("cacheBuster");
+	}
 
 	// the placeholder is only used while loading, so that size computations are done right
 	var $placeholder = $('<div class="ag_osc" />');
@@ -248,6 +261,9 @@ visir.AgilentOscilloscope = function(id, elem, props)
 
 		me._ShowCursors(false);
 
+		if (visir.Config.Get("displayManuals") == false) {
+			elem.find(".manual_link").remove();
+		}
 	});
 };
 
@@ -310,6 +326,9 @@ visir.AgilentOscilloscope.prototype._DrawGrid = function($elem)
 
 visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 {
+	if ($elem.length == 0) {
+		return;
+	}
 	var context = $elem[0].getContext('2d');
 	context.strokeStyle = "#00ff00";
 	context.lineWidth		= 1.2;
@@ -340,18 +359,18 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 			}
 		}
 	}
-	
+
 	function DrawXY(chnr1, chnr2) {
 		if (!me._channels[chnr2].xyg) { return; }
-		var maxrange = Math.max(me._channels[0].range, me._channels[1].range);
-		var graph1 = me._channels[0].graph;
-		var graph2 = me._channels[1].graph;
+		var maxrange = Math.max(me._channels[1].range, me._channels[0].range);
+		var graph1 = me._channels[1].graph;
+		var graph2 = me._channels[0].graph;
 		var len = Math.min(graph1.length, graph2.length);
 		var sum = 0.0;
 		for(var i=0;i<len;i++) {
 			var sample = 0.0;
-			var sample1 = graph1[i] * (me._channels[0].inverted ? -1 : 1);
-			var sample2 = graph2[i] * (me._channels[1].inverted ? -1 : 1);
+			var sample1 = graph1[i] * (me._channels[1].inverted ? -1 : 1);
+			var sample2 = graph2[i] * (me._channels[0].inverted ? -1 : 1);
 			if (me._math.visible){
 				sample = sample1 - sample2;
 			} else {
@@ -359,7 +378,7 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 			}
 			var x = ((sample2 / me._channels[1].range) + me._math.display_offset) * (w / 8.0) + w/2;
 			var y = -((sample / me._channels[0].range) + me._math.display_offset) * (h / 8.0) + h/2;
-			y+=0.5; 
+			y += 0.5;
 			if (i===0) {
 				context.moveTo(x,y);
 			} else {
@@ -367,7 +386,7 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 			}
 		}
 	}
-	
+
 	function DrawMath() {
 		if (!me._math.visible) return;
 		var maxrange = Math.max(me._channels[0].range, me._channels[1].range);
@@ -444,7 +463,7 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 		DrawCursor(0, transformY(ch, me._cursors.p1.y), w, transformY(ch, me._cursors.p1.y), me._cursors.selected & 4 ? selcolor : unselcolor, [6]);
 		DrawCursor(0, transformY(ch, me._cursors.p2.y), w, transformY(ch, me._cursors.p2.y), me._cursors.selected & 8 ? selcolor : unselcolor, [7]);
 	}
-	if (!me._channels[1].xyg) { 
+	if (!me._channels[1].xyg) {
 		DrawChannel(0);
 		DrawChannel(1);
 		context.stroke();
@@ -986,6 +1005,7 @@ visir.AgilentOscilloscope.prototype._UpdateRunStopSingleButtons = function(state
 }
 
 visir.AgilentOscilloscope.prototype._MakeMeasurement = function(button) {
+	this._measureCount = 0;
 	switch(button) {
 		case "single":
 			this._UpdateRunStopSingleButtons("single");
@@ -1087,11 +1107,11 @@ function CreateChannelMenu(osc, ch, $menu)
 					osc._UpdateDisplay();
 					break;
 				case 3:
-					if (ch == 1) { 
-						osc._channels[ch].xyg = !osc._channels[ch].xyg; 
+					if (ch == 1) {
+						osc._channels[ch].xyg = !osc._channels[ch].xyg;
 						this.Redraw();
 						osc._UpdateDisplay();
-						}
+					}
 				default:
 				break;
 			}
@@ -1271,16 +1291,22 @@ function CreateCursorsMenu(osc, $menu)
 			this.Redraw();
 			switch(nr) {
 				case 1:
+					// mode
 				break;
 				case 2:
+					// source
 				break;
 				case 3:
+					// x / y
 				break;
 				case 4:
+					// xy1
 				break;
 				case 5:
+					// xy2
 				break;
 				case 6:
+					// xy both
 				break;
 			}
 			this.Redraw();
@@ -1356,4 +1382,79 @@ function CreateMathMenu(osc, $menu)
 	};
 }
 
+visir.AgilentOscilloscope.prototype.ReadSave = function($xml) {
+	var $oscilloscope = $xml.find("oscilloscope[id='" + this._id + "']");
+	if ($oscilloscope.length == 0)
+		return;
+	
+	var timediv = $oscilloscope.attr("timeDiv");
+	for (var i = 0; i < this._timedivs.length; ++i) {
+		var currentTimeDiv = "" + this._timedivs[i];
+		if (currentTimeDiv === timediv) {
+			this._SetTimedivIdx(i);
+			break;
+		}
+	}
 
+	for (var i = 0; i < 2; ++i) {
+		var $channel = $oscilloscope.find("channel[number='" + (i+1) + "']");
+		if ($channel.length == 0)
+			continue;
+		
+		var source = parseInt($channel.attr("number"));
+		source = source - 1;
+
+		var currentChannel = this._channels[source];
+		currentChannel.xyg = $channel.attr('xyg') === 'true';
+
+		var displayOffset = $channel.attr('display_offset');
+		if (displayOffset !== undefined && displayOffset !== null) {
+			var displayOffsetValue = Number(displayOffset);
+			this._SetDisplayOffset(source, displayOffsetValue);
+		}
+
+		var range = $channel.attr('range');
+
+		for (var voltageIndex = 0; voltageIndex < this._voltages.length; voltageIndex++) {
+			var currentVoltage = "" + this._voltages[voltageIndex];
+			if (currentVoltage === range) {
+				this._SetVoltIdx(source, voltageIndex);
+				break
+			}
+		}
+	}
+
+	this._UpdateDisplay();
+};
+
+visir.AgilentOscilloscope.prototype.WriteSave = function() {
+	var $xml = $("<oscilloscope id='" + this._id + "'></oscilloscope>");
+	$xml.attr("timeDiv", this._timedivs[this._timeIdx]);
+
+	var $trigger = $("<trigger></trigger>");
+	$trigger.attr("source", this._trigger.source);
+	$trigger.attr("slope", this._trigger.slope);
+	$trigger.attr("coupling", this._trigger.coupling);
+	$trigger.attr("level", this._trigger.level);
+	$trigger.attr("mode", this._trigger.mode);
+	$trigger.attr("timeout", this._trigger.timeout);
+	$trigger.attr("delay", this._trigger.delay);
+	$xml.append($trigger);
+
+	for (var i = 0; i < 2; i++) {
+		var ch = this._channels[i];
+
+		var $channel = $("<channel></channel>");
+		$channel.attr("number", i+1);
+		$channel.attr("visible", ch.visible);
+		$channel.attr("coupling", ch.coupling);
+		$channel.attr("display_offset", ch.display_offset);
+		$channel.attr("attenuation", ch.attenuation);
+		$channel.attr("xyg", ch.xyg);
+		$channel.attr("range", ch.range);
+
+		$xml.append($channel);
+	}
+
+	return $xml;
+};

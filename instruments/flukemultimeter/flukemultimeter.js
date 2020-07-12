@@ -151,3 +151,39 @@ visir.FlukeMultimeter.prototype._GetUnit = function(val)
 	var last = units[units.length - 1];
 	return {unit: last[0], pow: last[1] };
 }
+
+visir.FlukeMultimeter.prototype.ReadSave = function($xml)
+{
+	var $multimeter = $xml.find("multimeter[id='" + this._id + "']");
+	if ($multimeter.length == 1) {
+		var mode = $multimeter.attr("mode");
+		this.SetMode(mode);
+
+		switch (mode) {
+			case 'ac volts':
+			  setRotation(this._elem.find(".top"), 15);
+			  break;
+			case 'dc volts':
+			  setRotation(this._elem.find(".top"), 45);
+			  break;
+			case 'resistance':
+			  setRotation(this._elem.find(".top"), 105);
+			  break;
+			case 'ac current':
+			  setRotation(this._elem.find(".top"), 165);
+			  break;
+			case 'dc current':
+			  setRotation(this._elem.find(".top"), 195);
+			  break;
+			default:
+			  setRotation(this._elem.find(".top"), 345);
+			  break;
+		}
+		this.UpdateDisplay();
+	}
+}
+
+visir.FlukeMultimeter.prototype.WriteSave = function()
+{
+	return $("<multimeter id='" + this._id + "'></multimeter>").attr("mode", this.GetMode());
+};

@@ -15,14 +15,6 @@ visir.HPFunctionGenerator = function(id, elem)
 	this._enterMode = this.NORMAL;
 	this._enterNumStr = "";
 
-	var argu = "0:0:sine";
-	var valini = argu.split(":");
-
-	if (arguments[2] != null) 
-	{
-		valini = arguments[2].split(":");
-	} 
-	
 	/* the multipliers are used to avoid storing the values in floating point
 	which will cause problems when trying to display the values */
 	this._values = {
@@ -77,11 +69,11 @@ visir.HPFunctionGenerator = function(id, elem)
 
 	elem.append(tpl);
 
-	this._SetInitialValue("freq", Number(valini[0]), 8);
-	this._SetInitialValue("ampl", Number(valini[1]), 4);
-	this._SetInitialWaveform(valini[2]);
+	this._SetInitialValue("freq", 0, 8);
+	this._SetInitialValue("ampl", 0, 4);
+	this._SetInitialWaveform("sine");
 	this.SetActiveValue("freq");
-	
+
 	var $doc = $(document);
 
 	var prev = 0;
@@ -405,6 +397,7 @@ visir.HPFunctionGenerator.prototype._IncDigit = function() {
 }
 
 visir.HPFunctionGenerator.prototype._ReadCurrentValues = function() {
+	/* if unrFormat is true */
 	var volts = "";
 	volts = this._values["freq"].value + ":" + this._values["ampl"].value + ":" + this.GetWaveform();
 	return volts;
@@ -416,6 +409,56 @@ visir.HPFunctionGenerator.prototype._SetInitialValue = function(ch, val, digit) 
 }
 
 visir.HPFunctionGenerator.prototype._SetInitialWaveform = function(wave) {
-	this.SetWaveform(wave); 
+	this.SetWaveform(wave);
 	this._UpdateDisplay();
 }
+
+visir.HPFunctionGenerator.prototype.ReadSave = function ($xml) {
+	var me = this;
+
+	// Only for backwards compatibility
+	var $instrumentsvalues = $xml.find("instrumentsvalues");
+	if ($instrumentsvalues.length == 1) {
+		var htmlinstrumentsvalues = $instrumentsvalues.attr("htmlinstrumentsvalues");
+		if (htmlinstrumentsvalues) {
+			$.each(htmlinstrumentsvalues.split("|"), function (pos, instrumentData) {
+				var instrumentName = instrumentData.split("#")[0];
+				if (instrumentName == "HPFunctionGenerator") {
+					var numbers = instrumentData.split("#")[1].split(":");
+					
+					var freq = Number(numbers[0]);
+					var ampl = Number(numbers[1]);
+					var wave = numbers[2];
+
+					me.SetWaveform(wave);
+					me._SetInitialValue("ampl", ampl, 4);
+					me._SetInitialValue("freq", freq, 8);
+
+					me._UpdateDisplay();
+				}
+			});
+		}
+	}
+
+	// Overwritten with the new format if available
+	var $currentFunctionGenerator = $xml.find("functiongenerator[id='" + this._id + "']");
+	if ($currentFunctionGenerator.length == 1) {
+		var wave = $currentFunctionGenerator.attr("wave");
+		var ampl = Number($currentFunctionGenerator.attr("ampl"));
+		var freq = Number($currentFunctionGenerator.attr("freq"));
+
+		this.SetWaveform(wave);
+		this._SetInitialValue("ampl", ampl, 4);
+		this._SetInitialValue("freq", freq, 8);
+
+		this._UpdateDisplay();
+	}
+};
+
+visir.HPFunctionGenerator.prototype.WriteSave = function () {
+	var $functiongenerator = $("<functiongenerator></functiongenerator>").attr("id", this._id);
+	$functiongenerator.attr("freq", this._values["freq"].value);
+	$functiongenerator.attr("ampl", this._values["ampl"].value);
+	$functiongenerator.attr("wave", this.GetWaveform());
+	return $functiongenerator;
+};
