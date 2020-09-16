@@ -515,10 +515,10 @@ visir.Breadboard = function(id, $elem)
 		<div class="left"></div>\
 	</div>\
 	<canvas id="wires" width="715" height="450"></canvas>\
-	<div id="wire_start" class="wirepoint start" />\
-	<div id="wire_mid" class="wirepoint mid" />\
-	<div id="wire_end" class="wirepoint end" />\
-	<div id="comp_circle" class="comp_circle" />\
+	<div id="wire_start" class="wirepoint start"></div>\
+	<div id="wire_mid" class="wirepoint mid"></div>\
+	<div id="wire_end" class="wirepoint end"></div>\
+	<div id="comp_circle" class="comp_circle"></div>\
 	<div class="componentbox">\
 	    <div class="componentlist">\
 	        <table class="componentlist-table">\
