@@ -1356,7 +1356,7 @@ function CreateMeasurementMenu(osc, $menu)
 
 	var $sel = $menu.find(".sel_meas_selection");
 	for(var i=0;i < osc._measurementInfo.length; i++) {
-		var $row = $('<div class="selection"><div class="checkmark_holder"><div class="checkmark" /></div><span>' + osc._measurementInfo[i].display + '</span></div>');
+		var $row = $('<div class="selection"><div class="checkmark_holder"><div class="checkmark"></div></div><span>' + osc._measurementInfo[i].display + '</span></div>');
 		$sel.append($row);
 	}
 
