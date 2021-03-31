@@ -57,7 +57,7 @@ visir.Oscilloscope.prototype.AddMeasurement = function(ch, selection, extra)
 
 visir.Oscilloscope.prototype.WriteRequest = function()
 {
-	var $xml = $('<oscilloscope><horizontal/><channels/><trigger/><measurements/></oscilloscope>');
+	var $xml = $('<oscilloscope><horizontal></horizontal><channels></channels><trigger></trigger><measurements></measurements></oscilloscope>');
 	$xml.attr("id", this._id);
 
 	AddXMLValue($xml, "osc_autoscale", this._autoScale);
