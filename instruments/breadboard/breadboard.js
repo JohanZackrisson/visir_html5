@@ -1647,8 +1647,8 @@ visir.Breadboard.prototype._AddFGEN = function(x, y, num)
 	'<div class="instrument fgen">\
 		<div class="texts">\
 			<div class="connectiontext"></div>\
-			<div class="connectiontext">'+visir.Lang.GetMessage('func_gen')+'</div>\
-			<div class="connectiontext">GND</div>\
+			<div class="connectiontext" style="position: absolute; top: 13px; right: 0px; white-space: nowrap">'+visir.Lang.GetMessage('func_gen')+'</div>\
+			<div class="connectiontext" style="position: absolute; top: 26px; right: 0px">GND</div>\
 		</div>\
 		<div class="connectionimages">\
 			<div style="height: 13px"></div>\
