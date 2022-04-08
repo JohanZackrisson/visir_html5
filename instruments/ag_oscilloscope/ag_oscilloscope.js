@@ -134,6 +134,9 @@ visir.AgilentOscilloscope = function(id, elem, props)
 	$.get(tplLocation, function(tpl) {
 		$placeholder.remove();
 		tpl = tpl.replace(/%img%/g, imgbase);
+		if (visir.Config.Get("oscImg")) {
+			tpl = tpl.replace(/osc.jpg/g, visir.Config.Get("oscImg"));
+		}
 		tpl = tpl.replace(/%downloadManual%/g, visir.Lang.GetMessage("down_man"));
 		elem.append(tpl);
 
