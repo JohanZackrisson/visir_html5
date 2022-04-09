@@ -121,6 +121,9 @@ visir.AgilentOscilloscope = function(id, elem, props)
 	if (visir.BaseLocation) imgbase = visir.BaseLocation + imgbase;
 
 	var tplLocation = "instruments/ag_oscilloscope/ag_oscilloscope.tpl";
+	if (visir.Config.Get("llUi")) {
+		tplLocation = "instruments/ag_oscilloscope/ag_oscilloscope_labsland.tpl";
+	}
 	if (visir.BaseLocation) tplLocation = visir.BaseLocation + tplLocation;
 
 	if (visir.Config.Get("cacheBuster") != null) {
@@ -134,9 +137,6 @@ visir.AgilentOscilloscope = function(id, elem, props)
 	$.get(tplLocation, function(tpl) {
 		$placeholder.remove();
 		tpl = tpl.replace(/%img%/g, imgbase);
-		if (visir.Config.Get("oscImg")) {
-			tpl = tpl.replace(/osc.jpg/g, visir.Config.Get("oscImg"));
-		}
 		tpl = tpl.replace(/%downloadManual%/g, visir.Lang.GetMessage("down_man"));
 		elem.append(tpl);
 
@@ -284,7 +284,11 @@ visir.AgilentOscilloscope.prototype._DrawGrid = function($elem)
 	var context = $elem[0].getContext('2d');
 
 	//context.strokeStyle = "#004000";
-	context.strokeStyle = "#00ff00";
+    if (visir.Config.Get("llUi")) {
+    	context.strokeStyle = "#ffffff";
+    } else {
+    	context.strokeStyle = "#00ff00";
+    }
 	context.lineWidth		= 0.5;
 	context.beginPath();
 
@@ -519,9 +523,22 @@ visir.AgilentOscilloscope.prototype._DrawPlot = function($elem)
 		DrawCursor(0, transformY(ch, me._cursors.p2.y), w, transformY(ch, me._cursors.p2.y), me._cursors.selected & 8 ? selcolor : unselcolor, [7]);
 	}
 	if (!me._maindelayed) {
+		if (visir.Config.Get("llUi")) {
+			context.strokeStyle = "#ffff00";
+			context.beginPath();
+		}
 		DrawChannel(0);
+		context.stroke();
+
+		if (visir.Config.Get("llUi")) {
+			context.strokeStyle = "#7fffd4";
+			context.beginPath();
+		}
 		DrawChannel(1);
 		context.stroke();
+
+		context.strokeStyle = "#00ff00";
+		context.beginPath();
 		DrawCursors();
 
 		context.strokeStyle = "#ff0000";

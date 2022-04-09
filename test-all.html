@@ -69,8 +69,11 @@
 
 	<script>
 
+	var useLabsLandUI = true;
+
 	function init()
 	{
+		visir.Config.Set("llUi", useLabsLandUI);
 		function MakeMeasurement()
 		{
 			transport.Request(breadboard.WriteRequest()
@@ -128,8 +131,7 @@
 			$("#logwindow").css("display", "none");
 		});
 	}
-	//$( function() { init(); });
-	$( function() {	visir.Load(init); });
+	$( function() { visir.Load(init, undefined, undefined, undefined, useLabsLandUI); });
 </script>
 </head>
 <body>

@@ -1,18 +1,32 @@
 var visir = visir || {};
 
-visir.Load = function( onSuccess, onFailure, baseurl, configUrlOrObject)
+visir.Load = function( onSuccess, onFailure, baseurl, configUrlOrObject, llUi)
 {
 	baseurl = baseurl || "";
 	visir.BaseLocation = baseurl;
-	var css = [
-		"instruments/breadboard/breadboard.css"
-		, "instruments/flukemultimeter/flukemultimeter.css"
-		, "instruments/tripledc/tripledc.css"
-		, "instruments/hp_funcgen/hp_funcgen.css"
-		, "instruments/ag_oscilloscope/ag_oscilloscope.css"
-		, "instruments/ni_oscilloscope/ni_oscilloscope.css"
-		, "instrumentframe/instrumentframe.css"
-	];
+	var css;
+	if (llUi === true) {
+		css = [
+			"instruments/breadboard/breadboard.css"
+			, "instruments/flukemultimeter/flukemultimeter.css"
+			, "instruments/tripledc/tripledc.css"
+			, "instruments/hp_funcgen/hp_funcgen.css"
+			, "instruments/ag_oscilloscope/ag_oscilloscope_labsland.css"
+			, "instruments/ni_oscilloscope/ni_oscilloscope.css"
+			, "instrumentframe/instrumentframe.css"
+		];
+	} else {
+		css = [
+			"instruments/breadboard/breadboard.css"
+			, "instruments/flukemultimeter/flukemultimeter.css"
+			, "instruments/tripledc/tripledc.css"
+			, "instruments/hp_funcgen/hp_funcgen.css"
+			, "instruments/ag_oscilloscope/ag_oscilloscope.css"
+			, "instruments/ni_oscilloscope/ni_oscilloscope.css"
+			, "instrumentframe/instrumentframe.css"
+		];
+	}
+
 
 	var stage1_scripts = [
 		"utils.js"

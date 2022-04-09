@@ -17,6 +17,7 @@ visir.ConfigClass = function()
 	this._vppInFuncgen = true;
 	this._disableLoadSave = true;
 	this._oscImg = null;
+	this._llUi = false;
 
 	var base = "";
 	if (visir.BaseLocation) base = visir.BaseLocation;
@@ -68,6 +69,7 @@ visir.ConfigClass.prototype.ReadConfig = function(config)
 	this._vppInFuncgen = (config.vppInFuncgen !== undefined)?config.vppInFuncgen:true;
 	this._disableLoadSave = (config.disableLoadSave !== undefined)?config.disableLoadSave:false;
 	this._oscImg = (config.oscImg !== undefined)?config.oscImg:null;
+	this._llUi = (config.llUi !== undefined)?config.llUi:false;
 }
 
 visir.ConfigClass.prototype.Get = function(name)
@@ -90,6 +92,7 @@ visir.ConfigClass.prototype.Get = function(name)
 		case "vppInFuncgen": return this._vppInFuncgen;
 		case "disableLoadSave": return this._disableLoadSave;
 		case "oscImg": return this._oscImg;
+		case "llUi": return this._llUi;
 	}
 
 	return undefined;
@@ -148,6 +151,9 @@ visir.ConfigClass.prototype.Set = function(name, value)
 			break;
 		case "oscImg":
 			this._oscImg= value;
+			break;
+		case "llUi":
+			this._llUi = value;
 			break;
 
 	}
