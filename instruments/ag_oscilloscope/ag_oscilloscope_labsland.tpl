@@ -91,7 +91,7 @@
 		</div>
 	</div>
 	<div class="display">
-		<div class="background-ll">
+		<div class="background">
 			<div class="topbar">
 				<div class="channel ch1"><span class="channelname">1</span><span class="lighttext voltage_ch1"><span class="value">1.00</span><div class="unitstring"></div>/</span></div>
 				<div class="channel ch2"><span class="channelname">2</span><span class="lighttext voltage_ch2"><span class="value">1.00</span><div class="unitstring"></div>/</span></div>
