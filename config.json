@@ -2,8 +2,9 @@
 	"teacherMode": true,
 	"instrReg": null,
 	"locale": "en_UK",
-	"mesServer": "http://194.47.149.204:8080/measureserver",
+	"mesServer": "http://localhost:9000/measureserver",
 	"readOnly": false,
 	"transMethod": "http",
+    "llUi": true,
 	"oscRunnable": true
 }

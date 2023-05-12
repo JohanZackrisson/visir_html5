@@ -14,12 +14,12 @@ visir.InstrumentRegistry = function(extService)
 
 	function InstrInfo(type, name, swf) { return { type: type, displayname: name, swf: swf } };
 	this._instrumentInfo = {
-		AgilentOscilloscope: InstrInfo("oscilloscope", visir.Lang.GetMessage("oscilloscope"), "oscilloscope/oscilloscope.swf")
-		, Breadboard: InstrInfo("circuit", visir.Lang.GetMessage("breadboard"), "breadboard/breadboard.swf")
-		, FlukeMultimeter: InstrInfo("multimeter", visir.Lang.GetMessage("multimeter"), "multimeter/multimeter.swf")
-		, HPFunctionGenerator: InstrInfo("functiongenerator", visir.Lang.GetMessage("func_gen"), "functiongenerator/functiongenerator.swf")
-		, NationalInstrumentOscilloscope: InstrInfo("oscilloscope", visir.Lang.GetMessage("oscilloscope"), "")
-		, TripleDC: InstrInfo("dcpower", visir.Lang.GetMessage("dc_power"), "tripledc/tripledc.swf")
+		AgilentOscilloscope: InstrInfo("oscilloscope", visir.Lang.GetMessage("oscilloscope"), "oscilloscope/oscilloscope.swf"),
+		Breadboard: InstrInfo("circuit", visir.Lang.GetMessage("breadboard"), "breadboard/breadboard.swf"),
+		FlukeMultimeter: InstrInfo("multimeter", visir.Lang.GetMessage("multimeter"), "multimeter/multimeter.swf"),
+		HPFunctionGenerator: InstrInfo("functiongenerator", visir.Lang.GetMessage("func_gen"), "functiongenerator/functiongenerator.swf"),
+		NationalInstrumentOscilloscope: InstrInfo("oscilloscope", visir.Lang.GetMessage("oscilloscope"), ""),
+		TripleDC: InstrInfo("dcpower", visir.Lang.GetMessage("dc_power"), "tripledc/tripledc.swf")
 	}
 
 	this._extServices = extService || null;
@@ -191,6 +191,11 @@ visir.InstrumentRegistry.prototype.LoadExperimentFromURL = function(url, $loc)
 
 visir.InstrumentRegistry.prototype.CreateInstrFromJSClass = function(classname, $loc)
 {
+    if (classname == "TripleDC") {
+        if (!visir.TripleDC && visir.LlTripleDC) {
+            visir.TripleDC = visir.LlTripleDC;
+        }
+    }
 	trace("creating instrument from js name: " + classname);
 	var $ctnr = this._CreateInstrContainer(this._instrumentInfo[classname].type);
 	this.CreateInstrument(classname, $ctnr);

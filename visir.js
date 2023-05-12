@@ -9,7 +9,7 @@ visir.Load = function( onSuccess, onFailure, baseurl, configUrlOrObject, llUi)
 		css = [
 			"instruments/breadboard/breadboard.css"
 			, "instruments/flukemultimeter/flukemultimeter.css"
-			, "instruments/tripledc/tripledc.css"
+			, "instruments/tripledc/lltripledc.css"
 			, "instruments/hp_funcgen/hp_funcgen.css"
 			, "instruments/ag_oscilloscope/ag_oscilloscope_labsland.css"
 			, "instruments/ni_oscilloscope/ni_oscilloscope.css"
@@ -53,15 +53,28 @@ visir.Load = function( onSuccess, onFailure, baseurl, configUrlOrObject, llUi)
 		, "instruments/transport.js"
 	];
 
-	var stage4_scripts = [
-		"instruments/breadboard/breadboard.js"
-		, "instruments/flukemultimeter/flukemultimeter.js"
-		, "instruments/tripledc/tripledc.js"
-		, "instruments/hp_funcgen/hp_funcgen.js"
-		, "instruments/ag_oscilloscope/ag_oscilloscope.js"
-		, "instruments/ni_oscilloscope/ni_oscilloscope.js"
-		, "instrumentframe/instrumentframe.js"
-	];
+    var stage4_scripts;
+    if (llUi) {
+        stage4_scripts = [
+            "instruments/breadboard/breadboard.js"
+            , "instruments/flukemultimeter/flukemultimeter.js"
+            , "instruments/tripledc/lltripledc.js"
+            , "instruments/hp_funcgen/hp_funcgen.js"
+            , "instruments/ag_oscilloscope/ag_oscilloscope.js"
+            , "instruments/ni_oscilloscope/ni_oscilloscope.js"
+            , "instrumentframe/instrumentframe.js"
+        ];
+    } else {
+        stage4_scripts = [
+            "instruments/breadboard/breadboard.js"
+            , "instruments/flukemultimeter/flukemultimeter.js"
+            , "instruments/tripledc/tripledc.js"
+            , "instruments/hp_funcgen/hp_funcgen.js"
+            , "instruments/ag_oscilloscope/ag_oscilloscope.js"
+            , "instruments/ni_oscilloscope/ni_oscilloscope.js"
+            , "instrumentframe/instrumentframe.js"
+        ];
+    }
 
 	function InjectCSS(src)
 	{

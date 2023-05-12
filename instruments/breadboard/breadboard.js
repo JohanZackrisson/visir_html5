@@ -1539,94 +1539,149 @@ visir.Breadboard.prototype._AddDCPower = function(x, y, num)
 {
 	if (num <= 0) return;
 
-	var dcPower25 = (visir.Config) ? visir.Config.Get("dcPower25") : true;
-	var dcPowerM25 = (visir.Config) ? visir.Config.Get("dcPowerM25") : true;
-	var dcPower6 = (visir.Config) ? visir.Config.Get("dcPower6") : true;
+    // traditional UI
+    if (!visir.Config.Get('llUi')) {
+        var dcPower25 = (visir.Config) ? visir.Config.Get("dcPower25") : true;
+        var dcPowerM25 = (visir.Config) ? visir.Config.Get("dcPowerM25") : true;
+        var dcPower6 = (visir.Config) ? visir.Config.Get("dcPower6") : true;
 
-	var dcPowerHtml = '<div class="instrument dcpower">\
-		<div class="title">'+visir.Lang.GetMessage('dc_power')+'</div>\
-			<div class="texts">\
-				<div class="connectiontext"></div>\n';
+        var dcPowerHtml = '<div class="instrument dcpower">\
+            <div class="title">'+visir.Lang.GetMessage('dc_power')+'</div>\
+                <div class="texts">\
+                    <div class="connectiontext"></div>\n';
 
-	if (dcPower25)
-		dcPowerHtml += '<div class="connectiontext">+20V</div>\n';
-	else
-		dcPowerHtml += '<div class="connectiontext"></div>\n';
+        if (dcPower25)
+            dcPowerHtml += '<div class="connectiontext">+20V</div>\n';
+        else
+            dcPowerHtml += '<div class="connectiontext"></div>\n';
 
-	if (dcPower25 || dcPowerM25)
-		dcPowerHtml += '<div class="connectiontext">COM</div>\n';
-	else
-		dcPowerHtml += '<div class="connectiontext"></div>\n';
+        if (dcPower25 || dcPowerM25)
+            dcPowerHtml += '<div class="connectiontext">COM</div>\n';
+        else
+            dcPowerHtml += '<div class="connectiontext"></div>\n';
 
-	if (dcPowerM25) 
-		dcPowerHtml += '<div class="connectiontext">-20V</div>\n';
-	else
-		dcPowerHtml += '<div class="connectiontext"></div>\n';
+        if (dcPowerM25) 
+            dcPowerHtml += '<div class="connectiontext">-20V</div>\n';
+        else
+            dcPowerHtml += '<div class="connectiontext"></div>\n';
 
-	dcPowerHtml += '<div class="connectiontext"></div>\n'
- 
-	if (dcPower6) {
-		dcPowerHtml += '<div class="connectiontext">+6V</div>\n';
-		dcPowerHtml += '<div class="connectiontext">GND</div>\n';
-	} else {
-		dcPowerHtml += '<div class="connectiontext"></div>\n';
-		dcPowerHtml += '<div class="connectiontext"></div>\n';
-	}
+        dcPowerHtml += '<div class="connectiontext"></div>\n'
+     
+        if (dcPower6) {
+            dcPowerHtml += '<div class="connectiontext">+6V</div>\n';
+            dcPowerHtml += '<div class="connectiontext">GND</div>\n';
+        } else {
+            dcPowerHtml += '<div class="connectiontext"></div>\n';
+            dcPowerHtml += '<div class="connectiontext"></div>\n';
+        }
 
-	var upperHeight = 0;
-	var upperImage = null;
-	var lowerHeight = 0;
-	var lowerImage = null;
+        var upperHeight = 0;
+        var upperImage = null;
+        var lowerHeight = 0;
+        var lowerImage = null;
 
-	if (dcPower25) {
-		upperHeight = 13;
-		if (dcPowerM25) {
-			lowerHeight = 10;
-			upperImage = this._BuildImageUrl('connections_3.png');
-		} else {
-			lowerHeight = 10 + 13;
-			upperImage = this._BuildImageUrl('connections_2.png');
-		}
-	} else {
-		if (dcPowerM25) {
-			upperHeight = 13 + 13;
-			lowerHeight = 10;
-			upperImage = this._BuildImageUrl('connections_2.png');
-		} else {
-			// No upperImage: 13 upper + 42 image + 10 lower
-			lowerHeight = 13 + 42 + 10;
-		}
-	}
-	if (dcPower6) {
-		lowerImage = this._BuildImageUrl('connections_2.png');
-	}
+        if (dcPower25) {
+            upperHeight = 13;
+            if (dcPowerM25) {
+                lowerHeight = 10;
+                upperImage = this._BuildImageUrl('connections_3.png');
+            } else {
+                lowerHeight = 10 + 13;
+                upperImage = this._BuildImageUrl('connections_2.png');
+            }
+        } else {
+            if (dcPowerM25) {
+                upperHeight = 13 + 13;
+                lowerHeight = 10;
+                upperImage = this._BuildImageUrl('connections_2.png');
+            } else {
+                // No upperImage: 13 upper + 42 image + 10 lower
+                lowerHeight = 13 + 42 + 10;
+            }
+        }
+        if (dcPower6) {
+            lowerImage = this._BuildImageUrl('connections_2.png');
+        }
 
-	dcPowerHtml += '</div>\
-			<div class="connectionimages">\
-				<div style="height: ' + upperHeight + 'px"></div>\n';
-	if (upperImage != null)
-		dcPowerHtml += '<img src="' + upperImage + '" draggable="false" />\n';
+        dcPowerHtml += '</div>\
+                <div class="connectionimages">\
+                    <div style="height: ' + upperHeight + 'px"></div>\n';
+        if (upperImage != null)
+            dcPowerHtml += '<img src="' + upperImage + '" draggable="false" />\n';
 
-	dcPowerHtml += '<div style="height: ' + lowerHeight + 'px"></div>\n';
-	if (lowerImage != null) 
-		dcPowerHtml += '<img src="' + lowerImage + '" draggable="false" />\n';
+        dcPowerHtml += '<div style="height: ' + lowerHeight + 'px"></div>\n';
+        if (lowerImage != null) 
+            dcPowerHtml += '<img src="' + lowerImage + '" draggable="false" />\n';
 
-	dcPowerHtml += '</div>\n';
-	dcPowerHtml += '</div>\n';
-	var $dcpower = $(dcPowerHtml);
+        dcPowerHtml += '</div>\n';
+        dcPowerHtml += '</div>\n';
+        var $dcpower = $(dcPowerHtml);
 
-	$dcpower.css("right", x + "px").css("top", y + "px");
-	this._$elem.find(".instruments .left").append($dcpower);
+        $dcpower.css("right", x + "px").css("top", y + "px");
+        this._$elem.find(".instruments .left").append($dcpower);
 
-	var p = new visir.Point(x / 13 | 0, y / 13 | 0);
-	var off_x = 8;
-	var off_y = 9;
+        var p = new visir.Point(x / 13 | 0, y / 13 | 0);
+        var off_x = 8;
+        var off_y = 9;
 
-	this.CreateInstr("VDC+25V", "1").AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 2));
-	this.CreateInstr("VDCCOM", "1").AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 3));
-	this.CreateInstr("VDC-25V", "1").AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 4));
-	this.CreateInstr("VDC+6V", "1").AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 6));
-	this.CreateInstr("0").AddConnection(new visir.Point(p.x + off_x, p.y + off_y + 7), "0");
+        this.CreateInstr("VDC+25V", "1").AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 2));
+        this.CreateInstr("VDCCOM", "1").AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 3));
+        this.CreateInstr("VDC-25V", "1").AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 4));
+        this.CreateInstr("VDC+6V", "1").AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 6));
+        this.CreateInstr("0").AddConnection(new visir.Point(p.x + off_x, p.y + off_y + 7), "0");
+    } else { // LL UI
+        var dcPowerHtml = '<div class="instrument dcpower">\
+            <div class="title">'+visir.Lang.GetMessage('dc_power')+'</div>\
+                <div class="texts">\
+                    <div class="connectiontext"></div>\n';
+
+        dcPowerHtml += '<div class="connectiontext">+5V</div>\n';
+        dcPowerHtml += '<div class="connectiontext">GND</div>\n';
+        dcPowerHtml += '<div class="connectiontext">-5V</div>\n';
+
+        dcPowerHtml += '<div class="connectiontext"></div>\n'
+        dcPowerHtml += '<div class="connectiontext">+15V</div>\n';
+        dcPowerHtml += '<div class="connectiontext">GND</div>\n';
+        dcPowerHtml += '<div class="connectiontext">-15V</div>\n';
+
+        var upperHeight = 0;
+        var upperImage = null;
+        var lowerHeight = 0;
+        var lowerImage = null;
+
+        upperHeight = 13;
+        lowerHeight = 10;
+        upperImage = this._BuildImageUrl('connections_3.png');
+        lowerImage = this._BuildImageUrl('connections_3.png');
+
+        dcPowerHtml += '</div>\
+                <div class="connectionimages">\
+                    <div style="height: ' + upperHeight + 'px"></div>\n';
+        if (upperImage != null)
+            dcPowerHtml += '<img src="' + upperImage + '" draggable="false" />\n';
+
+        dcPowerHtml += '<div style="height: ' + lowerHeight + 'px"></div>\n';
+        if (lowerImage != null) 
+            dcPowerHtml += '<img src="' + lowerImage + '" draggable="false" />\n';
+
+        dcPowerHtml += '</div>\n';
+        dcPowerHtml += '</div>\n';
+        var $dcpower = $(dcPowerHtml);
+
+        $dcpower.css("right", x + "px").css("top", y + "px");
+        this._$elem.find(".instruments .left").append($dcpower);
+
+        var p = new visir.Point(x / 13 | 0, y / 13 | 0);
+        var off_x = 8;
+        var off_y = 9;
+
+        this.CreateInstr("VDC+5V", "1").AddConnection(  new visir.Point(p.x + off_x, p.y + off_y + 2));
+        this.CreateInstr("0", "1").AddConnection(       new visir.Point(p.x + off_x, p.y + off_y + 3), "0");
+        this.CreateInstr("VDC-5V", "1").AddConnection(  new visir.Point(p.x + off_x, p.y + off_y + 4));
+        this.CreateInstr("VDC+15V", "1").AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 6));
+        this.CreateInstr("0", "1").AddConnection(       new visir.Point(p.x + off_x, p.y + off_y + 7), "0");
+        this.CreateInstr("VDC-15V", "1").AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 8));
+    }
 }
 
 visir.Breadboard.prototype._BuildImageUrl = function(img)
@@ -1643,26 +1698,35 @@ visir.Breadboard.prototype._BuildImageUrl = function(img)
 visir.Breadboard.prototype._AddFGEN = function(x, y, num)
 {
 	if (num <= 0) return;
-	var $fgen = $(
-	'<div class="instrument fgen">\
-		<div class="texts">\
-			<div class="connectiontext"></div>\
-			<div class="connectiontext" style="position: absolute; top: 13px; right: 0px; white-space: nowrap">'+visir.Lang.GetMessage('func_gen')+'</div>\
-			<div class="connectiontext" style="position: absolute; top: 26px; right: 0px">GND</div>\
-		</div>\
-		<div class="connectionimages">\
-			<div style="height: 13px"></div>\
-			<img src="' + 	this._BuildImageUrl('connections_2.png') + '" draggable="false" />\
-		</div>\
-	</div>'
-	);
 
-	$fgen.css("right", x + "px").css("top", y + "px");
-	this._$elem.find(".instruments .left").append($fgen);
+    for (var i = 0; i < num; i++) {
+        var letter = String.fromCharCode("A".charCodeAt(0) + i);
+        var numInFuncgen = " " + (i + 1);
+        if (num == 1)
+            numInFuncgen = "";
+        var $fgen = $(
+        '<div class="instrument fgen">\
+            <div class="texts">\
+                <div class="connectiontext"></div>\
+                <div class="connectiontext" style="position: absolute; top: 13px; right: 0px; white-space: nowrap">'+visir.Lang.GetMessage('func_gen')+ numInFuncgen + '</div>\
+                <div class="connectiontext" style="position: absolute; top: 26px; right: 0px">GND</div>\
+            </div>\
+            <div class="connectionimages">\
+                <div style="height: 13px"></div>\
+                <img src="' + 	this._BuildImageUrl('connections_2.png') + '" draggable="false" />\
+            </div>\
+        </div>'
+        );
 
-	var p = new visir.Point(x / 13 | 0, y / 13 | 0);
-	var off_x = 8;
-	var off_y = 9;
-	this.CreateInstr("VFGENA", 1).AddConnection( new visir.Point(p.x + off_x, p.y + off_y + 2)).AddConnection(new visir.Point(1000,1000),"0");
-	this.CreateInstr("0").AddConnection(new visir.Point(p.x + off_x, p.y + off_y + 3), "0");
+        $fgen.css("right", x + "px").css("top", y + "px");
+        this._$elem.find(".instruments .left").append($fgen);
+
+        var p1 = new visir.Point(x / 13 | 0, y / 13 | 0);
+        var off_x1 = 8;
+        var off_y1 = 9;
+        this.CreateInstr("VFGEN" + letter, i + 1).AddConnection( new visir.Point(p1.x + off_x1, p1.y + off_y1 + 2)).AddConnection(new visir.Point(1000,1000),"0");
+        this.CreateInstr("0").AddConnection(new visir.Point(p1.x + off_x1, p1.y + off_y1 + 3), "0");
+
+        y += 13 * 3; // Move 3 positions down
+    }
 };

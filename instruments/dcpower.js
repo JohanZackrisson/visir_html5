@@ -5,11 +5,18 @@ var visir = visir || {};
 visir.DCPower = function(id)
 {
 	this._id = id;
-	this._channels = {
-		"6V+": { voltage: 0.0, current: 0.5, measured_voltage: 0, measured_current: 0, limited: 0, enabled: 0 },
-		"25V+": { voltage: 0.0, current: 0.5, measured_voltage: 0, measured_current: 0, limited: 0, enabled: 0 },
-		"25V-": { voltage: 0.0, current: 0.5, measured_voltage: 0, measured_current: 0, limited: 0, enabled: 0 }
-	 }
+    if (!visir.Config.Get("llUi")) {
+        this._channels = {
+            "6V+": { voltage: 0.0, current: 0.5, measured_voltage: 0, measured_current: 0, limited: 0, enabled: 0 },
+            "25V+": { voltage: 0.0, current: 0.5, measured_voltage: 0, measured_current: 0, limited: 0, enabled: 0 },
+            "25V-": { voltage: 0.0, current: 0.5, measured_voltage: 0, measured_current: 0, limited: 0, enabled: 0 }
+        }
+    } else {
+        this._channels = {
+            "5V+": { voltage: 0.0, current: 0.5, measured_voltage: 0, measured_current: 0, limited: 0, enabled: 0 },
+            "5V-": { voltage: 0.0, current: 0.5, measured_voltage: 0, measured_current: 0, limited: 0, enabled: 0 },
+        }
+    }
 }
 
 // XXX: Should probably fix a nicer interface for changing the settings

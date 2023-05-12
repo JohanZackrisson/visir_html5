@@ -307,6 +307,8 @@ visir.InstrumentFrame.prototype._PopulateInstrumentDialog = function()
 			var image = $elem.attr("image");
 			var path = $elem.attr("path"); // this is the swf path, do not use
 			var jsclass = $elem.attr("jsclass");
+            if (visir.Config.Get("llUi") && jsclass == "TripleDC")
+                jsclass = "LlTripleDC";
 
 			var elem = '<div class="list-elem"><img src="%img%/' + image + '" /><div class="title">' + displayname + '</div></div>';
 			elem = elem.replace(/%img%/g, me._baseurl);
