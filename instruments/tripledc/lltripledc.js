@@ -26,7 +26,9 @@ visir.LlTripleDC.prototype._Redraw = function (initialValue)
 	// XXX: need to change this later, both voltage and current has an active digit
 	this._values = {
 		"5V+": { voltage: 500, current: 5000, digit: 2, min: 500, max: 5000 },
-		"5V-": { voltage: -500, current: 5000, digit: 2, min: -5000, max: -500 }
+		"5V-": { voltage: -500, current: 5000, digit: 2, min: -5000, max: -500 },
+		"15V+": { voltage: 15000, current: 5000, digit: 2, min: 15000, max: 15000 },
+		"15V-": { voltage: -15000, current: 5000, digit: 2, min: -15000, max: -15000 }
 	 }
 
 	var imgbase = "instruments/tripledc/images";
@@ -166,6 +168,8 @@ visir.LlTripleDC.prototype._SetActiveChannel = function(ch) {
 	switch(ch) {
 		case "5V+": show = "p5v"; break;
 		case "5V-": show = "m5v"; break;
+		case "15V+": show = "p15v"; break;
+		case "15V-": show = "m15v"; break;
 		default: show = "p6v";
 	}
 	this._elem.find(".channelselect > div." + show).removeClass("hide");
@@ -253,5 +257,10 @@ visir.LlTripleDC.prototype.WriteSave = function()
     $xml.append(channel);
     var channel = $("<dc_output channel=\"5V-\" value=\"" + (this._channels["5V-"].voltage * 1000) + "\"/>");
     $xml.append(channel);
+    var channel = $("<dc_output channel=\"15V+\" value=\"" + (this._channels["15V+"].voltage * 1000) + "\"/>");
+    $xml.append(channel);
+    var channel = $("<dc_output channel=\"15V-\" value=\"" + (this._channels["15V-"].voltage * 1000) + "\"/>");
+    $xml.append(channel);
+
 	return $xml;
 };

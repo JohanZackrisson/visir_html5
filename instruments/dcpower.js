@@ -15,6 +15,8 @@ visir.DCPower = function(id)
         this._channels = {
             "5V+": { voltage: 0.0, current: 0.5, measured_voltage: 0, measured_current: 0, limited: 0, enabled: 0 },
             "5V-": { voltage: 0.0, current: 0.5, measured_voltage: 0, measured_current: 0, limited: 0, enabled: 0 },
+            "15V+": { voltage: 15.0, current: 0.5, measured_voltage: 0, measured_current: 0, limited: 0, enabled: 0 },
+            "15V-": { voltage: -15.0, current: 0.5, measured_voltage: 0, measured_current: 0, limited: 0, enabled: 0 },
         }
     }
 }
