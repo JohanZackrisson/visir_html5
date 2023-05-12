@@ -5,6 +5,5 @@
 	"mesServer": "http://localhost:9000/measureserver",
 	"readOnly": false,
 	"transMethod": "http",
-    "llUi": true,
 	"oscRunnable": true
 }
